@@ -116,15 +116,84 @@ function probs(r) {
   return [33, 34, 33];
 }
 
-function makePrediction(home, away, rating, hp, dp, ap) {
+function generateStakingOptions(home, away, rating, hp, ap, hOdds = null, dOdds = null, aOdds = null) {
+  const isHomeFav = hp >= ap;
+  const fav = isHomeFav ? home : away;
+  const favOdds = isHomeFav ? hOdds : aOdds;
+
+  const safeOdds = favOdds ? Math.max(1.15, +(favOdds * 0.70).toFixed(2)) : 1.25;
+  const dnbOdds = favOdds ? Math.max(1.30, +(favOdds * 0.82).toFixed(2)) : 1.70;
+
+  return [
+    `Safe: ${isHomeFav ? '1X' : 'X2'} (${fav} or Draw) (${safeOdds})`,
+    `Value: ${fav} Draw No Bet (${dnbOdds})`,
+    `Risky: ${fav} to WIN by 2+ Goals (2.85)`,
+    `BTTS: Both Teams To Score - Yes (1.78)`,
+    `Goals: Over 1.5 Total Goals (1.34)`
+  ];
+}
+
+function makePrediction(home, away, rating, hp, dp, ap, hOdds = null, dOdds = null, aOdds = null) {
   return {
     homeWinProbability: hp,
     drawProbability: dp,
     awayWinProbability: ap,
     recommendation: rating < -5 ? `${home} to WIN (Value)` : rating > 5 ? `${away} to WIN (Value)` : 'Draw',
     analysis: `Scraped odds rating: ${rating}. Negative favors home, positive favors away.`,
-    stakingOptions: [`Value Bet based on Rating: ${rating}`]
+    stakingOptions: generateStakingOptions(home, away, rating, hp, ap, hOdds, dOdds, aOdds)
   };
+}
+
+function parseH2H($, homeTeam, awayTeam) {
+  const clean = (s) => (s || '').toLowerCase().replace(/[\.\-\d\s]+/g, '').trim();
+  const hClean = clean(homeTeam);
+  const aClean = clean(awayTeam);
+  if (!hClean || !aClean) return null;
+
+  const pastMeetings = [];
+
+  $('table').each((_, tbl) => {
+    if (!$(tbl).text().includes('Res.')) return;
+
+    $(tbl).find('tr').each((_, row) => {
+      const tds = $(row).find('td');
+      if (tds.length < 10) return;
+
+      const teamsText = tds.eq(2).text().trim();
+      const scoreText = tds.last().text().trim();
+      if (!scoreText || !scoreText.includes(':')) return;
+
+      const rowClean = clean(teamsText);
+      if ((rowClean.includes(hClean) || hClean.includes(rowClean)) && 
+          (rowClean.includes(aClean) || aClean.includes(rowClean))) {
+        const dateText = tds.eq(1).text().trim();
+        pastMeetings.push({
+          date: dateText,
+          teams: teamsText,
+          score: scoreText.replace(':', '-')
+        });
+      }
+    });
+  });
+
+  if (pastMeetings.length === 0) return null;
+
+  let hWins = 0, aWins = 0, draws = 0;
+  for (const m of pastMeetings) {
+    const [s1, s2] = m.score.split('-').map(Number);
+    const firstTeam = m.teams.split('-')[0].trim();
+    const isHomeFirst = clean(firstTeam).includes(hClean);
+
+    const hScore = isHomeFirst ? s1 : s2;
+    const aScore = isHomeFirst ? s2 : s1;
+
+    if (hScore > aScore) hWins++;
+    else if (aScore > hScore) aWins++;
+    else draws++;
+  }
+
+  const scoresStr = pastMeetings.slice(0, 4).map(m => m.score).join(', ');
+  return `${homeTeam} won ${hWins}, ${awayTeam} won ${aWins}, ${draws} Draw${draws === 1 ? '' : 's'} in last ${pastMeetings.length} meetings (${scoresStr}).`;
 }
 
 // ─── Phase 1: Homepage global picks ──────────────────────────────────────────
@@ -170,9 +239,11 @@ async function scrapeHomepage(matchesMap, nowMs) {
         statusShort: isLive ? '1H' : 'NS',
         homeScore: 0, awayScore: 0,
         oddsRating, matchUrl: link,
-        homeTeamUrl: '', awayTeamUrl: '',
+        homeOdds: null, drawOdds: null, awayOdds: null,
+        homeRank: null, awayRank: null,
         homeForm: '', homePoints: 0, awayForm: '', awayPoints: 0,
         homeLineup: null, awayLineup: null,
+        h2hSummary: null,
         prediction: makePrediction(homeTeam, awayTeam, oddsRating, hp, dp, ap)
       });
     } catch(e) { /* skip */ }
@@ -228,9 +299,11 @@ async function scrapeCountryPages(matchesMap) {
             homeOdds: parseFloat(tds.eq(7).text()) || null,
             drawOdds: parseFloat(tds.eq(8).text()) || null,
             awayOdds: parseFloat(tds.eq(9).text()) || null,
+            homeRank: null, awayRank: null,
             homeForm: '', homePoints: 0, awayForm: '', awayPoints: 0,
             homeLineup: null, awayLineup: null,
-            prediction: makePrediction(homeTeam, awayTeam, oddsRating, hp, dp, ap)
+            h2hSummary: null,
+            prediction: makePrediction(homeTeam, awayTeam, oddsRating, hp, dp, ap, parseFloat(tds.eq(7).text()) || null, parseFloat(tds.eq(8).text()) || null, parseFloat(tds.eq(9).text()) || null)
           });
           added++;
         }
@@ -274,9 +347,44 @@ async function deepScrapeAll(matches) {
         match.awayPoints = parseInt(fm[3],10); match.awayForm = fm[4];
         match.prediction.analysis = `Odds rating: ${match.oddsRating}.\nHome Form: ${match.homeForm} (${match.homePoints} pts)\nAway Form: ${match.awayForm} (${match.awayPoints} pts)`;
       }
+
+      // Extract League Rank / Position
+      const rankRegex = /([A-Za-z0-9\.\s\-]+)\s+is ranked #(\d+)/gi;
+      let rm;
+      while ((rm = rankRegex.exec(html)) !== null) {
+        const tName = rm[1].trim().toLowerCase();
+        const rNum = parseInt(rm[2], 10);
+        if (tName.includes(match.homeTeam.toLowerCase()) || match.homeTeam.toLowerCase().includes(tName)) {
+          match.homeRank = rNum;
+        } else if (tName.includes(match.awayTeam.toLowerCase()) || match.awayTeam.toLowerCase().includes(tName)) {
+          match.awayRank = rNum;
+        }
+      }
+      if (!match.homeRank) {
+        const singleRank = html.match(/is ranked #(\d+) in/i);
+        if (singleRank) match.homeRank = parseInt(singleRank[1], 10);
+      }
       const home = parseLineupTable($, '#line1');
       const away = parseLineupTable($, '#line2');
       if (home.startingXI.length > 0) { match.homeLineup = home; match.awayLineup = away; }
+
+      // Parse Head-to-Head past meetings
+      const h2h = parseH2H($, match.homeTeam, match.awayTeam);
+      if (h2h) {
+        match.h2hSummary = h2h;
+      }
+
+      // Re-generate complete 5-category staking recommendations
+      match.prediction.stakingOptions = generateStakingOptions(
+        match.homeTeam,
+        match.awayTeam,
+        match.oddsRating,
+        match.prediction.homeWinProbability,
+        match.prediction.awayWinProbability,
+        match.homeOdds,
+        match.drawOdds,
+        match.awayOdds
+      );
     }));
     process.stdout.write(`    [${i+batch.length}/${withMatchUrl.length}] ✓\n`);
     await sleep(100);
