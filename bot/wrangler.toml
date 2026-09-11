@@ -1,0 +1,16 @@
+name = "ai-football-bot"
+main = "src/index.js"
+compatibility_date = "2023-10-30"
+
+# This tells the worker to run twice a day to get fresh data while avoiding FotMob blocking
+[triggers]
+crons = ["0 */12 * * *"]
+
+# We use KV to store the JSON so the flutter app can fetch it instantly
+[[kv_namespaces]]
+binding = "SCORES_KV"
+id = "ca798cfd487c4155ad736cdc19bc6e51"
+
+# Ensure environment variables are loaded securely
+[vars]
+SPORTS_API_URL = "https://v3.football.api-sports.io/fixtures?live=all"
