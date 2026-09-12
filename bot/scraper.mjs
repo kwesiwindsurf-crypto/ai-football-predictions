@@ -443,6 +443,7 @@ async function fetchEspnScoresForDate(dateStr = '') {
     const eventsList = [];
 
     for (const block of scores) {
+      const league = block.leagues?.[0]?.name || 'International League';
       for (const ev of (block.events || [])) {
         const comp = ev.competitions?.[0];
         if (!comp) continue;
@@ -462,6 +463,9 @@ async function fetchEspnScoresForDate(dateStr = '') {
         eventsList.push({
           homeName: home.team?.displayName || home.team?.name || '',
           awayName: away.team?.displayName || away.team?.name || '',
+          homeLogo: home.team?.logo || '',
+          awayLogo: away.team?.logo || '',
+          league,
           homeScore,
           awayScore,
           completed,
@@ -492,11 +496,11 @@ async function fetchAllLiveAndRecentScores() {
   ]);
 
   const allEvents = [...liveEvents, ...todayEvents, ...yesterdayEvents];
-  console.log(`  Retrieved ${allEvents.length} score events from ESPN`);
-  return allEvents;
+  console.log(`  Retrieved ${allEvents.length} score events from ESPN (${yesterdayEvents.length} yesterday)`);
+  return { allEvents, yesterdayEvents };
 }
 
-function applyScoresToMatches(matches, scoreEvents) {
+function applyScoresToMatches(matches, scoreEvents, yesterdayEvents = []) {
   let updatedCount = 0;
   for (const match of matches) {
     const matched = scoreEvents.find(ev =>
@@ -520,6 +524,43 @@ function applyScoresToMatches(matches, scoreEvents) {
     }
   }
   console.log(`  Applied real-time scores to ${updatedCount} matches`);
+
+  // Ensure yesterday's finished matches are included so the user can always see yesterday's results
+  let addedYest = 0;
+  for (const ev of yesterdayEvents) {
+    if (!ev.completed || ev.homeScore === null || ev.awayScore === null) continue;
+    const exists = matches.some(m =>
+      teamsMatch(m.homeTeam, ev.homeName) && teamsMatch(m.awayTeam, ev.awayName)
+    );
+    if (!exists && ev.homeName && ev.awayName) {
+      const id = `${ev.homeName}-${ev.awayName}`.replace(/\s+/g, '-');
+      matches.push({
+        id,
+        homeTeam: ev.homeName,
+        awayTeam: ev.awayName,
+        homeLogo: ev.homeLogo || '',
+        awayLogo: ev.awayLogo || '',
+        league: ev.league || 'International League',
+        date: ev.date,
+        status: 'finished',
+        statusShort: ev.detail || 'FT',
+        homeScore: ev.homeScore,
+        awayScore: ev.awayScore,
+        oddsRating: 0,
+        matchUrl: null,
+        homeOdds: null, drawOdds: null, awayOdds: null,
+        homeRank: null, awayRank: null,
+        homeForm: '', homePoints: 0, awayForm: '', awayPoints: 0,
+        homeLineup: null, awayLineup: null,
+        h2hSummary: null,
+        prediction: makePrediction(ev.homeName, ev.awayName, 0, 33, 34, 33)
+      });
+      addedYest++;
+    }
+  }
+  if (addedYest > 0) {
+    console.log(`  Backfilled ${addedYest} completed matches from yesterday to guarantee yesterday's results`);
+  }
 }
 
 // ─── Cloudflare KV Helpers ───────────────────────────────────────────────────
@@ -614,8 +655,8 @@ async function main() {
 
   // 6. Fetch live & recent scores from ESPN and update scores & statuses
   try {
-    const scoreEvents = await fetchAllLiveAndRecentScores();
-    applyScoresToMatches(matches, scoreEvents);
+    const { allEvents, yesterdayEvents } = await fetchAllLiveAndRecentScores();
+    applyScoresToMatches(matches, allEvents, yesterdayEvents);
   } catch (err) {
     console.warn('Live score fetching failed, proceeding with current data:', err.message);
   }
