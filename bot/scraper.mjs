@@ -95,10 +95,10 @@ function parseLineupTable($, sel) {
   return { avgRating: avg, startingXI, bench };
 }
 
-async function safeFetch(url, retries = 2) {
+async function safeFetch(url, retries = 2, customHeaders = {}) {
   for (let i = 0; i <= retries; i++) {
     try {
-      const res = await fetch(url, { headers: { 'User-Agent': UA } });
+      const res = await fetch(url, { headers: { 'User-Agent': UA, ...customHeaders } });
       if (res.ok) return res;
       if (i < retries) await sleep(500);
     } catch (e) {
@@ -222,7 +222,8 @@ async function scrapeHomepage(matchesMap, nowMs) {
       const fullLeagueName = formatLeagueName(td2.text().replace(/[\d\.]+/,'').trim(), country);
       const matchDateIso = parseMatchDate(matchTimeTitle);
       const matchDateMs = new Date(matchDateIso).getTime();
-      if (matchDateMs && matchDateMs < nowMs - 110*60*1000) return;
+      // Keep matches from the last 48 hours (yesterday & today) plus upcoming
+      if (matchDateMs && matchDateMs < nowMs - 48*60*60*1000) return;
 
       const rMatch = td4.text().replace(/\s+/,' ').trim().match(/([\-\d]+)\/([\-\d]+)/);
       const oddsRating = rMatch ? parseInt(rMatch[1],10) : 0;
@@ -235,7 +236,7 @@ async function scrapeHomepage(matchesMap, nowMs) {
         homeLogo: flagUrl, awayLogo: flagUrl,
         league: fullLeagueName,
         date: matchDateIso,
-        status: isLive ? 'inPlay' : 'notStarted',
+        status: isLive ? 'live' : 'notStarted',
         statusShort: isLive ? '1H' : 'NS',
         homeScore: 0, awayScore: 0,
         oddsRating, matchUrl: link,
@@ -328,8 +329,8 @@ async function deepScrapeAll(matches) {
     return ap - bp;
   });
 
-  const withMatchUrl = matches.filter(m => !!m.matchUrl);
-  console.log(`  Deep scraping ${withMatchUrl.length} match pages...`);
+  const withMatchUrl = matches.filter(m => !!m.matchUrl && (!m.homeLineup?.startingXI?.length));
+  console.log(`  Deep scraping ${withMatchUrl.length} match pages (skipping ${matches.filter(m => m.homeLineup?.startingXI?.length).length} already cached)...`);
 
   const BATCH = 8;
   for (let i = 0; i < withMatchUrl.length; i += BATCH) {
@@ -408,7 +409,134 @@ async function deepScrapeAll(matches) {
   }
 }
 
-// ─── Phase 4: Push to Cloudflare KV ──────────────────────────────────────────
+// ─── Phase 4: Live & Recent Scores Engine ────────────────────────────────────
+function cleanTeamName(name) {
+  if (!name) return '';
+  return name
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/\b(fc|cf|sc|afc|ac|as|cd|sv|fsv|mfk|de|la|the|club|calcio)\b/gi, '')
+    .replace(/[^a-z0-9]/g, '')
+    .trim();
+}
+
+function teamsMatch(a, b) {
+  const cA = cleanTeamName(a);
+  const cB = cleanTeamName(b);
+  if (!cA || !cB) return false;
+  if (cA === cB) return true;
+  if (cA.length >= 4 && cB.length >= 4) {
+    if (cA.includes(cB) || cB.includes(cA)) return true;
+  }
+  return false;
+}
+
+async function fetchEspnScoresForDate(dateStr = '') {
+  try {
+    const url = dateStr 
+      ? `https://site.api.espn.com/apis/site/v2/sports/soccer/scorepanel?dates=${dateStr}`
+      : `https://site.api.espn.com/apis/site/v2/sports/soccer/scorepanel`;
+    const res = await safeFetch(url, 2);
+    if (!res) return [];
+    const data = await res.json();
+    const scores = data.scores || [];
+    const eventsList = [];
+
+    for (const block of scores) {
+      for (const ev of (block.events || [])) {
+        const comp = ev.competitions?.[0];
+        if (!comp) continue;
+        const home = comp.competitors?.find(c => c.homeAway === 'home');
+        const away = comp.competitors?.find(c => c.homeAway === 'away');
+        if (!home || !away) continue;
+
+        const statusObj = ev.status || comp.status || {};
+        const type = statusObj.type || {};
+        const state = type.state || ''; // 'pre', 'in', 'post'
+        const completed = type.completed || state === 'post';
+        const detail = type.shortDetail || type.detail || (completed ? 'FT' : '');
+
+        const homeScore = (home.score !== undefined && home.score !== null && home.score !== '') ? parseInt(home.score, 10) : null;
+        const awayScore = (away.score !== undefined && away.score !== null && away.score !== '') ? parseInt(away.score, 10) : null;
+
+        eventsList.push({
+          homeName: home.team?.displayName || home.team?.name || '',
+          awayName: away.team?.displayName || away.team?.name || '',
+          homeScore,
+          awayScore,
+          completed,
+          state,
+          detail,
+          date: ev.date
+        });
+      }
+    }
+    return eventsList;
+  } catch (e) {
+    console.warn(`ESPN score fetch error (${dateStr}):`, e.message);
+    return [];
+  }
+}
+
+async function fetchAllLiveAndRecentScores() {
+  console.log('\nFetching live & recent match scores (today & yesterday)...');
+  const now = new Date();
+  const todayStr = now.toISOString().slice(0, 10).replace(/-/g, '');
+  const yesterdayDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+  const yesterdayStr = yesterdayDate.toISOString().slice(0, 10).replace(/-/g, '');
+
+  const [liveEvents, todayEvents, yesterdayEvents] = await Promise.all([
+    fetchEspnScoresForDate(''),
+    fetchEspnScoresForDate(todayStr),
+    fetchEspnScoresForDate(yesterdayStr)
+  ]);
+
+  const allEvents = [...liveEvents, ...todayEvents, ...yesterdayEvents];
+  console.log(`  Retrieved ${allEvents.length} score events from ESPN`);
+  return allEvents;
+}
+
+function applyScoresToMatches(matches, scoreEvents) {
+  let updatedCount = 0;
+  for (const match of matches) {
+    const matched = scoreEvents.find(ev =>
+      teamsMatch(match.homeTeam, ev.homeName) && teamsMatch(match.awayTeam, ev.awayName)
+    );
+
+    if (matched) {
+      if (matched.homeScore !== null && matched.awayScore !== null) {
+        match.homeScore = matched.homeScore;
+        match.awayScore = matched.awayScore;
+      }
+
+      if (matched.completed) {
+        match.status = 'finished';
+        match.statusShort = matched.detail || 'FT';
+      } else if (matched.state === 'in') {
+        match.status = 'live';
+        match.statusShort = matched.detail || 'LIVE';
+      }
+      updatedCount++;
+    }
+  }
+  console.log(`  Applied real-time scores to ${updatedCount} matches`);
+}
+
+// ─── Cloudflare KV Helpers ───────────────────────────────────────────────────
+async function getExistingKVMatches() {
+  if (!CF_ACCOUNT_ID || !CF_API_TOKEN || !CF_KV_NS_ID) return [];
+  try {
+    const url = `https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/storage/kv/namespaces/${CF_KV_NS_ID}/values/${KV_KEY}`;
+    const res = await safeFetch(url, 1, { 'Authorization': `Bearer ${CF_API_TOKEN}` });
+    if (!res) return [];
+    const json = await res.json();
+    return json?.matchesData?.matches || [];
+  } catch (e) {
+    console.warn('Could not read existing KV data:', e.message);
+    return [];
+  }
+}
+
 async function pushToCloudflareKV(data) {
   const url = `https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/storage/kv/namespaces/${CF_KV_NS_ID}/values/${KV_KEY}`;
   const res = await fetch(url, {
@@ -428,35 +556,79 @@ async function main() {
     process.exit(1);
   }
 
-  console.log('Starting GitHub Actions full scraper...');
+  console.log('Starting GitHub Actions scraper (incremental + live scores)...');
   const nowMs = Date.now();
   const matchesMap = new Map();
 
+  // 1. Fetch existing matches from Cloudflare KV
+  console.log('\nFetching existing KV matches for incremental merge...');
+  const existingMatches = await getExistingKVMatches();
+  console.log(`  Found ${existingMatches.length} matches in current KV store`);
+
+  // 2. Scrape fresh picks from homepage
   console.log('\nPhase 1: Scraping homepage (global daily picks)...');
   await scrapeHomepage(matchesMap, nowMs);
 
+  // 3. Scrape Top 5 country pages
   console.log('\nPhase 2: Scraping Top 5 country pages...');
   await scrapeCountryPages(matchesMap);
 
-  let matches = Array.from(matchesMap.values());
-  console.log(`\nTotal: ${matches.length} matches across ${new Set(matches.map(m=>m.league)).size} leagues`);
-  const dates = [...new Set(matches.map(m => m.date.substring(0,10)))].sort();
-  console.log('Dates:', dates.join(', '));
+  // 4. Merge with existing KV matches (keep yesterday & today results, preserve lineups & ranks)
+  const cutoffMs = nowMs - 48 * 60 * 60 * 1000;
+  let preservedCount = 0;
+  for (const ex of existingMatches) {
+    const dMs = new Date(ex.date).getTime();
+    if (dMs && dMs >= cutoffMs) {
+      if (!matchesMap.has(ex.id)) {
+        matchesMap.set(ex.id, ex);
+        preservedCount++;
+      } else {
+        const current = matchesMap.get(ex.id);
+        if (!current.homeLineup && ex.homeLineup) current.homeLineup = ex.homeLineup;
+        if (!current.awayLineup && ex.awayLineup) current.awayLineup = ex.awayLineup;
+        if (!current.homeRank && ex.homeRank) current.homeRank = ex.homeRank;
+        if (!current.awayRank && ex.awayRank) current.awayRank = ex.awayRank;
+        if (!current.h2hSummary && ex.h2hSummary) current.h2hSummary = ex.h2hSummary;
+        if (ex.status === 'finished') {
+          current.status = 'finished';
+          current.statusShort = ex.statusShort || 'FT';
+          current.homeScore = ex.homeScore;
+          current.awayScore = ex.awayScore;
+        }
+      }
+    }
+  }
+  console.log(`  Preserved ${preservedCount} existing/yesterday matches from previous runs`);
 
-  console.log('\nPhase 3: Deep-scraping all match pages...');
+  let matches = Array.from(matchesMap.values());
+  console.log(`\nTotal: ${matches.length} matches across ${new Set(matches.map(m => m.league)).size} leagues`);
+  const dates = [...new Set(matches.map(m => m.date.substring(0, 10)))].sort();
+  console.log('Dates included:', dates.join(', '));
+
+  // 5. Deep-scrape match pages only for matches that need lineups
+  console.log('\nPhase 3: Deep-scraping uncached match pages...');
   await deepScrapeAll(matches);
 
   const withLineups = matches.filter(m => m.homeLineup?.startingXI?.length > 0).length;
   console.log(`\nLineup coverage: ${withLineups}/${matches.length} matches`);
 
+  // 6. Fetch live & recent scores from ESPN and update scores & statuses
+  try {
+    const scoreEvents = await fetchAllLiveAndRecentScores();
+    applyScoresToMatches(matches, scoreEvents);
+  } catch (err) {
+    console.warn('Live score fetching failed, proceeding with current data:', err.message);
+  }
+
+  // 7. Push updated data to Cloudflare KV
   const finalData = JSON.stringify({
     matchesData: { lastUpdated: new Date().toISOString(), scrapedBy: 'github-actions', matches },
     standingsData: null
   });
 
-  console.log('\nPhase 4: Pushing to Cloudflare KV...');
+  console.log('\nPhase 5: Pushing updated matches + scores to Cloudflare KV...');
   await pushToCloudflareKV(finalData);
-  console.log(`Done! ${matches.length} matches live.`);
+  console.log(`Done! ${matches.length} matches live in KV.`);
 }
 
 main().catch(e => { console.error('Fatal:', e); process.exit(1); });
