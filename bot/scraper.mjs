@@ -482,21 +482,76 @@ async function fetchEspnScoresForDate(dateStr = '') {
   }
 }
 
+const SPORTS_API_KEY = process.env.SPORTS_API_KEY || '3d923c01afee89b7b9ae92761979ef56';
+
+async function fetchApiSportsEventsForDate(dateIsoStr) {
+  if (!SPORTS_API_KEY) return [];
+  try {
+    const url = `https://v3.football.api-sports.io/fixtures?date=${dateIsoStr}`;
+    const res = await safeFetch(url, 2, { 'x-apisports-key': SPORTS_API_KEY });
+    if (!res) return [];
+    const data = await res.json();
+    const fixtures = data.response || [];
+    const events = [];
+
+    for (const f of fixtures) {
+      const home = f.teams?.home;
+      const away = f.teams?.away;
+      if (!home || !away) continue;
+
+      const sShort = f.fixture?.status?.short || '';
+      const isFinished = ['FT', 'AET', 'PEN'].includes(sShort);
+      const isLive = ['1H', '2H', 'HT', 'ET', 'BT', 'P', 'LIVE'].includes(sShort);
+
+      events.push({
+        homeName: home.name || '',
+        awayName: away.name || '',
+        homeLogo: home.logo || '',
+        awayLogo: away.logo || '',
+        league: `${f.league?.country ? f.league.country + ' - ' : ''}${f.league?.name || 'Soccer'}`,
+        homeScore: f.goals?.home !== null && f.goals?.home !== undefined ? f.goals.home : null,
+        awayScore: f.goals?.away !== null && f.goals?.away !== undefined ? f.goals.away : null,
+        completed: isFinished,
+        state: isFinished ? 'post' : (isLive ? 'in' : 'pre'),
+        detail: sShort || (isFinished ? 'FT' : ''),
+        date: f.fixture?.date
+      });
+    }
+    return events;
+  } catch (e) {
+    console.warn(`API-Sports error for ${dateIsoStr}:`, e.message);
+    return [];
+  }
+}
+
 async function fetchAllLiveAndRecentScores() {
   console.log('\nFetching live & recent match scores (today & yesterday)...');
   const now = new Date();
-  const todayStr = now.toISOString().slice(0, 10).replace(/-/g, '');
+  const todayYmd = now.toISOString().slice(0, 10);
+  const todayStr = todayYmd.replace(/-/g, '');
   const yesterdayDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-  const yesterdayStr = yesterdayDate.toISOString().slice(0, 10).replace(/-/g, '');
+  const yesterdayYmd = yesterdayDate.toISOString().slice(0, 10);
+  const yesterdayStr = yesterdayYmd.replace(/-/g, '');
 
-  const [liveEvents, todayEvents, yesterdayEvents] = await Promise.all([
-    fetchEspnScoresForDate(''),
-    fetchEspnScoresForDate(todayStr),
-    fetchEspnScoresForDate(yesterdayStr)
-  ]);
+  // 1. Primary: API-Sports (works reliably on GitHub Actions cloud runners)
+  let todayEvents = await fetchApiSportsEventsForDate(todayYmd);
+  let yesterdayEvents = await fetchApiSportsEventsForDate(yesterdayYmd);
+  console.log(`  API-Sports: ${todayEvents.length} today, ${yesterdayEvents.length} yesterday`);
 
-  const allEvents = [...liveEvents, ...todayEvents, ...yesterdayEvents];
-  console.log(`  Retrieved ${allEvents.length} score events from ESPN (${yesterdayEvents.length} yesterday)`);
+  // 2. Fallback / supplementary: ESPN
+  if (todayEvents.length === 0 || yesterdayEvents.length === 0) {
+    console.log('  Checking ESPN for additional/fallback scores...');
+    const [espnLive, espnToday, espnYest] = await Promise.all([
+      fetchEspnScoresForDate(''),
+      fetchEspnScoresForDate(todayStr),
+      fetchEspnScoresForDate(yesterdayStr)
+    ]);
+    if (todayEvents.length === 0) todayEvents = [...espnLive, ...espnToday];
+    if (yesterdayEvents.length === 0) yesterdayEvents = espnYest;
+  }
+
+  const allEvents = [...todayEvents, ...yesterdayEvents];
+  console.log(`  Retrieved ${allEvents.length} total score events (${yesterdayEvents.length} yesterday)`);
   return { allEvents, yesterdayEvents };
 }
 

@@ -36,6 +36,7 @@ jobs:
           CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
           CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
           CF_KV_NAMESPACE_ID: ${{ secrets.CF_KV_NAMESPACE_ID }}
+          SPORTS_API_KEY: ${{ secrets.SPORTS_API_KEY || '3d923c01afee89b7b9ae92761979ef56' }}
         run: node scraper.mjs
         working-directory: bot
 
