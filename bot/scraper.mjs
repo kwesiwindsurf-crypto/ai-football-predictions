@@ -225,8 +225,7 @@ function parseH2H($, homeTeam, awayTeam) {
     else draws++;
   }
 
-  const scoresStr = pastMeetings.slice(0, 4).map(m => m.score).join(', ');
-  return `${homeTeam} won ${hWins}, ${awayTeam} won ${aWins}, ${draws} Draw${draws === 1 ? '' : 's'} in last ${pastMeetings.length} meetings (${scoresStr}).`;
+  return `${homeTeam} won ${hWins}, ${awayTeam} won ${aWins}, ${draws} Draw${draws === 1 ? '' : 's'} in last ${pastMeetings.length} meetings.`;
 }
 
 // ─── Phase 1: Homepage global picks ──────────────────────────────────────────
