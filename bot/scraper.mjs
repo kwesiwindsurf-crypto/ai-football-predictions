@@ -181,6 +181,10 @@ function makePrediction(home, away, rating, hp, dp, ap, hOdds = null, dOdds = nu
   const isHomeUnderdog = hasOdds ? (hOdds >= aOdds + 1.50) : (hp + 15 <= ap);
   const isHomeFavorite = hasOdds ? (hOdds <= 1.50) : (hp >= ap + 25);
 
+  let finalHp = hp;
+  let finalDp = dp;
+  let finalAp = ap;
+
   // 1. Champions League Strategy
   if (isUCL) {
     const isLeg1 = (league || '').toLowerCase().includes('leg 1') || (league || '').toLowerCase().includes('1st leg');
@@ -188,10 +192,16 @@ function makePrediction(home, away, rating, hp, dp, ap, hOdds = null, dOdds = nu
       recommendation = rating < 0 ? `${home} or Draw (1X)` : `${away} or Draw (X2)`;
       primarySafeOption = rating < 0 ? `Safe: 1X (${home} or Draw)` : `Safe: X2 (${away} or Draw)`;
       strategyAnalysis = `UCL Knockout Leg 1: Stalemate protection active (${recommendation}).`;
+      finalDp = 35;
+      finalHp = rating < 0 ? 45 : 20;
+      finalAp = rating < 0 ? 20 : 45;
     } else {
       recommendation = `${home} or ${away} (Home or Away Win - 12)`;
       primarySafeOption = `Safe: 12 (${home} or ${away} Win)`;
       strategyAnalysis = `UCL Group Stage / Leg 2: Forced attacking scenario active (12).`;
+      finalDp = 10;
+      finalHp = 48;
+      finalAp = 42;
     }
   } 
   // 2. Even Odds Rule (Check H2H)
@@ -217,14 +227,17 @@ function makePrediction(home, away, rating, hp, dp, ap, hOdds = null, dOdds = nu
       recommendation = `${home} or Draw (1X)`;
       primarySafeOption = `Safe: 1X (${home} or Draw)`;
       strategyAnalysis = `Even Odds Fixture: H2H favors home team (${hWins} vs ${aWins} wins). Output 1X.`;
+      finalHp = 52; finalDp = 28; finalAp = 20;
     } else if (aWins > hWins) {
       recommendation = `${away} or Draw (X2)`;
       primarySafeOption = `Safe: X2 (${away} or Draw)`;
       strategyAnalysis = `Even Odds Fixture: H2H favors away team (${aWins} vs ${hWins} wins). Output X2.`;
+      finalHp = 20; finalDp = 28; finalAp = 52;
     } else {
       recommendation = `${home} or ${away} (Home or Away Win - 12)`;
       primarySafeOption = `Safe: 12 (${home} or ${away} Win)`;
       strategyAnalysis = `Even Odds Fixture: H2H is a dead tie. Output 12 (Force a decisive outcome).`;
+      finalHp = 45; finalDp = 10; finalAp = 45;
     }
   }
   // 3. Home Favorite Rule (Home Odds <= 1.50)
@@ -232,6 +245,7 @@ function makePrediction(home, away, rating, hp, dp, ap, hOdds = null, dOdds = nu
     recommendation = `${home} or Draw & Over 1.5 Goals (1X + Over 1.5)`;
     primarySafeOption = `Safe: 1X + Over 1.5 Goals (${home} or Draw & Over 1.5 Goals)`;
     strategyAnalysis = `Home Favorite (Odds <= 1.50): Compound market 1X + Over 1.5 Goals executed to preserve multiplier value.`;
+    finalHp = 70; finalDp = 20; finalAp = 10;
   }
   // 4. Home Underdog Rule (Home Odds >= Away Odds + 1.50)
   else if (isHomeUnderdog) {
@@ -240,10 +254,12 @@ function makePrediction(home, away, rating, hp, dp, ap, hOdds = null, dOdds = nu
       recommendation = `${home} or ${away} (Home or Away Win - 12)`;
       primarySafeOption = `Safe: 12 (${home} or ${away} Win)`;
       strategyAnalysis = `Home Underdog Exception: Volatile league historical draw rate < 20%. Output 12 to capture volatility.`;
+      finalHp = 42; finalDp = 10; finalAp = 48;
     } else {
       recommendation = `${away} or Draw (X2)`;
       primarySafeOption = `Safe: X2 (${away} or Draw)`;
       strategyAnalysis = `Home Underdog: Guarding against parked bus. Output X2.`;
+      finalHp = 15; finalDp = 25; finalAp = 60;
     }
   }
   // 5. Default Market Rule
@@ -252,24 +268,27 @@ function makePrediction(home, away, rating, hp, dp, ap, hOdds = null, dOdds = nu
       recommendation = `${home} or Draw (1X)`;
       primarySafeOption = `Safe: 1X (${home} or Draw)`;
       strategyAnalysis = `Standard Market: Home team favored by market odds (Rating: ${rating}).`;
+      finalHp = 55; finalDp = 27; finalAp = 18;
     } else if (rating > 5 || (hasOdds && aOdds < hOdds)) {
       recommendation = `${away} or Draw (X2)`;
       primarySafeOption = `Safe: X2 (${away} or Draw)`;
       strategyAnalysis = `Standard Market: Away team favored by market odds (Rating: ${rating}).`;
+      finalHp = 18; finalDp = 27; finalAp = 55;
     } else {
       recommendation = `${home} or ${away} (Home or Away Win - 12)`;
       primarySafeOption = `Safe: 12 (${home} or ${away} Win)`;
       strategyAnalysis = `Standard Market: Balanced match, outputting double chance 12.`;
+      finalHp = 45; finalDp = 10; finalAp = 45;
     }
   }
 
   return {
-    homeWinProbability: hp,
-    drawProbability: dp,
-    awayWinProbability: ap,
+    homeWinProbability: finalHp,
+    drawProbability: finalDp,
+    awayWinProbability: finalAp,
     recommendation: recommendation,
     analysis: `${strategyAnalysis}\nOdds rating: ${rating}.`,
-    stakingOptions: generateStakingOptions(home, away, rating, hp, ap, hOdds, dOdds, aOdds, primarySafeOption)
+    stakingOptions: generateStakingOptions(home, away, rating, finalHp, finalAp, hOdds, dOdds, aOdds, primarySafeOption)
   };
 }
 

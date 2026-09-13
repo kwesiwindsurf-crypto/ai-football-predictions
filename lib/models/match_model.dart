@@ -292,16 +292,22 @@ class AIPrediction {
     String strategyAnalysis = '';
     String primarySafeOption = '';
 
+    double finalHWin = hWin;
+    double finalDProb = dProb;
+    double finalAWin = aWin;
+
     if (isUCL) {
       final isLeg1 = league.toLowerCase().contains('leg 1') || league.toLowerCase().contains('1st leg');
       if (isLeg1) {
         rec = '$homeTeam or Draw (1X)';
         primarySafeOption = 'Safe: 1X ($homeTeam or Draw)';
         strategyAnalysis = 'UCL Knockout Leg 1: Stalemate protection active ($rec).';
+        finalDProb = 35.0; finalHWin = 45.0; finalAWin = 20.0;
       } else {
         rec = '$homeTeam or $awayTeam (Home or Away Win - 12)';
         primarySafeOption = 'Safe: 12 ($homeTeam or $awayTeam Win)';
         strategyAnalysis = 'UCL Group Stage / Leg 2: Forced attacking scenario active (12).';
+        finalDProb = 10.0; finalHWin = 48.0; finalAWin = 42.0;
       }
     } else if (isEvenOdds) {
       int hWins = 0;
@@ -323,48 +329,57 @@ class AIPrediction {
         rec = '$homeTeam or Draw (1X)';
         primarySafeOption = 'Safe: 1X ($homeTeam or Draw)';
         strategyAnalysis = 'Even Odds Fixture: H2H favors home team ($hWins vs $aWins wins). Output 1X.';
+        finalHWin = 52.0; finalDProb = 28.0; finalAWin = 20.0;
       } else if (aWins > hWins) {
         rec = '$awayTeam or Draw (X2)';
         primarySafeOption = 'Safe: X2 ($awayTeam or Draw)';
         strategyAnalysis = 'Even Odds Fixture: H2H favors away team ($aWins vs $hWins wins). Output X2.';
+        finalHWin = 20.0; finalDProb = 28.0; finalAWin = 52.0;
       } else {
         rec = '$homeTeam or $awayTeam (Home or Away Win - 12)';
         primarySafeOption = 'Safe: 12 ($homeTeam or $awayTeam Win)';
         strategyAnalysis = 'Even Odds Fixture: H2H is a dead tie. Output 12 (Force a decisive outcome).';
+        finalHWin = 45.0; finalDProb = 10.0; finalAWin = 45.0;
       }
     } else if (isHomeFavorite) {
       rec = '$homeTeam or Draw & Over 1.5 Goals (1X + Over 1.5)';
       primarySafeOption = 'Safe: 1X + Over 1.5 Goals ($homeTeam or Draw & Over 1.5 Goals)';
       strategyAnalysis = 'Home Favorite (Odds <= 1.50): Compound market 1X + Over 1.5 Goals executed to preserve multiplier value.';
+      finalHWin = 70.0; finalDProb = 20.0; finalAWin = 10.0;
     } else if (isHomeUnderdog) {
       final isVolatileLeague = league.toLowerCase().contains('mls') || league.toLowerCase().contains('bundesliga');
       if (isVolatileLeague) {
         rec = '$homeTeam or $awayTeam (Home or Away Win - 12)';
         primarySafeOption = 'Safe: 12 ($homeTeam or $awayTeam Win)';
         strategyAnalysis = 'Home Underdog Exception: Volatile league historical draw rate < 20%. Output 12 to capture volatility.';
+        finalHWin = 42.0; finalDProb = 10.0; finalAWin = 48.0;
       } else {
         rec = '$awayTeam or Draw (X2)';
         primarySafeOption = 'Safe: X2 ($awayTeam or Draw)';
         strategyAnalysis = 'Home Underdog: Guarding against parked bus. Output X2.';
+        finalHWin = 15.0; finalDProb = 25.0; finalAWin = 60.0;
       }
     } else {
       if (hWin > aWin) {
         rec = '$homeTeam or Draw (1X)';
         primarySafeOption = 'Safe: 1X ($homeTeam or Draw)';
         strategyAnalysis = 'Standard Market: Home team favored by odds probability.';
+        finalHWin = 55.0; finalDProb = 27.0; finalAWin = 18.0;
       } else if (aWin > hWin) {
         rec = '$awayTeam or Draw (X2)';
         primarySafeOption = 'Safe: X2 ($awayTeam or Draw)';
         strategyAnalysis = 'Standard Market: Away team favored by odds probability.';
+        finalHWin = 18.0; finalDProb = 27.0; finalAWin = 55.0;
       } else {
         rec = '$homeTeam or $awayTeam (Home or Away Win - 12)';
         primarySafeOption = 'Safe: 12 ($homeTeam or $awayTeam Win)';
         strategyAnalysis = 'Standard Market: Balanced match, outputting double chance 12.';
+        finalHWin = 45.0; finalDProb = 10.0; finalAWin = 45.0;
       }
     }
 
-    final String fav = hWin >= aWin ? homeTeam : awayTeam;
-    final double? favOdds = hWin >= aWin ? realHomeOdds : realAwayOdds;
+    final String fav = finalHWin >= finalAWin ? homeTeam : awayTeam;
+    final double? favOdds = finalHWin >= finalAWin ? realHomeOdds : realAwayOdds;
     final double dnbOdds = favOdds != null ? (favOdds * 0.82).clamp(1.30, 9.99) : 1.70;
 
     List<String> stakingOptions = [
@@ -376,9 +391,9 @@ class AIPrediction {
     ];
 
     return AIPrediction(
-      homeWinProbability: hWin,
-      drawProbability: dProb,
-      awayWinProbability: aWin,
+      homeWinProbability: finalHWin,
+      drawProbability: finalDProb,
+      awayWinProbability: finalAWin,
       recommendation: rec,
       analysis: strategyAnalysis,
       stakingOptions: stakingOptions,
