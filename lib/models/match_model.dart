@@ -69,11 +69,12 @@ class Match {
     int? aRank = json['awayRank'];
     int? aPts = json['awayPoints'];
     String? aForm = json['awayForm'];
+    final homeName = json['homeTeam'] ?? '';
+    final awayName = json['awayTeam'] ?? '';
+    final leagueName = json['league'] ?? '';
+    final h2h = json['h2hSummary'];
 
     if (standingsData != null) {
-      final homeName = json['homeTeam'];
-      final awayName = json['awayTeam'];
-      
       if (standingsData.containsKey(homeName)) {
          final s = standingsData[homeName];
          hRank ??= s['rank'];
@@ -88,13 +89,60 @@ class Match {
       }
     }
 
+    final hOdds = json['homeOdds'] != null ? (json['homeOdds'] as num).toDouble() : null;
+    final dOdds = json['drawOdds'] != null ? (json['drawOdds'] as num).toDouble() : null;
+    final aOdds = json['awayOdds'] != null ? (json['awayOdds'] as num).toDouble() : null;
+    final rating = json['oddsRating'] is int ? json['oddsRating'] : int.tryParse(json['oddsRating']?.toString() ?? '0');
+
+    // Always recompute prediction locally using current strategy engine
+    AIPrediction pred;
+    if (json['prediction'] != null) {
+      try {
+        pred = AIPrediction.generateLocal(
+          homeName,
+          awayName,
+          hForm,
+          aForm,
+          h2h,
+          homeRank: hRank,
+          homePts: hPts,
+          awayRank: aRank,
+          awayPts: aPts,
+          realHomeOdds: hOdds,
+          realDrawOdds: dOdds,
+          realAwayOdds: aOdds,
+          league: leagueName,
+          oddsRating: rating,
+        );
+      } catch (_) {
+        pred = AIPrediction.fromJson(json['prediction']);
+      }
+    } else {
+      pred = AIPrediction.generateLocal(
+        homeName,
+        awayName,
+        hForm,
+        aForm,
+        h2h,
+        homeRank: hRank,
+        homePts: hPts,
+        awayRank: aRank,
+        awayPts: aPts,
+        realHomeOdds: hOdds,
+        realDrawOdds: dOdds,
+        realAwayOdds: aOdds,
+        league: leagueName,
+        oddsRating: rating,
+      );
+    }
+
     return Match(
       id: json['id'],
-      homeTeam: json['homeTeam'],
-      awayTeam: json['awayTeam'],
-      homeLogo: json['homeLogo'],
-      awayLogo: json['awayLogo'],
-      league: json['league'],
+      homeTeam: homeName,
+      awayTeam: awayName,
+      homeLogo: json['homeLogo'] ?? '',
+      awayLogo: json['awayLogo'] ?? '',
+      league: leagueName,
       date: DateTime.parse(json['date']),
       status: MatchStatus.values.firstWhere(
         (e) => e.name == json['status'],
@@ -102,20 +150,20 @@ class Match {
       ),
       homeScore: json['homeScore'],
       awayScore: json['awayScore'],
-      prediction: AIPrediction.fromJson(json['prediction']),
+      prediction: pred,
       homeRank: hRank,
       homePoints: hPts,
       homeForm: hForm,
       awayRank: aRank,
       awayPoints: aPts,
       awayForm: aForm,
-      h2hSummary: json['h2hSummary'],
+      h2hSummary: h2h,
       elapsed: json['elapsed'],
       statusShort: json['statusShort'],
-      homeOdds: json['homeOdds'] != null ? (json['homeOdds'] as num).toDouble() : null,
-      drawOdds: json['drawOdds'] != null ? (json['drawOdds'] as num).toDouble() : null,
-      awayOdds: json['awayOdds'] != null ? (json['awayOdds'] as num).toDouble() : null,
-      oddsRating: json['oddsRating'],
+      homeOdds: hOdds,
+      drawOdds: dOdds,
+      awayOdds: aOdds,
+      oddsRating: rating,
       matchUrl: json['matchUrl'],
       homeLineup: json['homeLineup'] != null ? TeamLineupData.fromJson(json['homeLineup']) : null,
       awayLineup: json['awayLineup'] != null ? TeamLineupData.fromJson(json['awayLineup']) : null,
@@ -246,7 +294,7 @@ class AIPrediction {
     );
   }
 
-  factory AIPrediction.generateLocal(String homeTeam, String awayTeam, String? homeForm, String? awayForm, String? h2hSummary, {int? homeRank, int? homePts, int? awayRank, int? awayPts, double? realHomeOdds, double? realDrawOdds, double? realAwayOdds, String league = ''}) {
+  factory AIPrediction.generateLocal(String homeTeam, String awayTeam, String? homeForm, String? awayForm, String? h2hSummary, {int? homeRank, int? homePts, int? awayRank, int? awayPts, double? realHomeOdds, double? realDrawOdds, double? realAwayOdds, String league = '', int? oddsRating}) {
     double hWin = 33.0;
     double dProb = 34.0;
     double aWin = 33.0;
@@ -262,6 +310,14 @@ class AIPrediction {
       hWin = (hImplied / totalImplied) * 100;
       dProb = (dImplied / totalImplied) * 100;
       aWin = (aImplied / totalImplied) * 100;
+    } else if (oddsRating != null && oddsRating != 0) {
+      final r = oddsRating;
+      if (r <= -15) { hWin = 70.0; dProb = 18.0; aWin = 12.0; }
+      else if (r <= -10) { hWin = 60.0; dProb = 23.0; aWin = 17.0; }
+      else if (r < 0) { hWin = 52.0; dProb = 28.0; aWin = 20.0; }
+      else if (r >= 15) { hWin = 12.0; dProb = 18.0; aWin = 70.0; }
+      else if (r >= 10) { hWin = 17.0; dProb = 23.0; aWin = 60.0; }
+      else if (r > 0) { hWin = 20.0; dProb = 28.0; aWin = 52.0; }
     } else {
       int hScore = 0;
       if (homeForm != null) {
