@@ -281,12 +281,28 @@ class AIPrediction {
       }
     }
 
+    int hWins = 0;
+    int aWins = 0;
+    if (h2hSummary != null) {
+      final cleanH2H = h2hSummary.replaceAll(RegExp(r'\s*\([\d\-,\s]+\)'), '');
+      final wonMatches = RegExp(r'([A-Za-z0-9\s\.\-]+?)\s+(?:won|holds)\s+(?:the\s+advantage|(\d+))', caseSensitive: false).allMatches(cleanH2H);
+      for (final m in wonMatches) {
+        final tName = (m.group(1) ?? '').trim().toLowerCase();
+        final count = int.tryParse(m.group(2) ?? '3') ?? 3;
+        if (tName.contains(homeTeam.toLowerCase()) || homeTeam.toLowerCase().contains(tName)) {
+          hWins += count;
+        } else if (tName.contains(awayTeam.toLowerCase()) || awayTeam.toLowerCase().contains(tName)) {
+          aWins += count;
+        }
+      }
+    }
+
     final isUCL = league.toLowerCase().contains('champions league') || league.toLowerCase().contains('ucl');
     final hasOdds = realHomeOdds != null && realAwayOdds != null && realHomeOdds > 0 && realAwayOdds > 0;
     final oddsDiff = hasOdds ? (realHomeOdds - realAwayOdds) : 0.0;
-    final isEvenOdds = hasOdds ? (oddsDiff.abs() <= 0.15) : ((hWin - aWin).abs() <= 5.0);
-    final isHomeFavorite = hasOdds ? (realHomeOdds <= 1.50) : (hWin >= aWin + 25.0);
-    final isHomeUnderdog = hasOdds ? (realHomeOdds >= realAwayOdds + 1.50) : (hWin + 15.0 <= aWin);
+    final isEvenOdds = hasOdds ? (oddsDiff.abs() <= 0.15) : (hWins == aWins && hWins > 0);
+    final isHomeFavorite = hasOdds ? (realHomeOdds <= 1.50) : (hWins > aWins + 1);
+    final isHomeUnderdog = hasOdds ? (realHomeOdds >= realAwayOdds + 1.50) : (aWins > hWins || (aWin > hWin && !isEvenOdds));
 
     String rec = '';
     String strategyAnalysis = '';
@@ -310,21 +326,6 @@ class AIPrediction {
         finalDProb = 10.0; finalHWin = 48.0; finalAWin = 42.0;
       }
     } else if (isEvenOdds) {
-      int hWins = 0;
-      int aWins = 0;
-      if (h2hSummary != null) {
-        final wonMatches = RegExp(r'([A-Za-z0-9\s\.\-]+?)\s+won\s+(\d+)', caseSensitive: false).allMatches(h2hSummary);
-        for (final m in wonMatches) {
-          final tName = (m.group(1) ?? '').trim().toLowerCase();
-          final count = int.tryParse(m.group(2) ?? '0') ?? 0;
-          if (tName.contains(homeTeam.toLowerCase()) || homeTeam.toLowerCase().contains(tName)) {
-            hWins = count;
-          } else if (tName.contains(awayTeam.toLowerCase()) || awayTeam.toLowerCase().contains(tName)) {
-            aWins = count;
-          }
-        }
-      }
-
       if (hWins > aWins) {
         rec = '$homeTeam or Draw (1X)';
         primarySafeOption = 'Safe: 1X ($homeTeam or Draw)';
@@ -356,20 +357,20 @@ class AIPrediction {
       } else {
         rec = '$awayTeam or Draw (X2)';
         primarySafeOption = 'Safe: X2 ($awayTeam or Draw)';
-        strategyAnalysis = 'Home Underdog: Guarding against parked bus. Output X2.';
-        finalHWin = 15.0; finalDProb = 25.0; finalAWin = 60.0;
+        strategyAnalysis = 'Away Favored / Home Underdog: H2H/Odds favor $awayTeam. Output X2.';
+        finalHWin = 11.0; finalDProb = 11.0; finalAWin = 78.0;
       }
     } else {
-      if (hWin > aWin) {
+      if (hWins > aWins || hWin > aWin) {
         rec = '$homeTeam or Draw (1X)';
         primarySafeOption = 'Safe: 1X ($homeTeam or Draw)';
         strategyAnalysis = 'Standard Market: Home team favored by odds probability.';
         finalHWin = 55.0; finalDProb = 27.0; finalAWin = 18.0;
-      } else if (aWin > hWin) {
+      } else if (aWins > hWins || aWin > hWin) {
         rec = '$awayTeam or Draw (X2)';
         primarySafeOption = 'Safe: X2 ($awayTeam or Draw)';
-        strategyAnalysis = 'Standard Market: Away team favored by odds probability.';
-        finalHWin = 18.0; finalDProb = 27.0; finalAWin = 55.0;
+        strategyAnalysis = 'Standard Market: Away team favored by H2H / odds probability.';
+        finalHWin = 11.0; finalDProb = 11.0; finalAWin = 78.0;
       } else {
         rec = '$homeTeam or $awayTeam (Home or Away Win - 12)';
         primarySafeOption = 'Safe: 12 ($homeTeam or $awayTeam Win)';

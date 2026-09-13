@@ -144,8 +144,12 @@ async function safeFetch(url, retries = 2, customHeaders = {}) {
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 function probs(r) {
-  if (r < -10) return [60, 20, 20];
-  if (r >  10) return [20, 20, 60];
+  if (r <= -15) return [70, 18, 12];
+  if (r <= -10) return [60, 23, 17];
+  if (r < 0)    return [52, 28, 20];
+  if (r >= 15)  return [12, 18, 70];
+  if (r >= 10)  return [17, 23, 60];
+  if (r > 0)    return [20, 28, 52];
   return [33, 34, 33];
 }
 
@@ -177,13 +181,38 @@ function makePrediction(home, away, rating, hp, dp, ap, hOdds = null, dOdds = nu
 
   const hasOdds = hOdds !== null && aOdds !== null && hOdds > 0 && aOdds > 0;
   const oddsDiff = hasOdds ? (hOdds - aOdds) : 0;
-  const isEvenOdds = hasOdds ? Math.abs(oddsDiff) <= 0.15 : Math.abs(hp - ap) <= 5;
-  const isHomeUnderdog = hasOdds ? (hOdds >= aOdds + 1.50) : (hp + 15 <= ap);
-  const isHomeFavorite = hasOdds ? (hOdds <= 1.50) : (hp >= ap + 25);
+
+  // Extract H2H wins if available
+  let hWins = 0, aWins = 0, draws = 0;
+  if (h2hSummary) {
+    const cleanH2H = h2hSummary.replace(/\s*\([\d\-,\s]+\)/g, '');
+    const wonMatches = [...cleanH2H.matchAll(/([A-Za-z0-9\s\.\-]+?)\s+(?:won|holds)\s+(?:the\s+advantage|(\d+))/gi)];
+    for (const m of wonMatches) {
+      const tName = (m[1] || '').trim().toLowerCase();
+      const count = parseInt(m[2] || '3', 10);
+      if (tName.includes(home.toLowerCase()) || home.toLowerCase().includes(tName)) {
+        hWins += count;
+      } else if (tName.includes(away.toLowerCase()) || away.toLowerCase().includes(tName)) {
+        aWins += count;
+      }
+    }
+    const drawMatch = cleanH2H.match(/(\d+)\s+Draw/i);
+    if (drawMatch) draws = parseInt(drawMatch[1] || '0', 10);
+  }
+
+  const isEvenOdds = hasOdds ? Math.abs(oddsDiff) <= 0.15 : (rating === 0 && hWins === aWins);
+  const isHomeUnderdog = hasOdds ? (hOdds >= aOdds + 1.50) : (rating >= 2 || ap > hp + 10 || aWins > hWins + 1);
+  const isHomeFavorite = hasOdds ? (hOdds <= 1.50) : (rating <= -5 || hp >= ap + 25 || hWins > aWins + 1);
 
   let finalHp = hp;
   let finalDp = dp;
   let finalAp = ap;
+
+  // Recalibrate probabilities based on rating if default 33/34/33 passed
+  if (finalHp === 33 && finalDp === 34 && finalAp === 33 && rating !== 0) {
+    const [p1, p2, p3] = probs(rating);
+    finalHp = p1; finalDp = p2; finalAp = p3;
+  }
 
   // 1. Champions League Strategy
   if (isUCL) {
@@ -206,23 +235,6 @@ function makePrediction(home, away, rating, hp, dp, ap, hOdds = null, dOdds = nu
   } 
   // 2. Even Odds Rule (Check H2H)
   else if (isEvenOdds) {
-    let hWins = 0, aWins = 0, draws = 0;
-    if (h2hSummary) {
-      const cleanH2H = h2hSummary.replace(/\s*\([\d\-,\s]+\)/g, '');
-      const wonMatches = [...cleanH2H.matchAll(/([A-Za-z0-9\s\.\-]+?)\s+won\s+(\d+)/gi)];
-      for (const m of wonMatches) {
-        const tName = (m[1] || '').trim().toLowerCase();
-        const count = parseInt(m[2] || '0', 10);
-        if (tName.includes(home.toLowerCase()) || home.toLowerCase().includes(tName)) {
-          hWins = count;
-        } else if (tName.includes(away.toLowerCase()) || away.toLowerCase().includes(tName)) {
-          aWins = count;
-        }
-      }
-      const drawMatch = cleanH2H.match(/(\d+)\s+Draw/i);
-      if (drawMatch) draws = parseInt(drawMatch[1] || '0', 10);
-    }
-
     if (hWins > aWins) {
       recommendation = `${home} or Draw (1X)`;
       primarySafeOption = `Safe: 1X (${home} or Draw)`;
@@ -240,14 +252,14 @@ function makePrediction(home, away, rating, hp, dp, ap, hOdds = null, dOdds = nu
       finalHp = 45; finalDp = 10; finalAp = 45;
     }
   }
-  // 3. Home Favorite Rule (Home Odds <= 1.50)
+  // 3. Home Favorite Rule (Home Odds <= 1.50 or strong Home rating)
   else if (isHomeFavorite) {
     recommendation = `${home} or Draw & Over 1.5 Goals (1X + Over 1.5)`;
     primarySafeOption = `Safe: 1X + Over 1.5 Goals (${home} or Draw & Over 1.5 Goals)`;
-    strategyAnalysis = `Home Favorite (Odds <= 1.50): Compound market 1X + Over 1.5 Goals executed to preserve multiplier value.`;
-    finalHp = 70; finalDp = 20; finalAp = 10;
+    strategyAnalysis = `Home Favorite (Odds <= 1.50 / Rating: ${rating}): Compound market 1X + Over 1.5 Goals executed.`;
+    finalHp = Math.max(finalHp, 65); finalDp = 22; finalAp = 13;
   }
-  // 4. Home Underdog Rule (Home Odds >= Away Odds + 1.50)
+  // 4. Home Underdog Rule (Home Odds >= Away Odds + 1.50 or Away favored)
   else if (isHomeUnderdog) {
     const isVolatileLeague = (league || '').toLowerCase().includes('mls') || (league || '').toLowerCase().includes('bundesliga');
     if (isVolatileLeague) {
@@ -258,8 +270,8 @@ function makePrediction(home, away, rating, hp, dp, ap, hOdds = null, dOdds = nu
     } else {
       recommendation = `${away} or Draw (X2)`;
       primarySafeOption = `Safe: X2 (${away} or Draw)`;
-      strategyAnalysis = `Home Underdog: Guarding against parked bus. Output X2.`;
-      finalHp = 15; finalDp = 25; finalAp = 60;
+      strategyAnalysis = `Away Favored / Home Underdog: H2H/Odds favor ${away}. Output X2.`;
+      finalAp = Math.max(finalAp, 60); finalDp = 25; finalHp = 15;
     }
   }
   // 5. Default Market Rule
@@ -269,7 +281,7 @@ function makePrediction(home, away, rating, hp, dp, ap, hOdds = null, dOdds = nu
       primarySafeOption = `Safe: 1X (${home} or Draw)`;
       strategyAnalysis = `Standard Market: Home team favored by market odds (Rating: ${rating}).`;
       finalHp = 55; finalDp = 27; finalAp = 18;
-    } else if (rating > 5 || (hasOdds && aOdds < hOdds)) {
+    } else if (rating > 5 || (hasOdds && aOdds < hOdds) || aWins > hWins) {
       recommendation = `${away} or Draw (X2)`;
       primarySafeOption = `Safe: X2 (${away} or Draw)`;
       strategyAnalysis = `Standard Market: Away team favored by market odds (Rating: ${rating}).`;
