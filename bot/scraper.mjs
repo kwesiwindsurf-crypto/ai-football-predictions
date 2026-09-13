@@ -149,7 +149,7 @@ function probs(r) {
   return [33, 34, 33];
 }
 
-function generateStakingOptions(home, away, rating, hp, ap, hOdds = null, dOdds = null, aOdds = null) {
+function generateStakingOptions(home, away, rating, hp, ap, hOdds = null, dOdds = null, aOdds = null, primarySafe = null) {
   const isHomeFav = hp >= ap;
   const fav = isHomeFav ? home : away;
   const favOdds = isHomeFav ? hOdds : aOdds;
@@ -157,8 +157,10 @@ function generateStakingOptions(home, away, rating, hp, ap, hOdds = null, dOdds 
   const safeOdds = favOdds ? Math.max(1.15, +(favOdds * 0.70).toFixed(2)) : 1.25;
   const dnbOdds = favOdds ? Math.max(1.30, +(favOdds * 0.82).toFixed(2)) : 1.70;
 
+  const safeLabel = primarySafe || `Safe: ${isHomeFav ? '1X' : 'X2'} (${fav} or Draw) (${safeOdds})`;
+
   return [
-    `Safe: ${isHomeFav ? '1X' : 'X2'} (${fav} or Draw) (${safeOdds})`,
+    safeLabel,
     `Value: ${fav} Draw No Bet (${dnbOdds})`,
     `Risky: ${fav} to WIN by 2+ Goals (2.85)`,
     `BTTS: Both Teams To Score - Yes (1.78)`,
@@ -166,14 +168,108 @@ function generateStakingOptions(home, away, rating, hp, ap, hOdds = null, dOdds 
   ];
 }
 
-function makePrediction(home, away, rating, hp, dp, ap, hOdds = null, dOdds = null, aOdds = null) {
+function makePrediction(home, away, rating, hp, dp, ap, hOdds = null, dOdds = null, aOdds = null, league = '', h2hSummary = null) {
+  const isUCL = (league || '').toLowerCase().includes('champions league') || (league || '').toLowerCase().includes('ucl');
+
+  let recommendation = '';
+  let strategyAnalysis = '';
+  let primarySafeOption = '';
+
+  const hasOdds = hOdds !== null && aOdds !== null && hOdds > 0 && aOdds > 0;
+  const oddsDiff = hasOdds ? (hOdds - aOdds) : 0;
+  const isEvenOdds = hasOdds ? Math.abs(oddsDiff) <= 0.15 : Math.abs(hp - ap) <= 5;
+  const isHomeUnderdog = hasOdds ? (hOdds >= aOdds + 1.50) : (hp + 15 <= ap);
+  const isHomeFavorite = hasOdds ? (hOdds <= 1.50) : (hp >= ap + 25);
+
+  // 1. Champions League Strategy
+  if (isUCL) {
+    const isLeg1 = (league || '').toLowerCase().includes('leg 1') || (league || '').toLowerCase().includes('1st leg');
+    if (isLeg1) {
+      recommendation = rating < 0 ? `${home} or Draw (1X)` : `${away} or Draw (X2)`;
+      primarySafeOption = rating < 0 ? `Safe: 1X (${home} or Draw)` : `Safe: X2 (${away} or Draw)`;
+      strategyAnalysis = `UCL Knockout Leg 1: Stalemate protection active (${recommendation}).`;
+    } else {
+      recommendation = `${home} or ${away} (Home or Away Win - 12)`;
+      primarySafeOption = `Safe: 12 (${home} or ${away} Win)`;
+      strategyAnalysis = `UCL Group Stage / Leg 2: Forced attacking scenario active (12).`;
+    }
+  } 
+  // 2. Even Odds Rule (Check H2H)
+  else if (isEvenOdds) {
+    let hWins = 0, aWins = 0, draws = 0;
+    if (h2hSummary) {
+      const cleanH2H = h2hSummary.replace(/\s*\([\d\-,\s]+\)/g, '');
+      const wonMatches = [...cleanH2H.matchAll(/([A-Za-z0-9\s\.\-]+?)\s+won\s+(\d+)/gi)];
+      for (const m of wonMatches) {
+        const tName = (m[1] || '').trim().toLowerCase();
+        const count = parseInt(m[2] || '0', 10);
+        if (tName.includes(home.toLowerCase()) || home.toLowerCase().includes(tName)) {
+          hWins = count;
+        } else if (tName.includes(away.toLowerCase()) || away.toLowerCase().includes(tName)) {
+          aWins = count;
+        }
+      }
+      const drawMatch = cleanH2H.match(/(\d+)\s+Draw/i);
+      if (drawMatch) draws = parseInt(drawMatch[1] || '0', 10);
+    }
+
+    if (hWins > aWins) {
+      recommendation = `${home} or Draw (1X)`;
+      primarySafeOption = `Safe: 1X (${home} or Draw)`;
+      strategyAnalysis = `Even Odds Fixture: H2H favors home team (${hWins} vs ${aWins} wins). Output 1X.`;
+    } else if (aWins > hWins) {
+      recommendation = `${away} or Draw (X2)`;
+      primarySafeOption = `Safe: X2 (${away} or Draw)`;
+      strategyAnalysis = `Even Odds Fixture: H2H favors away team (${aWins} vs ${hWins} wins). Output X2.`;
+    } else {
+      recommendation = `${home} or ${away} (Home or Away Win - 12)`;
+      primarySafeOption = `Safe: 12 (${home} or ${away} Win)`;
+      strategyAnalysis = `Even Odds Fixture: H2H is a dead tie. Output 12 (Force a decisive outcome).`;
+    }
+  }
+  // 3. Home Favorite Rule (Home Odds <= 1.50)
+  else if (isHomeFavorite) {
+    recommendation = `${home} or Draw & Over 1.5 Goals (1X + Over 1.5)`;
+    primarySafeOption = `Safe: 1X + Over 1.5 Goals (${home} or Draw & Over 1.5 Goals)`;
+    strategyAnalysis = `Home Favorite (Odds <= 1.50): Compound market 1X + Over 1.5 Goals executed to preserve multiplier value.`;
+  }
+  // 4. Home Underdog Rule (Home Odds >= Away Odds + 1.50)
+  else if (isHomeUnderdog) {
+    const isVolatileLeague = (league || '').toLowerCase().includes('mls') || (league || '').toLowerCase().includes('bundesliga');
+    if (isVolatileLeague) {
+      recommendation = `${home} or ${away} (Home or Away Win - 12)`;
+      primarySafeOption = `Safe: 12 (${home} or ${away} Win)`;
+      strategyAnalysis = `Home Underdog Exception: Volatile league historical draw rate < 20%. Output 12 to capture volatility.`;
+    } else {
+      recommendation = `${away} or Draw (X2)`;
+      primarySafeOption = `Safe: X2 (${away} or Draw)`;
+      strategyAnalysis = `Home Underdog: Guarding against parked bus. Output X2.`;
+    }
+  }
+  // 5. Default Market Rule
+  else {
+    if (rating < -5 || (hasOdds && hOdds < aOdds)) {
+      recommendation = `${home} or Draw (1X)`;
+      primarySafeOption = `Safe: 1X (${home} or Draw)`;
+      strategyAnalysis = `Standard Market: Home team favored by market odds (Rating: ${rating}).`;
+    } else if (rating > 5 || (hasOdds && aOdds < hOdds)) {
+      recommendation = `${away} or Draw (X2)`;
+      primarySafeOption = `Safe: X2 (${away} or Draw)`;
+      strategyAnalysis = `Standard Market: Away team favored by market odds (Rating: ${rating}).`;
+    } else {
+      recommendation = `${home} or ${away} (Home or Away Win - 12)`;
+      primarySafeOption = `Safe: 12 (${home} or ${away} Win)`;
+      strategyAnalysis = `Standard Market: Balanced match, outputting double chance 12.`;
+    }
+  }
+
   return {
     homeWinProbability: hp,
     drawProbability: dp,
     awayWinProbability: ap,
-    recommendation: rating < -5 ? `${home} to WIN (Value)` : rating > 5 ? `${away} to WIN (Value)` : 'Draw',
-    analysis: `Scraped odds rating: ${rating}. Negative favors home, positive favors away.`,
-    stakingOptions: generateStakingOptions(home, away, rating, hp, ap, hOdds, dOdds, aOdds)
+    recommendation: recommendation,
+    analysis: `${strategyAnalysis}\nOdds rating: ${rating}.`,
+    stakingOptions: generateStakingOptions(home, away, rating, hp, ap, hOdds, dOdds, aOdds, primarySafeOption)
   };
 }
 
@@ -277,7 +373,7 @@ async function scrapeHomepage(matchesMap, nowMs) {
         homeForm: '', homePoints: 0, awayForm: '', awayPoints: 0,
         homeLineup: null, awayLineup: null,
         h2hSummary: null,
-        prediction: makePrediction(homeTeam, awayTeam, oddsRating, hp, dp, ap)
+        prediction: makePrediction(homeTeam, awayTeam, oddsRating, hp, dp, ap, null, null, null, fullLeagueName)
       });
     } catch(e) { /* skip */ }
   });
@@ -357,7 +453,7 @@ async function scrapeCountryPages(matchesMap) {
             homeForm: '', homePoints: 0, awayForm: '', awayPoints: 0,
             homeLineup: null, awayLineup: null,
             h2hSummary: null,
-            prediction: makePrediction(homeTeam, awayTeam, oddsRating, hp, dp, ap, parseFloat(tds.eq(7).text()) || null, parseFloat(tds.eq(8).text()) || null, parseFloat(tds.eq(9).text()) || null)
+            prediction: makePrediction(homeTeam, awayTeam, oddsRating, hp, dp, ap, parseFloat(tds.eq(7).text()) || null, parseFloat(tds.eq(8).text()) || null, parseFloat(tds.eq(9).text()) || null, c.defaultLeague)
           });
           added++;
         }
@@ -439,16 +535,19 @@ async function deepScrapeAll(matches) {
         match.h2hSummary = h2h;
       }
 
-      // Re-generate complete 5-category staking recommendations
-      match.prediction.stakingOptions = generateStakingOptions(
+      // Re-generate prediction with full H2H and league context
+      match.prediction = makePrediction(
         match.homeTeam,
         match.awayTeam,
         match.oddsRating,
         match.prediction.homeWinProbability,
+        match.prediction.drawProbability,
         match.prediction.awayWinProbability,
         match.homeOdds,
         match.drawOdds,
-        match.awayOdds
+        match.awayOdds,
+        match.league,
+        match.h2hSummary
       );
     }));
     process.stdout.write(`    [${i+batch.length}/${withMatchUrl.length}] ✓\n`);
