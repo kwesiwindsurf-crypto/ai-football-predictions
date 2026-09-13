@@ -48,7 +48,33 @@ const TOP_COUNTRIES = [
   { country: 'England', defaultLeague: 'England - Premier League', url: 'https://soccer-rating.com/England/' }
 ];
 
-const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36';
+// ─── User-Agent Pool (20 realistic modern browser UAs) ──────────────────────
+const USER_AGENTS = [
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36 Edg/123.0.0.0',
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4.1 Safari/605.1.15',
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0',
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:125.0) Gecko/20100101 Firefox/125.0',
+  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+  'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:125.0) Gecko/20100101 Firefox/125.0',
+  'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4.1 Mobile/15E148 Safari/604.1',
+  'Mozilla/5.0 (iPad; CPU OS 17_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4.1 Mobile/15E148 Safari/604.1',
+  'Mozilla/5.0 (Linux; Android 14; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.6367.82 Mobile Safari/537.36',
+  'Mozilla/5.0 (Linux; Android 14; Pixel 8 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.6367.82 Mobile Safari/537.36',
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 OPR/108.0.0.0',
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 Vivaldi/6.7.3329.35',
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_4_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_4_1) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4.1 Safari/605.1.15',
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0',
+  'Mozilla/5.0 (Linux; Android 13; SM-G998B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Mobile Safari/537.36',
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36 Edg/121.0.0.0'
+];
+
+function getRandomUserAgent() {
+  return USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
+}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function formatLeagueName(rawCode, country) {
@@ -69,7 +95,13 @@ function parseMatchDate(title) {
   if (!title) return new Date().toISOString();
   const m = title.match(/(\d{1,2})\/(\d{1,2})\s+(\d{1,2}):(\d{2})/);
   if (!m) return new Date().toISOString();
-  return new Date(Date.UTC(new Date().getUTCFullYear(), +m[2]-1, +m[1], +m[3], +m[4])).toISOString();
+  const year = new Date().getUTCFullYear();
+  const day = m[1].padStart(2, '0');
+  const month = m[2].padStart(2, '0');
+  const hour = m[3].padStart(2, '0');
+  const min = m[4].padStart(2, '0');
+  // soccer-rating.com operates in UTC+1 (BST/CET)
+  return new Date(`${year}-${month}-${day}T${hour}:${min}:00+01:00`).toISOString();
 }
 
 function parseLineupTable($, sel) {
@@ -96,9 +128,10 @@ function parseLineupTable($, sel) {
 }
 
 async function safeFetch(url, retries = 2, customHeaders = {}) {
+  const ua = getRandomUserAgent();
   for (let i = 0; i <= retries; i++) {
     try {
-      const res = await fetch(url, { headers: { 'User-Agent': UA, ...customHeaders } });
+      const res = await fetch(url, { headers: { 'User-Agent': ua, ...customHeaders } });
       if (res.ok) return res;
       if (i < retries) await sleep(500);
     } catch (e) {
@@ -289,13 +322,34 @@ async function scrapeCountryPages(matchesMap) {
         const [hp, dp, ap] = probs(oddsRating);
         const id = `${homeTeam}-${awayTeam}`.replace(/\s+/g,'-');
 
+        const titleAttr = (tds.eq(0).attr('title') || '').trim();
+        let status = 'notStarted';
+        let statusShort = 'NS';
+        let homeScore = 0;
+        let awayScore = 0;
+
+        const finishedMatch = titleAttr.match(/Finished\s+(\d+)\s*[:\-]\s*(\d+)/i);
+        const liveMatch = titleAttr.match(/Live\s+(\d+)\s*[:\-]\s*(\d+)/i);
+
+        if (finishedMatch) {
+          status = 'finished';
+          statusShort = 'FT';
+          homeScore = parseInt(finishedMatch[1], 10);
+          awayScore = parseInt(finishedMatch[2], 10);
+        } else if (liveMatch) {
+          status = 'live';
+          statusShort = '1H';
+          homeScore = parseInt(liveMatch[1], 10);
+          awayScore = parseInt(liveMatch[2], 10);
+        }
+
         if (!matchesMap.has(id)) {
           matchesMap.set(id, {
             id, homeTeam, awayTeam,
             homeLogo: flagUrl, awayLogo: flagUrl,
             league: c.defaultLeague, date: matchDateIso,
-            status: 'notStarted', statusShort: 'NS',
-            homeScore: 0, awayScore: 0,
+            status, statusShort,
+            homeScore, awayScore,
             oddsRating, matchUrl, homeTeamUrl: hHref, awayTeamUrl: aHref,
             homeOdds: parseFloat(tds.eq(7).text()) || null,
             drawOdds: parseFloat(tds.eq(8).text()) || null,
@@ -341,6 +395,17 @@ async function deepScrapeAll(matches) {
       if (!res) return;
       const html = await res.text();
       const $ = cheerio.load(html);
+
+      // Extract exact match kickoff time from JSON-LD schema
+      const startDateMatch = html.match(/"startDate":\s*"([^"]+)"/);
+      if (startDateMatch && startDateMatch[1]) {
+        try {
+          const parsedDate = new Date(startDateMatch[1]);
+          if (!isNaN(parsedDate.getTime())) {
+            match.date = parsedDate.toISOString();
+          }
+        } catch (_) {}
+      }
 
       const fm = html.match(/Form Last 3 Games[\s\S]*?(\d+)\s*P[^\(]*\(([WDL]+)\)[\s\S]*?(\d+)\s*P[^\(]*\(([WDL]+)\)/i);
       if (fm) {
