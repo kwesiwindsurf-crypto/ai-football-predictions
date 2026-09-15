@@ -802,25 +802,29 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
                 child: const Icon(Icons.compare_arrows_rounded, color: Colors.orange, size: 20),
               ),
               const SizedBox(width: 10),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Head-to-Head History',
-                    style: TextStyle(
-                      color: AppTheme.textPrimaryOf(context),
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Head-to-Head History',
+                      style: TextStyle(
+                        color: AppTheme.textPrimaryOf(context),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
-                  ),
-                  Text(
-                    'Past $total Matches Overall Record',
-                    style: TextStyle(
-                      color: textSecondary,
-                      fontSize: 11,
+                    Text(
+                      'Past $total Matches Overall Record',
+                      style: TextStyle(
+                        color: textSecondary,
+                        fontSize: 11,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),
@@ -1057,8 +1061,8 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
             children: [
               Expanded(
                 child: Text(m.homeTeam,
-                    style: const TextStyle(
-                        color: AppTheme.success,
+                    style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.9),
                         fontWeight: FontWeight.bold,
                         fontSize: 12),
                     maxLines: 1,
@@ -1067,8 +1071,8 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
               Expanded(
                 child: Text(m.awayTeam,
                     textAlign: TextAlign.end,
-                    style: const TextStyle(
-                        color: AppTheme.secondary,
+                    style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.9),
                         fontWeight: FontWeight.bold,
                         fontSize: 12),
                     maxLines: 1,
@@ -2217,6 +2221,7 @@ class _Interactive3dPitchBoardState extends State<_Interactive3dPitchBoard>
                       ),
                     ),
                   ),
+
                   if (player.rating > 0)
                     Positioned(
                       right: -6,

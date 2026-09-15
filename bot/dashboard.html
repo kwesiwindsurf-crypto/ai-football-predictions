@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Predictions Dashboard - Today</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #020617;
+      --card-bg: rgba(30, 41, 59, 0.4);
+      --card-border: rgba(255, 255, 255, 0.1);
+      --accent: #38bdf8;
+      --win: #4ade80;
+      --loss: #f87171;
+      --pending: #fbbf24;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: radial-gradient(circle at top left, #0f172a, #020617);
+      color: var(--text-main);
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+      box-sizing: border-box;
+    }
+
+    h1 {
+      font-weight: 800;
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+      background: -webkit-linear-gradient(45deg, #38bdf8, #818cf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+      font-weight: 300;
+    }
+
+    .tracker {
+      display: flex;
+      gap: 2rem;
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      padding: 1.5rem 3rem;
+      border-radius: 20px;
+      border: 1px solid var(--card-border);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      margin-bottom: 3rem;
+      animation: fadeInDown 0.8s ease;
+    }
+
+    .stat-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: 800;
+    }
+
+    .stat-value.win { color: var(--win); text-shadow: 0 0 15px rgba(74, 222, 128, 0.4); }
+    .stat-value.loss { color: var(--loss); text-shadow: 0 0 15px rgba(248, 113, 113, 0.4); }
+    .stat-value.pending { color: var(--pending); }
+
+    .stat-label {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .matches-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 1.5rem;
+      width: 100%;
+      max-width: 1200px;
+    }
+
+    .match-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+      animation: fadeInUp 0.6s ease both;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .match-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .league-info {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      padding-bottom: 0.5rem;
+    }
+
+    .teams-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 0.5rem;
+    }
+
+    .team {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      width: 40%;
+    }
+
+    .team-name {
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+
+    .score-container {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--accent);
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .prediction-box {
+      margin-top: auto;
+      background: rgba(0,0,0,0.2);
+      border-radius: 8px;
+      padding: 1rem;
+      font-size: 0.9rem;
+    }
+
+    .pred-header {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .pred-value {
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .status-badge {
+      padding: 0.2rem 0.6rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+
+    .status-win { background: rgba(74, 222, 128, 0.15); color: var(--win); border: 1px solid rgba(74, 222, 128, 0.3); }
+    .status-loss { background: rgba(248, 113, 113, 0.15); color: var(--loss); border: 1px solid rgba(248, 113, 113, 0.3); }
+    .status-pending { background: rgba(251, 191, 36, 0.15); color: var(--pending); border: 1px solid rgba(251, 191, 36, 0.3); }
+
+    .loader {
+      border: 4px solid rgba(255,255,255,0.1);
+      border-left-color: var(--accent);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 4rem auto;
+    }
+
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+    @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+    .league-section {
+      width: 100%;
+      max-width: 1200px;
+      margin-bottom: 3rem;
+    }
+    
+    .league-header {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .league-count {
+      background: rgba(255,255,255,0.1);
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Upcoming Matches (Next 7 Days)</h1>
+  <div class="subtitle" id="date-subtitle">Loading...</div>
+
+  <div class="tracker" id="tracker" style="display: none;">
+    <div class="stat-box">
+      <div class="stat-value win" id="tracker-wins">0</div>
+      <div class="stat-label">Wins</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-value loss" id="tracker-losses">0</div>
+      <div class="stat-label">Losses</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-value" id="tracker-accuracy">0%</div>
+      <div class="stat-label">Accuracy</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-value pending" id="tracker-pending">0</div>
+      <div class="stat-label">Pending</div>
+    </div>
+  </div>
+
+  <div id="loading" class="loader"></div>
+  <div id="content-area" style="width: 100%; display: flex; flex-direction: column; align-items: center;"></div>
+
+  <script>
+    async function loadData() {
+      try {
+        const res = await fetch('/api/upcoming');
+        const data = await res.json();
+        
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('date-subtitle').innerText = 'Grouped by League (Yesterday -> Next 7 Days)';
+        
+        // Show tracker for completed matches
+        document.getElementById('tracker').style.display = 'flex';
+
+        let wins = 0;
+        let losses = 0;
+        let pending = 0;
+        
+        const byLeague = {};
+
+        data.forEach(match => {
+          if (match.correct === 'WIN') wins++;
+          else if (match.correct === 'LOSS') losses++;
+          else pending++;
+          
+          if (!byLeague[match.league]) byLeague[match.league] = [];
+          byLeague[match.league].push(match);
+        });
+        
+        const contentArea = document.getElementById('content-area');
+        
+        // Sort leagues alphabetically
+        const sortedLeagues = Object.keys(byLeague).sort((a,b) => a.localeCompare(b));
+        
+        let cardIndex = 0;
+        
+        for (const leagueName of sortedLeagues) {
+          const leagueMatches = byLeague[leagueName];
+          
+          const section = document.createElement('div');
+          section.className = 'league-section';
+          section.innerHTML = `
+            <div class="league-header">
+              ${leagueName} <span class="league-count">${leagueMatches.length}</span>
+            </div>
+            <div class="matches-grid" id="grid-${leagueName.replace(/[^a-zA-Z0-9]/g, '')}"></div>
+          `;
+          contentArea.appendChild(section);
+          
+          const grid = section.querySelector('.matches-grid');
+          
+          leagueMatches.forEach(match => {
+            let statusClass = 'status-pending';
+            let statusText = 'PENDING';
+            
+            if (match.correct === 'WIN') { statusClass = 'status-win'; statusText = 'WIN'; }
+            else if (match.correct === 'LOSS') { statusClass = 'status-loss'; statusText = 'LOSS'; }
+
+            const card = document.createElement('div');
+            card.className = 'match-card';
+            
+            // Limit animation delay so it doesn't wait forever on 2000 cards
+            const delay = Math.min(cardIndex * 0.02, 1.5); 
+            card.style.animationDelay = `${delay}s`;
+            cardIndex++;
+            
+            const scoreDisplay = match.status === 'FT' || match.status.includes('H') || match.status.includes('LIVE')
+              ? `${match.homeScore ?? '-'} : ${match.awayScore ?? '-'}`
+              : 'vs';
+
+            card.innerHTML = `
+              <div class="league-info">
+                <span>${match.date}</span>
+                <span>${match.kickoff}</span>
+              </div>
+              <div class="teams-container">
+                <div class="team">
+                  <span class="team-name">${match.homeName}</span>
+                </div>
+                <div class="score-container">${scoreDisplay}</div>
+                <div class="team">
+                  <span class="team-name">${match.awayName}</span>
+                </div>
+              </div>
+              <div class="prediction-box">
+                <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 0.5rem;">
+                  <div class="pred-header">PREDICTION</div>
+                  <div class="status-badge ${statusClass}">${statusText}</div>
+                </div>
+                <div class="pred-value">${match.pred.rec}</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem; display: flex; flex-direction: column; gap: 4px;">
+                  <span>Strategy: ${match.pred.strategy}</span>
+                  ${match.probs ? `<span style="color: var(--accent);">Probs: H ${match.probs.h}% | D ${match.probs.d}% | A ${match.probs.a}%</span>` : ''}
+                </div>
+              </div>
+            `;
+            grid.appendChild(card);
+          });
+        }
+
+        // Update Tracker UI
+        document.getElementById('tracker-wins').innerText = wins;
+        document.getElementById('tracker-losses').innerText = losses;
+        document.getElementById('tracker-pending').innerText = pending;
+        
+        const totalCompleted = wins + losses;
+        const accuracy = totalCompleted > 0 ? Math.round((wins / totalCompleted) * 100) : 0;
+        document.getElementById('tracker-accuracy').innerText = `${accuracy}%`;
+
+      } catch (err) {
+        console.error(err);
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('date-subtitle').innerText = 'Error loading matches.';
+      }
+    }
+
+    loadData();
+  </script>
+</body>
+</html>
