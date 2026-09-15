@@ -262,6 +262,24 @@ function parseEspnEvent(ev, leagueLabel) {
 
   const id = `${homeTeam}-${awayTeam}`.replace(/\s+/g, '-');
 
+  // Form & Records (Points Calculation)
+  const homeForm = homeComp.form || '';
+  const awayForm = awayComp.form || '';
+  
+  const parsePoints = (records) => {
+    if (!records || !records[0] || !records[0].summary) return 0;
+    const parts = records[0].summary.split('-'); // e.g. "1-3-0" for W-D-L
+    if (parts.length === 3) {
+      const w = parseInt(parts[0], 10) || 0;
+      const d = parseInt(parts[1], 10) || 0;
+      return (w * 3) + (d * 1);
+    }
+    return 0;
+  };
+
+  const homePoints = parsePoints(homeComp.records);
+  const awayPoints = parsePoints(awayComp.records);
+
   return {
     id,
     espnEventId: ev.id,
@@ -281,10 +299,10 @@ function parseEspnEvent(ev, leagueLabel) {
     oddsRating: oddsToRating(hOdds, aOdds),
     homeRank: null,
     awayRank: null,
-    homeForm: '',
-    awayForm: '',
-    homePoints: 0,
-    awayPoints: 0,
+    homeForm,
+    awayForm,
+    homePoints,
+    awayPoints,
     homeLineup: null,
     awayLineup: null,
     h2hSummary: null,
