@@ -5,6 +5,8 @@
 const CF_ACCOUNT_ID = process.env.CF_ACCOUNT_ID;
 const CF_API_TOKEN  = process.env.CF_API_TOKEN;
 const CF_KV_NS_ID   = process.env.CF_KV_NAMESPACE_ID;
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 const KV_KEY        = 'latest_soccer_data';
 
 // ─── Keywords used to filter out women's / youth / irrelevant matches ─────────
@@ -377,7 +379,23 @@ async function fetchAllEspnFixtures() {
 }
 
 // ─── Cloudflare KV Helpers ────────────────────────────────────────────────────
+async function getCloudflareKV() {
+  if (!CF_ACCOUNT_ID || !CF_API_TOKEN || !CF_KV_NS_ID) return null;
+  const url = `https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/storage/kv/namespaces/${CF_KV_NS_ID}/values/${KV_KEY}`;
+  try {
+    const res = await fetch(url, { headers: { 'Authorization': `Bearer ${CF_API_TOKEN}` } });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
 async function pushToCloudflareKV(data) {
+  if (!CF_ACCOUNT_ID || !CF_API_TOKEN || !CF_KV_NS_ID) {
+    console.log('Skipping CF KV push (missing credentials).');
+    return;
+  }
   const url = `https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/storage/kv/namespaces/${CF_KV_NS_ID}/values/${KV_KEY}`;
   const res = await fetch(url, {
     method: 'PUT',
@@ -387,6 +405,54 @@ async function pushToCloudflareKV(data) {
   const json = await res.json();
   if (!json.success) throw new Error(`KV write failed: ${JSON.stringify(json.errors)}`);
   console.log('  Pushed to Cloudflare KV successfully');
+}
+
+// ─── Telegram Broadcasting ────────────────────────────────────────────────────
+async function postPickOfTheDayToTelegram(matches) {
+  if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
+    console.log('Skipping Telegram: Missing TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID');
+    return;
+  }
+  
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const todaysMatches = matches.filter(m => m.date.startsWith(todayStr) && m.prediction);
+  
+  if (todaysMatches.length === 0) {
+    console.log('No matches today to post to Telegram.');
+    return;
+  }
+
+  // Find the most confident pick based on highest absolute oddsRating
+  todaysMatches.sort((a, b) => Math.abs(b.oddsRating || 0) - Math.abs(a.oddsRating || 0));
+  const bestMatch = todaysMatches[0];
+
+  const safeOption = bestMatch.prediction.stakingOptions?.find(o => o.risk === 'Safe')?.pick || bestMatch.prediction.recommendation;
+  const time = new Date(bestMatch.date).toLocaleTimeString('en-US', { hour: '2-digit', minute:'2-digit', timeZone: 'UTC' }) + ' UTC';
+
+  const msg = `🏆 *PICK OF THE DAY* 🏆\n\n` +
+              `⚽ *${bestMatch.homeTeam} vs ${bestMatch.awayTeam}*\n` +
+              `🌍 ${bestMatch.league}\n` +
+              `⏰ ${time}\n\n` +
+              `💡 *AI Prediction:* ${bestMatch.prediction.recommendation}\n` +
+              `🛡️ *Safe Option:* ${safeOption}\n\n` +
+              `📲 _Get all our daily picks inside the app!_`;
+
+  const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: msg, parse_mode: 'Markdown' })
+    });
+    const result = await res.json();
+    if (!result.ok) {
+      console.error('Telegram API error:', result.description);
+    } else {
+      console.log('✅ Successfully posted Pick of the Day to Telegram!');
+    }
+  } catch (e) {
+    console.error('Error posting to Telegram:', e.message);
+  }
 }
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
@@ -445,13 +511,30 @@ async function main() {
   // Clean up internal slug before upload
   matches.forEach(m => delete m.espnLeagueSlug);
 
+  // 3. Telegram Broadcast (Once per day)
+  const todayStr = new Date().toISOString().slice(0, 10);
+  let lastTelegramPostDate = null;
+  const currentKvData = await getCloudflareKV();
+  if (currentKvData && currentKvData.lastTelegramPostDate) {
+    lastTelegramPostDate = currentKvData.lastTelegramPostDate;
+  }
+
+  if (lastTelegramPostDate !== todayStr) {
+    console.log(`\nNew day detected! Attempting to post Pick of the Day to Telegram...`);
+    await postPickOfTheDayToTelegram(matches);
+    lastTelegramPostDate = todayStr; // Update flag
+  } else {
+    console.log(`\nTelegram: Already posted today (${todayStr}).`);
+  }
+
   const finalData = JSON.stringify({
     matchesData: {
       lastUpdated: new Date().toISOString(),
       scrapedBy: 'espn-only',
       matches
     },
-    standingsData: null
+    standingsData: null,
+    lastTelegramPostDate
   });
 
   console.log('\nPushing to Cloudflare KV...');
