@@ -224,8 +224,21 @@ async function fetchEspnLeagueFixtures(slug, dateStr) {
   }
 }
 
+// ─── Fetch ESPN summary for detailed lineups ───────────────────────────────────
+async function fetchEspnSummary(leagueSlug, eventId) {
+  const url = `https://site.api.espn.com/apis/site/v2/sports/soccer/${leagueSlug}/summary?event=${eventId}`;
+  const res = await safeFetch(url, 1);
+  if (!res) return null;
+  try {
+    const data = await res.json();
+    return data;
+  } catch {
+    return null;
+  }
+}
+
 // ─── Parse a single ESPN event into our match schema ─────────────────────────
-function parseEspnEvent(ev, leagueLabel) {
+function parseEspnEvent(ev, leagueLabel, leagueSlug) {
   const comp = ev.competitions?.[0];
   if (!comp) return null;
 
@@ -297,6 +310,7 @@ function parseEspnEvent(ev, leagueLabel) {
     drawOdds: dOdds,
     awayOdds: aOdds,
     oddsRating: oddsToRating(hOdds, aOdds),
+    espnLeagueSlug: leagueSlug, // Internal use
     homeRank: null,
     awayRank: null,
     homeForm,
@@ -339,7 +353,7 @@ async function fetchAllEspnFixtures() {
     for (const ev of allEvents) {
       if (isExcludedLeague(ev.name || '')) continue;
 
-      const match = parseEspnEvent(ev, league.label);
+      const match = parseEspnEvent(ev, league.label, league.slug);
       if (!match) continue;
 
       // Avoid duplicates - prefer richer record (with odds) if conflict
@@ -386,6 +400,50 @@ async function main() {
   console.log(`\nTotal: ${matches.length} matches across ${leagues.size} leagues`);
   const dates = [...new Set(matches.map(m => m.date.substring(0, 10)))].sort();
   console.log('Dates included:', dates.join(', '));
+
+  // 2. Fetch Lineups for Today's and Live Matches
+  console.log('\nFetching lineups for matches happening today or live...');
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const matchesToEnrich = matches.filter(m => m.date.startsWith(todayStr) || m.status === 'live');
+  
+  // Process in small batches to avoid spamming the API
+  const batchSize = 10;
+  for (let i = 0; i < matchesToEnrich.length; i += batchSize) {
+    const batch = matchesToEnrich.slice(i, i + batchSize);
+    await Promise.all(batch.map(async (m) => {
+      const summary = await fetchEspnSummary(m.espnLeagueSlug, m.espnEventId);
+      if (!summary || !summary.rosters || summary.rosters.length < 2) return;
+      
+      const parseLineup = (rosterObj) => {
+        if (!rosterObj || !rosterObj.roster) return null;
+        const startingXI = [];
+        const bench = [];
+        rosterObj.roster.forEach(p => {
+          const player = {
+            number: p.athlete?.jersey || '?',
+            name: p.athlete?.displayName || 'Unknown',
+            position: p.position?.abbreviation || 'N/A',
+            rating: 0,
+            stats: ''
+          };
+          if (p.starter) startingXI.push(player);
+          else bench.push(player);
+        });
+        return { avgRating: 0, startingXI, bench };
+      };
+      
+      // Match roster to home/away
+      const r1 = summary.rosters[0];
+      const r2 = summary.rosters[1];
+      const r1IsHome = r1.homeAway === 'home';
+      
+      m.homeLineup = parseLineup(r1IsHome ? r1 : r2);
+      m.awayLineup = parseLineup(r1IsHome ? r2 : r1);
+    }));
+  }
+  
+  // Clean up internal slug before upload
+  matches.forEach(m => delete m.espnLeagueSlug);
 
   const finalData = JSON.stringify({
     matchesData: {

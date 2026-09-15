@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../matches/presentation/pages/home_screen.dart';
-import '../../../standings/presentation/pages/standings_screen.dart';
 import '../../../tracker/presentation/pages/tracker_screen.dart';
 import '../../../settings/presentation/pages/settings_screen.dart';
 
@@ -17,7 +16,6 @@ class _MainLayoutState extends State<MainLayout> {
   
   final List<Widget> _screens = [
     const HomeScreen(),
-    const StandingsScreen(),
     const TrackerScreen(),
     const SettingsScreen(),
   ];
@@ -53,14 +51,13 @@ class _MainLayoutState extends State<MainLayout> {
         ),
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _buildNavItem(0, Icons.sports_soccer_rounded, 'Home', primary),
-                _buildNavItem(1, Icons.leaderboard_rounded, 'Tables', primary),
-                _buildNavItem(2, Icons.insights_rounded, 'Tracker', primary),
-                _buildNavItem(3, Icons.tune_rounded, 'Settings', primary),
+                _buildNavItem(1, Icons.insights_rounded, 'Tracker', primary),
+                _buildNavItem(2, Icons.tune_rounded, 'Settings', primary),
               ],
             ),
           ),
@@ -83,7 +80,7 @@ class _MainLayoutState extends State<MainLayout> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 250),
         curve: Curves.easeOutCubic,
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected ? primary.withValues(alpha: 0.15) : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
