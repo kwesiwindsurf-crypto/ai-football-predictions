@@ -382,22 +382,10 @@ class AIPrediction {
         finalDProb = 10.0; finalHWin = 48.0; finalAWin = 42.0;
       }
     } else if (isEvenOdds) {
-      if (hWins > aWins) {
-        rec = '$homeTeam or Draw (1X)';
-        primarySafeOption = 'Safe: 1X ($homeTeam or Draw)';
-        strategyAnalysis = 'Even Odds Fixture: H2H favors home team ($hWins vs $aWins wins). Output 1X.';
-        finalHWin = 52.0; finalDProb = 28.0; finalAWin = 20.0;
-      } else if (aWins > hWins) {
-        rec = '$awayTeam or Draw (X2)';
-        primarySafeOption = 'Safe: X2 ($awayTeam or Draw)';
-        strategyAnalysis = 'Even Odds Fixture: H2H favors away team ($aWins vs $hWins wins). Output X2.';
-        finalHWin = 20.0; finalDProb = 28.0; finalAWin = 52.0;
-      } else {
-        rec = '$homeTeam or $awayTeam (Home or Away Win - 12)';
-        primarySafeOption = 'Safe: 12 ($homeTeam or $awayTeam Win)';
-        strategyAnalysis = 'Even Odds Fixture: H2H is a dead tie. Output 12 (Force a decisive outcome).';
-        finalHWin = 45.0; finalDProb = 10.0; finalAWin = 45.0;
-      }
+      rec = 'Over 0.5 Goals';
+      primarySafeOption = 'Safe: Over 0.5 Goals';
+      strategyAnalysis = 'Even Odds Fixture: Output Over 0.5 (Tight Match).';
+      finalHWin = 45.0; finalDProb = 10.0; finalAWin = 45.0;
     } else if (isHomeFavorite) {
       rec = '$homeTeam or Draw & Over 1.5 Goals (1X + Over 1.5)';
       primarySafeOption = 'Safe: 1X + Over 1.5 Goals ($homeTeam or Draw & Over 1.5 Goals)';
@@ -406,9 +394,9 @@ class AIPrediction {
     } else if (isHomeUnderdog) {
       final isVolatileLeague = league.toLowerCase().contains('mls') || league.toLowerCase().contains('bundesliga');
       if (isVolatileLeague) {
-        rec = '$homeTeam or $awayTeam (Home or Away Win - 12)';
-        primarySafeOption = 'Safe: 12 ($homeTeam or $awayTeam Win)';
-        strategyAnalysis = 'Home Underdog Exception: Volatile league historical draw rate < 20%. Output 12 to capture volatility.';
+        rec = 'Over 0.5 Goals';
+        primarySafeOption = 'Safe: Over 0.5 Goals';
+        strategyAnalysis = 'Home Underdog Exception: Volatile league historical draw rate < 20%. Output Over 0.5 to capture volatility.';
         finalHWin = 42.0; finalDProb = 10.0; finalAWin = 48.0;
       } else {
         rec = '$awayTeam or Draw (X2)';
@@ -428,9 +416,9 @@ class AIPrediction {
         strategyAnalysis = 'Standard Market: Away team favored by H2H / odds probability.';
         finalHWin = 11.0; finalDProb = 11.0; finalAWin = 78.0;
       } else {
-        rec = '$homeTeam or $awayTeam (Home or Away Win - 12)';
-        primarySafeOption = 'Safe: 12 ($homeTeam or $awayTeam Win)';
-        strategyAnalysis = 'Standard Market: Balanced match, outputting double chance 12.';
+        rec = 'Over 0.5 Goals';
+        primarySafeOption = 'Safe: Over 0.5 Goals';
+        strategyAnalysis = 'Standard Market: Balanced match, outputting Over 0.5 Goals.';
         finalHWin = 45.0; finalDProb = 10.0; finalAWin = 45.0;
       }
     }
