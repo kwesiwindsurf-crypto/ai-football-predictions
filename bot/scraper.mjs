@@ -76,7 +76,7 @@ async function safeFetch(url, retries = 2) {
   for (let i = 0; i <= retries; i++) {
     try {
       const res = await fetch(url, {
-        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; AIFootballBot/1.0)' }
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
       });
       if (res.ok) return res;
       if (i < retries) await sleep(400);
@@ -359,11 +359,6 @@ async function pushToCloudflareKV(data) {
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 async function main() {
-  if (!CF_ACCOUNT_ID || !CF_API_TOKEN || !CF_KV_NS_ID) {
-    console.error('Missing CF_ACCOUNT_ID, CF_API_TOKEN, or CF_KV_NAMESPACE_ID env vars');
-    process.exit(1);
-  }
-
   console.log('Starting ESPN-only scraper...');
   console.log(`Fetching fixtures for yesterday → +6 days from ESPN...`);
 
