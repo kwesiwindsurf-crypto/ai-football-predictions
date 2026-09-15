@@ -512,7 +512,7 @@ async function main() {
   matches.forEach(m => delete m.espnLeagueSlug);
 
   // 3. Telegram Broadcast (Once per day)
-  const todayStr = new Date().toISOString().slice(0, 10);
+  // Use the same todayStr already defined above
   let lastTelegramPostDate = null;
   const currentKvData = await getCloudflareKV();
   if (currentKvData && currentKvData.lastTelegramPostDate) {
