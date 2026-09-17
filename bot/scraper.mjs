@@ -706,10 +706,10 @@ function parseEspnEvent(ev, leagueLabel, leagueSlug) {
     const awayRoster = ev.summaryData.rosters.find(r => r.homeAway === 'away');
     
     if (homeRoster && homeRoster.roster) {
-      homeLineup = homeRoster.roster.map(p => \`\${p.athlete?.displayName || 'Unknown'} (\${p.position?.name || 'Unknown'})\`);
+      homeLineup = homeRoster.roster.map(p => `${p.athlete?.displayName || 'Unknown'} (${p.position?.name || 'Unknown'})`);
     }
     if (awayRoster && awayRoster.roster) {
-      awayLineup = awayRoster.roster.map(p => \`\${p.athlete?.displayName || 'Unknown'} (\${p.position?.name || 'Unknown'})\`);
+      awayLineup = awayRoster.roster.map(p => `${p.athlete?.displayName || 'Unknown'} (${p.position?.name || 'Unknown'})`);
     }
   }
 
