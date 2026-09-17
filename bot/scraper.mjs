@@ -548,6 +548,11 @@ function makePrediction(home, away, hOdds, dOdds, aOdds, league, homeFormStr, aw
   const isHomeFav = fHp >= fAp;
   const fav = isHomeFav ? home : away;
   const favOdds = isHomeFav ? hOdds : aOdds;
+
+  const formGap = Math.abs(hForm - aForm);
+  const isFormFav = formGap >= 25 || hForm >= 60 || aForm >= 60;
+  const formFav = hForm >= aForm ? home : away;
+  const isHomeFormFav = hForm >= aForm;
   
   let recommendation = '';
   let primarySafe = '';
@@ -567,17 +572,29 @@ function makePrediction(home, away, hOdds, dOdds, aOdds, league, homeFormStr, aw
     }
     strategyAnalysis = `Clear Favorite (Prob >= 60%): Direct Win.`;
   } else if (maxProb >= 50) {
-    recommendation = `${fav} or Draw (Double Chance) or -0.5 Handicap`;
+    recommendation = `${fav} or Draw (Double Chance)`;
     primarySafe = `Safe: ${isHomeFav ? '1X' : 'X2'} (${fav} or Draw)`;
-    strategyAnalysis = `Moderate Favorite (Prob 50-59%): Double Chance or -0.5.`;
+    strategyAnalysis = `Moderate Favorite (Prob 50-59%): Double Chance.`;
   } else if (maxProb >= 40) {
-    recommendation = `${fav} Draw No Bet (DNB)`;
-    primarySafe = `Safe: Over 1.5 Goals`;
-    strategyAnalysis = `Tight Match (Prob 40-49%): Draw No Bet.`;
+    if (isFormFav) {
+      recommendation = `${formFav} or Draw (Double Chance)`;
+      primarySafe = `Safe: ${isHomeFormFav ? '1X' : 'X2'} (${formFav} or Draw)`;
+      strategyAnalysis = `Form Favorite (${formFav}): Double Chance or Over 0.5 Goals.`;
+    } else {
+      recommendation = `Over 0.5 Goals or Under 2.5 Goals`;
+      primarySafe = `Safe: Over 0.5 Goals`;
+      strategyAnalysis = `Tight Match (Prob 40-49%): Goals Market / Double Chance.`;
+    }
   } else {
-    recommendation = `Draw (X) or Under 2.5 Goals`;
-    primarySafe = `Safe: Under 3.5 Goals`;
-    strategyAnalysis = `Very Tight/Inconsistent: Expect a Draw.`;
+    if (isFormFav) {
+      recommendation = `${formFav} or Draw (Double Chance)`;
+      primarySafe = `Safe: ${isHomeFormFav ? '1X' : 'X2'} (${formFav} or Draw)`;
+      strategyAnalysis = `Form Advantage (${formFav}): Double Chance.`;
+    } else {
+      recommendation = `Under 2.5 Goals or Over 0.5 Goals`;
+      primarySafe = `Safe: Over 0.5 Goals`;
+      strategyAnalysis = `Inconsistent Teams: Under 2.5 / Over 0.5 Goals.`;
+    }
   }
   
   const dnbOdds = favOdds ? Math.max(1.30, parseFloat((favOdds * 0.82).toFixed(2))) : 1.70;

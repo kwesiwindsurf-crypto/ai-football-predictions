@@ -741,6 +741,11 @@ class AIPrediction {
     final isHomeFav = fHp >= fAp;
     final fav = isHomeFav ? homeTeam : awayTeam;
     final favOdds = isHomeFav ? realHomeOdds : realAwayOdds;
+
+    final formGap = (hForm - aForm).abs();
+    final isFormFav = formGap >= 25 || hForm >= 60 || aForm >= 60;
+    final formFav = hForm >= aForm ? homeTeam : awayTeam;
+    final isHomeFormFav = hForm >= aForm;
     
     String rec = '';
     String strategyAnalysis = '';
@@ -760,17 +765,29 @@ class AIPrediction {
       }
       strategyAnalysis = 'Clear Favorite (Prob >= 60%): Direct Win.';
     } else if (maxProb >= 50) {
-      rec = '$fav or Draw (Double Chance) or -0.5 Handicap';
+      rec = '$fav or Draw (Double Chance)';
       primarySafe = 'Safe: ${isHomeFav ? '1X' : 'X2'} ($fav or Draw)';
-      strategyAnalysis = 'Moderate Favorite (Prob 50-59%): Double Chance or -0.5.';
+      strategyAnalysis = 'Moderate Favorite (Prob 50-59%): Double Chance.';
     } else if (maxProb >= 40) {
-      rec = '$fav Draw No Bet (DNB)';
-      primarySafe = 'Safe: Over 1.5 Goals';
-      strategyAnalysis = 'Tight Match (Prob 40-49%): Draw No Bet.';
+      if (isFormFav) {
+        rec = '$formFav or Draw (Double Chance)';
+        primarySafe = 'Safe: ${isHomeFormFav ? '1X' : 'X2'} ($formFav or Draw)';
+        strategyAnalysis = 'Form Favorite ($formFav): Double Chance or Over 0.5 Goals.';
+      } else {
+        rec = 'Over 0.5 Goals or Under 2.5 Goals';
+        primarySafe = 'Safe: Over 0.5 Goals';
+        strategyAnalysis = 'Tight Match (Prob 40-49%): Goals Market / Double Chance.';
+      }
     } else {
-      rec = 'Draw (X) or Under 2.5 Goals';
-      primarySafe = 'Safe: Under 3.5 Goals';
-      strategyAnalysis = 'Very Tight/Inconsistent: Expect a Draw.';
+      if (isFormFav) {
+        rec = '$formFav or Draw (Double Chance)';
+        primarySafe = 'Safe: ${isHomeFormFav ? '1X' : 'X2'} ($formFav or Draw)';
+        strategyAnalysis = 'Form Advantage ($formFav): Double Chance.';
+      } else {
+        rec = 'Under 2.5 Goals or Over 0.5 Goals';
+        primarySafe = 'Safe: Over 0.5 Goals';
+        strategyAnalysis = 'Inconsistent Teams: Under 2.5 / Over 0.5 Goals.';
+      }
     }
     
     final dnbOdds = favOdds != null ? (favOdds * 0.82).clamp(1.30, 9.99) : 1.70;
