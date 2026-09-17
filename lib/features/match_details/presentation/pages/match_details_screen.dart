@@ -425,8 +425,10 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
         _buildPredictionGraph(),
         const SizedBox(height: 16),
         _buildAIPredictionCard(),
-        const SizedBox(height: 16),
-        _buildH2HGraphicalCard(),
+        if (widget.match.h2hSummary != null && widget.match.h2hSummary!.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          _buildH2HGraphicalCard(),
+        ],
         const SizedBox(height: 16),
         _buildRecentFormCard(),
         const SizedBox(height: 16),
