@@ -29,8 +29,8 @@ class Match {
   // Scraped data
   final int? oddsRating;
   final String? matchUrl;
-  final TeamLineupData? homeLineup;
-  final TeamLineupData? awayLineup;
+  final List<String>? homeLineup;
+  final List<String>? awayLineup;
 
   Match({
     required this.id,
@@ -165,8 +165,8 @@ class Match {
       awayOdds: aOdds,
       oddsRating: rating,
       matchUrl: json['matchUrl'],
-      homeLineup: json['homeLineup'] != null ? TeamLineupData.fromJson(json['homeLineup']) : null,
-      awayLineup: json['awayLineup'] != null ? TeamLineupData.fromJson(json['awayLineup']) : null,
+      homeLineup: (json['homeLineup'] as List<dynamic>?)?.map((e) => e.toString()).toList(),
+      awayLineup: (json['awayLineup'] as List<dynamic>?)?.map((e) => e.toString()).toList(),
     );
   }
 }
@@ -294,153 +294,481 @@ class AIPrediction {
     );
   }
 
-  factory AIPrediction.generateLocal(String homeTeam, String awayTeam, String? homeForm, String? awayForm, String? h2hSummary, {int? homeRank, int? homePts, int? awayRank, int? awayPts, double? realHomeOdds, double? realDrawOdds, double? realAwayOdds, String league = '', int? oddsRating}) {
-    double hWin = 33.0;
-    double dProb = 34.0;
-    double aWin = 33.0;
+  static bool _isBigGame(String home, String away) {
+    const bigTeams = [
+  'manchester city',
+  'arsenal',
+  'liverpool',
+  'chelsea',
+  'manchester united',
+  'tottenham hotspur',
+  'newcastle united',
+  'aston villa',
+  'brighton & hove albion',
+  'west ham united',
+  'leeds united',
+  'leicester city',
+  'southampton',
+  'burnley',
+  'sheffield united',
+  'west bromwich albion',
+  'norwich city',
+  'middlesbrough',
+  'sunderland',
+  'coventry city',
+  'watford',
+  'hull city',
+  'birmingham city',
+  'wrexham',
+  'charlton athletic',
+  'huddersfield town',
+  'bolton wanderers',
+  'reading',
+  'peterborough united',
+  'barnsley',
+  'blackpool',
+  'wycombe wanderers',
+  'rotherham united',
+  'bradford city',
+  'chesterfield',
+  'mk dons',
+  'notts county',
+  'doncaster rovers',
+  'gillingham',
+  'port vale',
+  'carlisle united',
+  'walsall',
+  'afc wimbledon',
+  'tranmere rovers',
+  'real madrid',
+  'fc barcelona',
+  'atlético madrid',
+  'athletic club',
+  'real sociedad',
+  'villarreal',
+  'real betis',
+  'sevilla',
+  'girona',
+  'real zaragoza',
+  'sporting gijón',
+  'levante',
+  'real oviedo',
+  'deportivo la coruña',
+  'elche',
+  'granada',
+  'cádiz',
+  'racing santander',
+  'cd tenerife',
+  'sd eibar',
+  'albacete balompié',
+  'mallorca',
+  'osasuna',
+  'inter milan',
+  'juventus',
+  'ac milan',
+  'napoli',
+  'as roma',
+  'atalanta',
+  'ss lazio',
+  'fiorentina',
+  'bologna',
+  'sampdoria',
+  'palermo',
+  'sassuolo',
+  'frosinone',
+  'salernitana',
+  'cremonese',
+  'spezia',
+  'bari',
+  'brescia',
+  'modena',
+  'cesena',
+  'pisa',
+  'bayern munich',
+  'bayer leverkusen',
+  'borussia dortmund',
+  'rb leipzig',
+  'vfb stuttgart',
+  'eintracht frankfurt',
+  'vfl wolfsburg',
+  'sc freiburg',
+  'borussia mönchengladbach',
+  'hamburger sv',
+  'fc schalke 04',
+  '1. fc köln',
+  'hertha bsc',
+  'fortuna düsseldorf',
+  'hannover 96',
+  '1. fc nürnberg',
+  '1. fc kaiserslautern',
+  'karlsruher sc',
+  'sv darmstadt 98',
+  'sc paderborn',
+  'paris saint-germain',
+  'as monaco',
+  'olympique de marseille',
+  'olympique lyonnais',
+  'losc lille',
+  'ogc nice',
+  'rc lens',
+  'stade rennais',
+  'stade brestois',
+  'fc metz',
+  'fc lorient',
+  'sm caen',
+  'paris fc',
+  'ea guingamp',
+  'troyes',
+  'ac ajaccio',
+  'clermont foot',
+  'amiens sc',
+  'grenoble foot',
+  'fc nantes',
+  'toulouse fc',
+  'ajax',
+  'psv eindhoven',
+  'feyenoord',
+  'az alkmaar',
+  'fc twente',
+  'fc utrecht',
+  'sl benfica',
+  'fc porto',
+  'sporting cp',
+  'sc braga',
+  'vitória de guimarães',
+  'fc famalicão',
+  'galatasaray',
+  'fenerbahçe',
+  'beşiktaş',
+  'trabzonspor',
+  'i̇stanbul başakşehir',
+  'samsunspor',
+  'adana demirspor',
+  'antalyaspor',
+  'club brugge',
+  'rsc anderlecht',
+  'royale union saint-gilloise',
+  'krc genk',
+  'royal antwerp',
+  'kaa gent',
+  'standard liège',
+  'cercle brugge',
+  'celtic',
+  'rangers',
+  'aberdeen',
+  'heart of midlothian',
+  'hibernian',
+  'kilmarnock',
+  'olympiacos',
+  'panathinaikos',
+  'aek athens',
+  'paok thessaloniki',
+  'aris thessaloniki',
+  'atromitos',
+  'ofi crete',
+  'zenit saint petersburg',
+  'spartak moscow',
+  'cska moscow',
+  'fc krasnodar',
+  'dynamo moscow',
+  'lokomotiv moscow',
+  'fc rostov',
+  'rubin kazan',
+  'shakhtar donetsk',
+  'dynamo kyiv',
+  'kryvbas kryvyi rih',
+  'polissya zhytomyr',
+  'zorya luhansk',
+  'karpaty lviv',
+  'red bull salzburg',
+  'sk sturm graz',
+  'lask',
+  'sk rapid wien',
+  'fk austria wien',
+  'wolfsberger ac',
+  'bsc young boys',
+  'fc basel',
+  'fc zürich',
+  'servette fc',
+  'fc lugano',
+  'fc st. gallen',
+  'fc luzern',
+  'fc copenhagen',
+  'fc midtjylland',
+  'brøndby if',
+  'fc nordsjælland',
+  'agf aarhus',
+  'silkeborg if',
+  'fk bodø/glimt',
+  'molde fk',
+  'rosenborg bk',
+  'sk brann',
+  'viking fk',
+  'lillestrøm sk',
+  'malmö ff',
+  'aik',
+  'djurgårdens if',
+  'ifk göteborg',
+  'bk häcken',
+  'if elfsborg',
+  'hammarby if',
+  'ifk norrköping',
+  'legia warsaw',
+  'lech poznań',
+  'raków częstochowa',
+  'jagiellonia białystok',
+  'pogoń szczecin',
+  'górnik zabrze',
+  'śląsk wrocław',
+  'cracovia',
+  'slavia prague',
+  'sparta prague',
+  'fc viktoria plzeň',
+  'baník ostrava',
+  'fk mladá boleslav',
+  'fc slovan liberec',
+  'sigma olomouc',
+  'inter miami cf',
+  'columbus crew',
+  'los angeles fc',
+  'lafc',
+  'la galaxy',
+  'seattle sounders fc',
+  'fc cincinnati',
+  'philadelphia union',
+  'atlanta united',
+  'new york red bulls',
+  'new york city fc',
+  'houston dynamo',
+  'club américa',
+  'cruz azul',
+  'chivas guadalajara',
+  'tigres uanl',
+  'cf monterrey',
+  'deportivo toluca',
+  'cf pachuca',
+  'pumas unam',
+  'club león',
+  'santos laguna',
+  'flamengo',
+  'palmeiras',
+  'atlético mineiro',
+  'botafogo',
+  'são paulo fc',
+  'fluminense',
+  'internacional',
+  'grêmio',
+  'corinthians',
+  'cruzeiro',
+  'athletico paranaense',
+  'fortaleza',
+  'bahia',
+  'river plate',
+  'boca juniors',
+  'racing club',
+  'independiente',
+  'san lorenzo',
+  'estudiantes de la plata',
+  'vélez sarsfield',
+  'rosario central',
+  'talleres de córdoba',
+  'colo-colo',
+  'universidad de chile',
+  'universidad católica',
+  'unión española',
+  'palestino',
+  'everton de viña del mar',
+  'cobresal',
+  'cobreloa',
+  'atlético nacional',
+  'millonarios fc',
+  'américa de cali',
+  'junior fc',
+  'independiente santa fe',
+  'independiente medellín',
+  'deportivo cali',
+  'deportes tolima',
+  'al hilal',
+  'al nassr',
+  'al ittihad',
+  'al ahli',
+  'al shabab',
+  'al ettifaq',
+  'al taawoun',
+  'al fateh',
+  'mamelodi sundowns',
+  'orlando pirates',
+  'kaizer chiefs',
+  'stellenbosch fc',
+  'supersport united',
+  'sekhukhune united',
+  'cape town city fc',
+  'peñarol',
+  'nacional',
+  'independiente del valle',
+  'olimpia',
+  'cerro porteño',
+  'lanús',
+  'defensa y justicia',
+  'red bull bragantino',
+  'belgrano',
+  'ldu quito'
+];
+    final h = home.toLowerCase();
+    final a = away.toLowerCase();
+    return bigTeams.any((t) => h.contains(t)) && bigTeams.any((t) => a.contains(t));
+  }
+
+  static double _parseForm(String? formStr) {
+    if (formStr == null || formStr.isEmpty) return 50.0;
+    final clean = formStr.toUpperCase().replaceAll(RegExp(r'[^WDL]'), '');
+    if (clean.isEmpty) return 50.0;
     
-    // If real odds are provided, convert them to implied probabilities
-    if (realHomeOdds != null && realDrawOdds != null && realAwayOdds != null) {
-      final hImplied = 100.0 / realHomeOdds;
-      final dImplied = 100.0 / realDrawOdds;
-      final aImplied = 100.0 / realAwayOdds;
-      
-      final totalImplied = hImplied + dImplied + aImplied;
-      
-      hWin = (hImplied / totalImplied) * 100;
-      dProb = (dImplied / totalImplied) * 100;
-      aWin = (aImplied / totalImplied) * 100;
-    } else if (oddsRating != null && oddsRating != 0) {
-      final r = oddsRating;
-      if (r <= -15) { hWin = 70.0; dProb = 18.0; aWin = 12.0; }
-      else if (r <= -10) { hWin = 60.0; dProb = 23.0; aWin = 17.0; }
-      else if (r < 0) { hWin = 52.0; dProb = 28.0; aWin = 20.0; }
-      else if (r >= 15) { hWin = 12.0; dProb = 18.0; aWin = 70.0; }
-      else if (r >= 10) { hWin = 17.0; dProb = 23.0; aWin = 60.0; }
-      else if (r > 0) { hWin = 20.0; dProb = 28.0; aWin = 52.0; }
-    } else {
-      int hScore = 0;
-      if (homeForm != null) {
-        hScore += homeForm.split('W').length - 1;
+    int pts = 0;
+    for (int i = 0; i < clean.length; i++) {
+      if (clean[i] == 'W') {
+        pts += 3;
+      } else if (clean[i] == 'D') {
+        pts += 1;
       }
-      int aScore = 0;
-      if (awayForm != null) {
-        aScore += awayForm.split('W').length - 1;
-      }
-      
-      if (hScore > aScore) {
-         hWin = 55.0; dProb = 25.0; aWin = 20.0;
-      } else if (aScore > hScore) {
-         hWin = 20.0; dProb = 25.0; aWin = 55.0;
-      } else {
-         hWin = 40.0; dProb = 30.0; aWin = 30.0;
+    }
+    return (pts / (clean.length * 3)) * 100.0;
+  }
+
+  factory AIPrediction.generateLocal(String homeTeam, String awayTeam, String? homeForm, String? awayForm, String? h2hSummary, {int? homeRank, int? homePts, int? awayRank, int? awayPts, double? realHomeOdds, double? realDrawOdds, double? realAwayOdds, String league = '', int? oddsRating}) {
+    final bool hasOdds = realHomeOdds != null && realAwayOdds != null && realHomeOdds > 0 && realAwayOdds > 0;
+    
+    double oddsHp = 45.0, oddsDp = 25.0, oddsAp = 30.0;
+    if (hasOdds) {
+      final rawH = 1.0 / realHomeOdds;
+      final rawD = realDrawOdds != null ? 1.0 / realDrawOdds : (1.0 - rawH - (1.0 / realAwayOdds) > 0 ? 1.0 - rawH - (1.0 / realAwayOdds) : 0.25);
+      final rawA = 1.0 / realAwayOdds;
+      final total = rawH + rawD + rawA;
+      oddsHp = (rawH / total) * 100;
+      oddsDp = (rawD / total) * 100;
+      oddsAp = (rawA / total) * 100;
+    }
+    
+    final double hForm = _parseForm(homeForm);
+    final double aForm = _parseForm(awayForm);
+    double formHp = 38.0, formDp = 24.0, formAp = 38.0;
+    if (hForm != 50.0 || aForm != 50.0) {
+      final totalF = hForm + aForm;
+      if (totalF > 0) {
+        formHp = (hForm / totalF) * 100;
+        formAp = (aForm / totalF) * 100;
+        final gap = (formHp - formAp).abs();
+        formDp = 30.0 - gap;
+        if (formDp < 5.0) formDp = 5.0;
+        final fTotal = formHp + formAp + formDp;
+        formHp = (formHp / fTotal) * 100;
+        formAp = (formAp / fTotal) * 100;
+        formDp = (formDp / fTotal) * 100;
       }
     }
 
-    int hWins = 0;
-    int aWins = 0;
-    if (h2hSummary != null) {
+    int hWins = 0, aWins = 0, draws = 0;
+    bool hasH2H = false;
+    double h2hHp = 0.0, h2hDp = 0.0, h2hAp = 0.0;
+    
+    if (h2hSummary != null && h2hSummary.isNotEmpty) {
       final cleanH2H = h2hSummary.replaceAll(RegExp(r'\s*\([\d\-,\s]+\)'), '');
-      final wonMatches = RegExp(r'([A-Za-z0-9\s\.\-]+?)\s+(?:won|holds)\s+(?:the\s+advantage|(\d+))', caseSensitive: false).allMatches(cleanH2H);
+      final wonMatches = RegExp(r'([A-Za-z0-9\s\.\-]+?)\s+won\s+(\d+)', caseSensitive: false).allMatches(cleanH2H);
       for (final m in wonMatches) {
         final tName = (m.group(1) ?? '').trim().toLowerCase();
-        final count = int.tryParse(m.group(2) ?? '3') ?? 3;
-        if (tName.contains(homeTeam.toLowerCase()) || homeTeam.toLowerCase().contains(tName)) {
+        final count = int.tryParse(m.group(2) ?? '0') ?? 0;
+        final hClean = homeTeam.toLowerCase();
+        final aClean = awayTeam.toLowerCase();
+        if (tName.contains(hClean) || hClean.contains(tName)) {
           hWins += count;
-        } else if (tName.contains(awayTeam.toLowerCase()) || awayTeam.toLowerCase().contains(tName)) {
+        } else if (tName.contains(aClean) || aClean.contains(tName)) {
           aWins += count;
         }
       }
+      final drawMatch = RegExp(r'(\d+)\s+Draw', caseSensitive: false).firstMatch(cleanH2H);
+      if (drawMatch != null) {
+        draws = int.tryParse(drawMatch.group(1) ?? '0') ?? 0;
+      }
+      
+      final total = hWins + aWins + draws;
+      if (total > 0) {
+        hasH2H = true;
+        h2hHp = (hWins / total) * 100;
+        h2hDp = (draws / total) * 100;
+        h2hAp = (aWins / total) * 100;
+      }
     }
-
-    final isUCL = league.toLowerCase().contains('champions league') || league.toLowerCase().contains('ucl');
-    final hasOdds = realHomeOdds != null && realAwayOdds != null && realHomeOdds > 0 && realAwayOdds > 0;
-    final oddsDiff = hasOdds ? (realHomeOdds - realAwayOdds) : 0.0;
-    final isEvenOdds = hasOdds ? (oddsDiff.abs() <= 0.15) : (hWins == aWins && hWins > 0);
-    final isHomeFavorite = hasOdds ? (realHomeOdds <= 1.50) : (hWins > aWins + 1);
-    final isHomeUnderdog = hasOdds ? (realHomeOdds >= realAwayOdds + 1.50) : (aWins > hWins || (aWin > hWin && !isEvenOdds));
-
+    
+    
+    
+    final wOdds = hasH2H ? 0.40 : 0.50;
+    final wForm = hasH2H ? 0.30 : 0.40;
+    final wH2H  = hasH2H ? 0.20 : 0.00;
+    final wHome = 0.10;
+    
+    const double homeAdvHp = 60.0, homeAdvDp = 20.0, homeAdvAp = 20.0;
+    
+    double fHp = (oddsHp * wOdds) + (formHp * wForm) + (h2hHp * wH2H) + (homeAdvHp * wHome);
+    double fDp = (oddsDp * wOdds) + (formDp * wForm) + (h2hDp * wH2H) + (homeAdvDp * wHome);
+    double fAp = (oddsAp * wOdds) + (formAp * wForm) + (h2hAp * wH2H) + (homeAdvAp * wHome);
+    
+    final fTotal = fHp + fDp + fAp;
+    fHp = (fHp / fTotal) * 100;
+    fDp = (fDp / fTotal) * 100;
+    fAp = (fAp / fTotal) * 100;
+    
+    final isBig = _isBigGame(homeTeam, awayTeam);
+    final maxProb = [fHp, fDp, fAp].reduce((a, b) => a > b ? a : b);
+    final isHomeFav = fHp >= fAp;
+    final fav = isHomeFav ? homeTeam : awayTeam;
+    final favOdds = isHomeFav ? realHomeOdds : realAwayOdds;
+    
     String rec = '';
     String strategyAnalysis = '';
-    String primarySafeOption = '';
-
-    double finalHWin = hWin;
-    double finalDProb = dProb;
-    double finalAWin = aWin;
-
-    if (isUCL) {
-      final isLeg1 = league.toLowerCase().contains('leg 1') || league.toLowerCase().contains('1st leg');
-      if (isLeg1) {
-        rec = '$homeTeam or Draw (1X)';
-        primarySafeOption = 'Safe: 1X ($homeTeam or Draw)';
-        strategyAnalysis = 'UCL Knockout Leg 1: Stalemate protection active ($rec).';
-        finalDProb = 35.0; finalHWin = 45.0; finalAWin = 20.0;
+    String primarySafe = '';
+    
+    if (isBig && maxProb < 55) {
+      rec = '$fav or Draw (Double Chance)';
+      primarySafe = 'Safe: ${isHomeFav ? '1X' : 'X2'} ($fav or Draw)';
+      strategyAnalysis = 'Big Game + Tight Match: Double Chance / Over 1.5 Goals.';
+    } else if (maxProb >= 60) {
+      if (fHp >= 60) {
+        rec = '$homeTeam to Win (1)';
+        primarySafe = 'Safe: 1X ($homeTeam or Draw)';
       } else {
-        rec = '$homeTeam or $awayTeam (Home or Away Win - 12)';
-        primarySafeOption = 'Safe: 12 ($homeTeam or $awayTeam Win)';
-        strategyAnalysis = 'UCL Group Stage / Leg 2: Forced attacking scenario active (12).';
-        finalDProb = 10.0; finalHWin = 48.0; finalAWin = 42.0;
+        rec = '$awayTeam to Win (2)';
+        primarySafe = 'Safe: X2 ($awayTeam or Draw)';
       }
-    } else if (isEvenOdds) {
-      rec = 'Over 0.5 Goals';
-      primarySafeOption = 'Safe: Over 0.5 Goals';
-      strategyAnalysis = 'Even Odds Fixture: Output Over 0.5 (Tight Match).';
-      finalHWin = 45.0; finalDProb = 10.0; finalAWin = 45.0;
-    } else if (isHomeFavorite) {
-      rec = '$homeTeam or Draw & Over 1.5 Goals (1X + Over 1.5)';
-      primarySafeOption = 'Safe: 1X + Over 1.5 Goals ($homeTeam or Draw & Over 1.5 Goals)';
-      strategyAnalysis = 'Home Favorite (Odds <= 1.50): Compound market 1X + Over 1.5 Goals executed to preserve multiplier value.';
-      finalHWin = 70.0; finalDProb = 20.0; finalAWin = 10.0;
-    } else if (isHomeUnderdog) {
-      final isVolatileLeague = league.toLowerCase().contains('mls') || league.toLowerCase().contains('bundesliga');
-      if (isVolatileLeague) {
-        rec = 'Over 0.5 Goals';
-        primarySafeOption = 'Safe: Over 0.5 Goals';
-        strategyAnalysis = 'Home Underdog Exception: Volatile league historical draw rate < 20%. Output Over 0.5 to capture volatility.';
-        finalHWin = 42.0; finalDProb = 10.0; finalAWin = 48.0;
-      } else {
-        rec = '$awayTeam or Draw (X2)';
-        primarySafeOption = 'Safe: X2 ($awayTeam or Draw)';
-        strategyAnalysis = 'Away Favored / Home Underdog: H2H/Odds favor $awayTeam. Output X2.';
-        finalHWin = 11.0; finalDProb = 11.0; finalAWin = 78.0;
-      }
+      strategyAnalysis = 'Clear Favorite (Prob >= 60%): Direct Win.';
+    } else if (maxProb >= 50) {
+      rec = '$fav or Draw (Double Chance) or -0.5 Handicap';
+      primarySafe = 'Safe: ${isHomeFav ? '1X' : 'X2'} ($fav or Draw)';
+      strategyAnalysis = 'Moderate Favorite (Prob 50-59%): Double Chance or -0.5.';
+    } else if (maxProb >= 40) {
+      rec = '$fav Draw No Bet (DNB)';
+      primarySafe = 'Safe: Over 1.5 Goals';
+      strategyAnalysis = 'Tight Match (Prob 40-49%): Draw No Bet.';
     } else {
-      if (hWins > aWins || hWin > aWin) {
-        rec = '$homeTeam or Draw (1X)';
-        primarySafeOption = 'Safe: 1X ($homeTeam or Draw)';
-        strategyAnalysis = 'Standard Market: Home team favored by odds probability.';
-        finalHWin = 55.0; finalDProb = 27.0; finalAWin = 18.0;
-      } else if (aWins > hWins || aWin > hWin) {
-        rec = '$awayTeam or Draw (X2)';
-        primarySafeOption = 'Safe: X2 ($awayTeam or Draw)';
-        strategyAnalysis = 'Standard Market: Away team favored by H2H / odds probability.';
-        finalHWin = 11.0; finalDProb = 11.0; finalAWin = 78.0;
-      } else {
-        rec = 'Over 0.5 Goals';
-        primarySafeOption = 'Safe: Over 0.5 Goals';
-        strategyAnalysis = 'Standard Market: Balanced match, outputting Over 0.5 Goals.';
-        finalHWin = 45.0; finalDProb = 10.0; finalAWin = 45.0;
-      }
+      rec = 'Draw (X) or Under 2.5 Goals';
+      primarySafe = 'Safe: Under 3.5 Goals';
+      strategyAnalysis = 'Very Tight/Inconsistent: Expect a Draw.';
     }
-
-    final String fav = finalHWin >= finalAWin ? homeTeam : awayTeam;
-    final double? favOdds = finalHWin >= finalAWin ? realHomeOdds : realAwayOdds;
-    final double dnbOdds = favOdds != null ? (favOdds * 0.82).clamp(1.30, 9.99) : 1.70;
-
-    List<String> stakingOptions = [
-      primarySafeOption,
+    
+    final dnbOdds = favOdds != null ? (favOdds * 0.82).clamp(1.30, 9.99) : 1.70;
+    final stakingOptions = [
+      primarySafe,
       'Value: $fav Draw No Bet (${dnbOdds.toStringAsFixed(2)})',
-      'Risky: $fav to WIN by 2+ Goals (2.85)',
+      (isBig && maxProb < 55) ? 'Goals: Over 1.5 Total Goals (1.30)' : 'Risky: $fav to WIN by 2+ Goals (2.85)',
       'BTTS: Both Teams To Score - Yes (1.78)',
-      'Goals: Over 1.5 Total Goals (1.34)'
+      maxProb < 45 ? 'Alternative: Under 2.5 Goals (1.80)' : 'Alternative: Over 2.5 Total Goals (1.70)'
     ];
 
     return AIPrediction(
-      homeWinProbability: finalHWin,
-      drawProbability: finalDProb,
-      awayWinProbability: finalAWin,
+      homeWinProbability: fHp.roundToDouble(),
+      drawProbability: fDp.roundToDouble(),
+      awayWinProbability: fAp.roundToDouble(),
       recommendation: rec,
-      analysis: strategyAnalysis,
+      analysis: '$strategyAnalysis\nHomeForm: ${hForm.round()}%, AwayForm: ${aForm.round()}%, BigGame: $isBig',
       stakingOptions: stakingOptions,
     );
   }

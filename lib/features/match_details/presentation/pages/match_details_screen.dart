@@ -3,7 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../../../models/match_model.dart' as model;
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/services/app_settings_service.dart';
+
 import '../../../../core/services/analytics_service.dart';
 
 
@@ -104,8 +104,8 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
                   text: 'AI Insights',
                 ),
                 Tab(
-                  icon: Icon(Icons.sports_soccer_rounded, size: 18),
-                  text: 'Tactical Board',
+                  icon: Icon(Icons.people_alt_rounded, size: 18),
+                  text: 'Lineups',
                 ),
               ],
             ),
@@ -116,7 +116,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
         controller: _tabController,
         children: [
           _buildAIInsightsTab(),
-          _buildTacticalTab(),
+          _buildLineupsTab(),
         ],
       ),
     );
@@ -449,24 +449,24 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            AppTheme.surface,
-            AppTheme.primary.withValues(alpha: 0.08),
+            AppTheme.surfaceOf(context),
+            AppTheme.primaryOf(context).withValues(alpha: 0.08),
           ],
         ),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppTheme.primary.withValues(alpha: 0.25)),
+        border: Border.all(color: AppTheme.primaryOf(context).withValues(alpha: 0.25)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.smart_toy_rounded, color: AppTheme.primary, size: 20),
+              Icon(Icons.smart_toy_rounded, color: AppTheme.primaryOf(context), size: 20),
               const SizedBox(width: 8),
               Text(
                 'AI Win Probability',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Colors.white,
+                      color: AppTheme.textPrimaryOf(context),
                       fontWeight: FontWeight.bold,
                     ),
               ),
@@ -494,14 +494,15 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
             children: [
               Expanded(
                 child: _buildProbBarColumn(
-                    m.homeTeam, home, AppTheme.success, true),
-              ),
-              Expanded(
-                child: _buildProbBarColumn('Draw', draw, Colors.orange, false),
+                    context, m.homeTeam, home, AppTheme.success, true),
               ),
               Expanded(
                 child: _buildProbBarColumn(
-                    m.awayTeam, away, AppTheme.secondary, false),
+                    context, 'Draw', draw, Colors.orange, false),
+              ),
+              Expanded(
+                child: _buildProbBarColumn(
+                    context, m.awayTeam, away, AppTheme.secondary, false),
               ),
             ],
           ),
@@ -533,10 +534,10 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: AppTheme.background,
+              color: AppTheme.backgroundOf(context),
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
-                  color: AppTheme.primary.withValues(alpha: 0.4)),
+                  color: AppTheme.primaryOf(context).withValues(alpha: 0.4)),
             ),
             child: Row(
               children: [
@@ -544,12 +545,12 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
                   padding: const EdgeInsets.symmetric(
                       horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppTheme.primary.withValues(alpha: 0.2),
+                    color: AppTheme.primaryOf(context).withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Text('AI',
+                  child: Text('AI',
                       style: TextStyle(
-                          color: AppTheme.primary,
+                          color: AppTheme.primaryOf(context),
                           fontWeight: FontWeight.w900,
                           fontSize: 13)),
                 ),
@@ -558,16 +559,16 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('RECOMMENDATION',
+                      Text('RECOMMENDATION',
                           style: TextStyle(
-                              color: AppTheme.textSecondary,
+                              color: AppTheme.textSecondaryOf(context),
                               fontSize: 9,
                               letterSpacing: 1.2)),
                       const SizedBox(height: 2),
                       Text(
                         m.prediction.recommendation,
-                        style: const TextStyle(
-                            color: Colors.white,
+                        style: TextStyle(
+                            color: AppTheme.textPrimaryOf(context),
                             fontWeight: FontWeight.bold,
                             fontSize: 15),
                       ),
@@ -585,7 +586,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
   }
 
   Widget _buildProbBarColumn(
-      String label, double prob, Color color, bool highlight) {
+      BuildContext context, String label, double prob, Color color, bool highlight) {
     final height = (prob / 100 * 90).clamp(12.0, 90.0);
     return Column(
       children: [
@@ -603,7 +604,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
           margin: const EdgeInsets.symmetric(horizontal: 4),
           height: 90,
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.04),
+            color: AppTheme.textPrimaryOf(context).withValues(alpha: 0.04),
             borderRadius: BorderRadius.circular(8),
           ),
           alignment: Alignment.bottomCenter,
@@ -636,8 +637,8 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
           textAlign: TextAlign.center,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-              color: AppTheme.textSecondary, fontSize: 10),
+          style: TextStyle(
+              color: AppTheme.textSecondaryOf(context), fontSize: 10),
         ),
       ],
     );
@@ -648,9 +649,9 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: AppTheme.surfaceOf(context),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.07)),
+        border: Border.all(color: AppTheme.textPrimaryOf(context).withValues(alpha: 0.07)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -659,9 +660,9 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
             children: [
               const Icon(Icons.analytics_outlined, color: AppTheme.secondary, size: 20),
               const SizedBox(width: 8),
-              const Text('AI Analysis',
+              Text('AI Analysis',
                   style: TextStyle(
-                      color: Colors.white,
+                      color: AppTheme.textPrimaryOf(context),
                       fontWeight: FontWeight.bold,
                       fontSize: 16)),
             ],
@@ -669,63 +670,14 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
           const SizedBox(height: 12),
           Text(
             m.prediction.analysis,
-            style: const TextStyle(
-                color: AppTheme.textSecondary, height: 1.6, fontSize: 13),
-          ),
-          if (m.oddsRating != null) ...[
-            const SizedBox(height: 12),
-            _buildOddsRatingChip(m.oddsRating!),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildOddsRatingChip(int rating) {
-    Color color;
-    String label;
-    if (rating < -10) {
-      color = AppTheme.success;
-      label = 'Strong Home Advantage';
-    } else if (rating > 10) {
-      color = AppTheme.secondary;
-      label = 'Strong Away Advantage';
-    } else if (rating < 0) {
-      color = Colors.lightGreen;
-      label = 'Slight Home Lean';
-    } else if (rating > 0) {
-      color = Colors.deepOrangeAccent;
-      label = 'Slight Away Lean';
-    } else {
-      color = Colors.orange;
-      label = 'Balanced Match';
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.35)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.trending_up, color: color, size: 16),
-          const SizedBox(width: 6),
-          Flexible(
-            child: Text(
-              'Rating: $rating  ·  $label',
-              style: TextStyle(
-                  color: color, fontSize: 12, fontWeight: FontWeight.w600),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
+            style: TextStyle(
+                color: AppTheme.textSecondaryOf(context), height: 1.6, fontSize: 13),
           ),
         ],
       ),
     );
   }
+
 
   Widget _buildH2HGraphicalCard() {
     final m = widget.match;
@@ -762,17 +714,11 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
       total = hWins + aWins + draws;
     }
 
-    // Default graphics values if no prior meetings found
-    if (total == 0) {
-      hWins = (m.prediction.homeWinProbability / 20).round().clamp(1, 4);
-      aWins = (m.prediction.awayWinProbability / 20).round().clamp(1, 4);
-      draws = 1;
-      total = hWins + aWins + draws;
-    }
+    final bool isFirstMeeting = total == 0;
 
-    final homePct = ((hWins / total) * 100).round();
-    final drawPct = ((draws / total) * 100).round();
-    final awayPct = (100 - homePct - drawPct).clamp(0, 100);
+    final homePct = isFirstMeeting ? 0 : ((hWins / total) * 100).round();
+    final drawPct = isFirstMeeting ? 0 : ((draws / total) * 100).round();
+    final awayPct = isFirstMeeting ? 0 : (100 - homePct - drawPct).clamp(0, 100);
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -815,7 +761,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
                       ),
                     ),
                     Text(
-                      'Past $total Matches Overall Record',
+                      isFirstMeeting ? '🆕 No previous meetings recorded' : 'Past $total Matches Overall Record',
                       style: TextStyle(
                         color: textSecondary,
                         fontSize: 11,
@@ -856,15 +802,15 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '$hWins Wins',
-                        style: const TextStyle(
-                          color: Colors.white,
+                        isFirstMeeting ? '—' : '$hWins Wins',
+                        style: TextStyle(
+                          color: AppTheme.textPrimaryOf(context),
                           fontWeight: FontWeight.w900,
                           fontSize: 18,
                         ),
                       ),
                       Text(
-                        '$homePct%',
+                        isFirstMeeting ? 'No data' : '$homePct%',
                         style: TextStyle(
                           color: AppTheme.success.withValues(alpha: 0.9),
                           fontSize: 11,
@@ -898,15 +844,15 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '$draws',
-                        style: const TextStyle(
-                          color: Colors.white,
+                        isFirstMeeting ? '—' : '$draws',
+                        style: TextStyle(
+                          color: AppTheme.textPrimaryOf(context),
                           fontWeight: FontWeight.w900,
                           fontSize: 18,
                         ),
                       ),
                       Text(
-                        '$drawPct%',
+                        isFirstMeeting ? 'No data' : '$drawPct%',
                         style: TextStyle(
                           color: Colors.orange.withValues(alpha: 0.9),
                           fontSize: 11,
@@ -942,15 +888,15 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '$aWins Wins',
-                        style: const TextStyle(
-                          color: Colors.white,
+                        isFirstMeeting ? '—' : '$aWins Wins',
+                        style: TextStyle(
+                          color: AppTheme.textPrimaryOf(context),
                           fontWeight: FontWeight.w900,
                           fontSize: 18,
                         ),
                       ),
                       Text(
-                        '$awayPct%',
+                        isFirstMeeting ? 'No data' : '$awayPct%',
                         style: TextStyle(
                           color: AppTheme.secondary.withValues(alpha: 0.9),
                           fontSize: 11,
@@ -965,32 +911,43 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
           ),
           const SizedBox(height: 16),
 
-          // Multi-color Segmented Progress Bar
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: SizedBox(
-              height: 12,
-              child: Row(
-                children: [
-                  if (homePct > 0)
-                    Expanded(
-                      flex: homePct,
-                      child: Container(color: AppTheme.success),
-                    ),
-                  if (drawPct > 0)
-                    Expanded(
-                      flex: drawPct,
-                      child: Container(color: Colors.orange),
-                    ),
-                  if (awayPct > 0)
-                    Expanded(
-                      flex: awayPct,
-                      child: Container(color: AppTheme.secondary),
-                    ),
-                ],
+          if (isFirstMeeting)
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Container(
+                height: 12,
+                decoration: BoxDecoration(
+                  color: AppTheme.cardBorderOf(context).withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            )
+          else
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: SizedBox(
+                height: 12,
+                child: Row(
+                  children: [
+                    if (homePct > 0)
+                      Expanded(
+                        flex: homePct,
+                        child: Container(color: AppTheme.success),
+                      ),
+                    if (drawPct > 0)
+                      Expanded(
+                        flex: drawPct,
+                        child: Container(color: Colors.orange),
+                      ),
+                    if (awayPct > 0)
+                      Expanded(
+                        flex: awayPct,
+                        child: Container(color: AppTheme.secondary),
+                      ),
+                  ],
+                ),
               ),
             ),
-          ),
           const SizedBox(height: 14),
 
           // Summary pill
@@ -1007,11 +964,13 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    hWins > aWins
-                        ? '${m.homeTeam} has dominated past head-to-head encounters.'
-                        : aWins > hWins
-                            ? '${m.awayTeam} holds the advantage in past meetings.'
-                            : 'Both teams are evenly matched in past head-to-head meetings.',
+                    isFirstMeeting
+                        ? 'No previous meetings — this could be a historic first encounter!'
+                        : hWins > aWins
+                            ? '${m.homeTeam} has dominated past head-to-head encounters.'
+                            : aWins > hWins
+                                ? '${m.awayTeam} holds the advantage in past meetings.'
+                                : 'Both teams are evenly matched in past head-to-head meetings.',
                     style: TextStyle(
                       color: AppTheme.textPrimaryOf(context),
                       fontSize: 12,
@@ -1038,9 +997,9 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: AppTheme.surfaceOf(context),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.07)),
+        border: Border.all(color: AppTheme.textPrimaryOf(context).withValues(alpha: 0.07)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1049,9 +1008,9 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
             children: [
               const Icon(Icons.history_toggle_off, color: Colors.orange, size: 20),
               const SizedBox(width: 8),
-              const Text('Recent Form',
+              Text('Recent Form',
                   style: TextStyle(
-                      color: Colors.white,
+                      color: AppTheme.textPrimaryOf(context),
                       fontWeight: FontWeight.bold,
                       fontSize: 16)),
             ],
@@ -1062,7 +1021,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
               Expanded(
                 child: Text(m.homeTeam,
                     style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.9),
+                        color: AppTheme.textPrimaryOf(context).withValues(alpha: 0.9),
                         fontWeight: FontWeight.bold,
                         fontSize: 12),
                     maxLines: 1,
@@ -1072,7 +1031,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
                 child: Text(m.awayTeam,
                     textAlign: TextAlign.end,
                     style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.9),
+                        color: AppTheme.textPrimaryOf(context).withValues(alpha: 0.9),
                         fontWeight: FontWeight.bold,
                         fontSize: 12),
                     maxLines: 1,
@@ -1089,12 +1048,12 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
                 children: [
                   Expanded(
                       child: i < homeRecent.length
-                          ? _buildFormRow(homeRecent[i], true)
+                          ? _buildFormRow(context, homeRecent[i], true)
                           : const SizedBox()),
                   const SizedBox(width: 8),
                   Expanded(
                       child: i < awayRecent.length
-                          ? _buildFormRow(awayRecent[i], false)
+                          ? _buildFormRow(context, awayRecent[i], false)
                           : const SizedBox()),
                 ],
               ),
@@ -1105,7 +1064,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
     );
   }
 
-  Widget _buildFormRow(model.RecentMatch r, bool isHome) {
+  Widget _buildFormRow(BuildContext context, model.RecentMatch r, bool isHome) {
     Color color = Colors.orange;
     if (r.result == 'W') color = AppTheme.success;
     if (r.result == 'L') color = AppTheme.secondary;
@@ -1135,8 +1094,8 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
           const SizedBox(width: 6),
           Expanded(
             child: Text('${r.goalsFor}-${r.goalsAgainst} vs ${r.opponent}',
-                style: const TextStyle(
-                    color: AppTheme.textPrimary, fontSize: 10),
+                style: TextStyle(
+                    color: AppTheme.textPrimaryOf(context), fontSize: 10),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis),
           ),
@@ -1151,7 +1110,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: AppTheme.surfaceOf(context),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppTheme.success.withValues(alpha: 0.2)),
       ),
@@ -1162,9 +1121,9 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
             children: [
               const Icon(Icons.monetization_on, color: AppTheme.success, size: 20),
               const SizedBox(width: 8),
-              const Text('Staking Recommendations',
+              Text('Staking Recommendations',
                   style: TextStyle(
-                      color: Colors.white,
+                      color: AppTheme.textPrimaryOf(context),
                       fontWeight: FontWeight.bold,
                       fontSize: 16)),
             ],
@@ -1194,8 +1153,8 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(opt,
-                        style: const TextStyle(
-                            color: Colors.white,
+                        style: TextStyle(
+                            color: AppTheme.textPrimaryOf(context),
                             fontWeight: FontWeight.w600,
                             fontSize: 13)),
                   ),
@@ -1209,86 +1168,96 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
   }
 
   // ─────────────────────────────────────────────────────────────
-  // TACTICAL BOARD TAB
+  // LINEUPS TAB
   // ─────────────────────────────────────────────────────────────
-  Widget _buildTacticalTab() {
-    final homeLineup = widget.match.homeLineup;
-    final awayLineup = widget.match.awayLineup;
-    final hasLineups = (homeLineup != null && homeLineup.startingXI.isNotEmpty) ||
-        (awayLineup != null && awayLineup.startingXI.isNotEmpty);
-
-    if (!hasLineups) return _buildLineupPendingCard();
-
-    return _TacticalBoardView(match: widget.match, header: _buildHeroHeader());
-  }
-
-  Widget _buildLineupPendingCard() {
-    final primary = Theme.of(context).primaryColor;
-    final surface = AppTheme.surfaceOf(context);
-    final textPrimary = AppTheme.textPrimaryOf(context);
-    final textSecondary = AppTheme.textSecondaryOf(context);
+  Widget _buildLineupsTab() {
+    final m = widget.match;
+    if (m.homeLineup == null || m.awayLineup == null || m.homeLineup!.isEmpty || m.awayLineup!.isEmpty) {
+      return ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          _buildHeroHeader(),
+          const SizedBox(height: 32),
+          Center(
+            child: Column(
+              children: [
+                const Icon(Icons.people_outline, size: 48, color: Colors.grey),
+                const SizedBox(height: 12),
+                Text('Lineups not available yet',
+                    style: TextStyle(color: AppTheme.textSecondaryOf(context), fontSize: 16)),
+              ],
+            ),
+          ),
+        ],
+      );
+    }
 
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
         _buildHeroHeader(),
-        const SizedBox(height: 32),
-        Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: surface,
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                        color: primary.withValues(alpha: 0.3), width: 2),
-                  ),
-                  child: Icon(Icons.sports_soccer_rounded,
-                      color: primary, size: 48),
-                ),
-                const SizedBox(height: 24),
-                Text('Tactical Board Pending',
-                    style: TextStyle(
-                        color: textPrimary,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20)),
-                const SizedBox(height: 10),
-                Text(
-                  'Official lineups are announced approximately\n1 hour before kickoff.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      color: textSecondary, height: 1.5, fontSize: 14),
-                ),
-                const SizedBox(height: 24),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                        color: primary.withValues(alpha: 0.3)),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.info_outline, color: primary, size: 16),
-                      const SizedBox(width: 8),
-                      Flexible(
-                        child: Text(
-                          'AI predictions & odds are ready on the Insights tab.',
-                          style: TextStyle(
-                              color: primary, fontSize: 12),
+        const SizedBox(height: 24),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppTheme.surfaceOf(context),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppTheme.textPrimaryOf(context).withValues(alpha: 0.05)),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        _buildTeamLogo(m.homeLogo, m.homeTeam),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(m.homeTeam,
+                              style: TextStyle(color: AppTheme.textPrimaryOf(context), fontWeight: FontWeight.bold),
+                              maxLines: 1, overflow: TextOverflow.ellipsis),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    ...m.homeLineup!.map((p) => Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Text(p, style: TextStyle(color: AppTheme.textSecondaryOf(context), fontSize: 13)),
+                    )),
+                  ],
                 ),
-              ],
-            ),
+              ),
+              Container(width: 1, height: 300, color: AppTheme.textPrimaryOf(context).withValues(alpha: 0.1)),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Expanded(
+                          child: Text(m.awayTeam,
+                              textAlign: TextAlign.right,
+                              style: TextStyle(color: AppTheme.textPrimaryOf(context), fontWeight: FontWeight.bold),
+                              maxLines: 1, overflow: TextOverflow.ellipsis),
+                        ),
+                        const SizedBox(width: 8),
+                        _buildTeamLogo(m.awayLogo, m.awayTeam),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    ...m.awayLineup!.map((p) => Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Text(p, textAlign: TextAlign.right, style: TextStyle(color: AppTheme.textSecondaryOf(context), fontSize: 13)),
+                    )),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ],
@@ -1328,1036 +1297,4 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
       );
     }).toList();
   }
-}
-
-// ─────────────────────────────────────────────────────────────
-// TACTICAL BOARD AS SEPARATE STATEFUL WIDGET
-// ─────────────────────────────────────────────────────────────
-class _TacticalBoardView extends StatefulWidget {
-  final model.Match match;
-  final Widget? header;
-  const _TacticalBoardView({required this.match, this.header});
-
-  @override
-  State<_TacticalBoardView> createState() => _TacticalBoardViewState();
-}
-
-class _TacticalBoardViewState extends State<_TacticalBoardView> {
-  bool _showHome = true;
-
-  @override
-  Widget build(BuildContext context) {
-    final homeLineup = widget.match.homeLineup;
-    final awayLineup = widget.match.awayLineup;
-    final current = _showHome ? homeLineup : awayLineup;
-    final settings = AppSettingsService.instance;
-
-    return ListenableBuilder(
-      listenable: settings,
-      builder: (context, _) {
-        final is3d = settings.is3dPitch; // If 2d is unchecked, make it 3d!
-
-        return ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            if (widget.header != null) ...[
-              widget.header!,
-              const SizedBox(height: 16),
-            ],
-
-            // Team toggle + 2D/3D Perspective Switcher
-            Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: AppTheme.surfaceOf(context),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: AppTheme.cardBorderOf(context)),
-                    ),
-                    child: Row(
-                      children: [
-                        _buildToggle(widget.match.homeTeam, true),
-                        _buildToggle(widget.match.awayTeam, false),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                // 2D / 3D Mode Selector
-                Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: AppTheme.surfaceOf(context),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppTheme.cardBorderOf(context)),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _buildPerspectiveToggle('2D', !is3d, () => settings.setUse2dPitch(true)),
-                      _buildPerspectiveToggle('3D', is3d, () => settings.setUse2dPitch(false)),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // Avg rating badge
-            if (current != null && (current.avgRating ?? 0) > 0)
-              Align(
-                alignment: Alignment.centerRight,
-                child: Container(
-                  margin: const EdgeInsets.only(bottom: 10),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                        color: Theme.of(context).primaryColor.withValues(alpha: 0.4)),
-                  ),
-                  child: Text(
-                    '∅ ${current.avgRating} Squad Rating',
-                    style: TextStyle(
-                        color: Theme.of(context).primaryColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12),
-                  ),
-                ),
-              ),
-
-            // Pitch board (2D or 3D based on setting)
-            if (current != null && current.startingXI.isNotEmpty) ...[
-              _buildPitchBoard(current.startingXI, is3d),
-              const SizedBox(height: 16),
-            ],
-
-            // Bench
-            if (current != null && current.bench.isNotEmpty)
-              _buildBenchSection(current.bench),
-
-            const SizedBox(height: 32),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildPerspectiveToggle(String label, bool active, VoidCallback onTap) {
-    final primary = Theme.of(context).primaryColor;
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-        decoration: BoxDecoration(
-          color: active ? primary : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (label == '3D') ...[
-              Icon(Icons.view_in_ar_rounded, size: 14, color: active ? Colors.black : AppTheme.textSecondaryOf(context)),
-              const SizedBox(width: 4),
-            ],
-            Text(
-              label,
-              style: TextStyle(
-                color: active ? Colors.black : AppTheme.textSecondaryOf(context),
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildToggle(String teamName, bool isHome) {
-    final active = _showHome == isHome;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => setState(() => _showHome = isHome),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          decoration: BoxDecoration(
-            color: active ? Theme.of(context).primaryColor : Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Center(
-            child: Text(
-              teamName,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: active ? Colors.black : AppTheme.textPrimaryOf(context),
-                fontWeight: FontWeight.bold,
-                fontSize: 13,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPitchBoard(List<model.PlayerLineup> starters, bool is3d) {
-    if (is3d) {
-      return _build3dPitchBoard(starters, _showHome);
-    }
-    return _build2dPitchBoard(starters, _showHome);
-  }
-
-  // ─────────────────────────────────────────────────────────────
-  // 2D PITCH BOARD (Left team faces right, Right team faces left)
-  // ─────────────────────────────────────────────────────────────
-  Widget _build2dPitchBoard(List<model.PlayerLineup> starters, bool isHome) {
-    final gks = starters.where((p) => p.position == 'GK').toList();
-    final dfs = starters.where((p) => p.position == 'DF').toList();
-    final mfs = starters.where((p) => p.position == 'MF').toList();
-    final fws = starters
-        .where((p) => p.position == 'ST' || p.position == 'FW')
-        .toList();
-
-    // Left team faces right: GK -> DF -> MF -> FW
-    // Right team faces left: FW -> MF -> DF -> GK
-    final columns = isHome
-        ? [
-            gks.isNotEmpty ? gks : starters.skip(10).take(1).toList(),
-            dfs.isNotEmpty ? dfs : starters.skip(6).take(4).toList(),
-            mfs.isNotEmpty ? mfs : starters.skip(2).take(4).toList(),
-            fws.isNotEmpty ? fws : starters.take(2).toList(),
-          ]
-        : [
-            fws.isNotEmpty ? fws : starters.take(2).toList(),
-            mfs.isNotEmpty ? mfs : starters.skip(2).take(4).toList(),
-            dfs.isNotEmpty ? dfs : starters.skip(6).take(4).toList(),
-            gks.isNotEmpty ? gks : starters.skip(10).take(1).toList(),
-          ];
-
-    return Container(
-      width: double.infinity,
-      height: 360,
-      decoration: BoxDecoration(
-        color: const Color(0xFF1B5E20),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 2),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.5),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(18),
-        child: Stack(
-          children: [
-            Positioned.fill(child: CustomPaint(painter: const _PitchPainter(is3d: false))),
-            // Direction Banner
-            Positioned(
-              top: 8,
-              left: isHome ? 12 : null,
-              right: !isHome ? 12 : null,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: Colors.black54,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.white24),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (!isHome) const Icon(Icons.arrow_back_rounded, color: Colors.white70, size: 12),
-                    Text(
-                      isHome ? 'ATTACKING RIGHT ➡️' : '⬅️ ATTACKING LEFT',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 9,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                    if (isHome) const Icon(Icons.arrow_forward_rounded, color: Colors.white70, size: 12),
-                  ],
-                ),
-              ),
-            ),
-            // Left & Right Goal indicators
-            Positioned(
-              left: 0,
-              top: 0,
-              bottom: 0,
-              child: Center(child: _buildHorizontalGoalPost(isLeft: true)),
-            ),
-            Positioned(
-              right: 0,
-              top: 0,
-              bottom: 0,
-              child: Center(child: _buildHorizontalGoalPost(isLeft: false)),
-            ),
-            // Players arranged horizontally
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: columns.map(_build2dPlayerColumn).toList(),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _build2dPlayerColumn(List<model.PlayerLineup> players) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: players.map(_build2dPlayerNode).toList(),
-    );
-  }
-
-  Widget _build2dPlayerNode(model.PlayerLineup player) {
-    Color ratingColor = AppTheme.textSecondary;
-    if (player.rating >= 75) { ratingColor = const Color(0xFFFFD700); }
-    else if (player.rating >= 65) { ratingColor = AppTheme.primary; }
-    else if (player.rating >= 50) { ratingColor = Colors.orangeAccent; }
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: const Color(0xFF132A13),
-                border: Border.all(color: Colors.white, width: 1.5),
-                boxShadow: [
-                  BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.4),
-                      blurRadius: 4)
-                ],
-              ),
-              child: Center(
-                child: Text(
-                  player.number.isNotEmpty ? '#${player.number}' : player.position,
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 10),
-                ),
-              ),
-            ),
-            if (player.rating > 0)
-              Positioned(
-                right: -6,
-                top: -4,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                  decoration: BoxDecoration(
-                    color: ratingColor,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text('${player.rating}',
-                      style: const TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 8)),
-                ),
-              ),
-          ],
-        ),
-        const SizedBox(height: 2),
-        Container(
-          constraints: const BoxConstraints(maxWidth: 62),
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-          decoration: BoxDecoration(
-            color: Colors.black.withValues(alpha: 0.7),
-            borderRadius: BorderRadius.circular(4),
-          ),
-          child: Text(
-            player.name.split(' ').last,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-                color: Colors.white, fontSize: 8.5, fontWeight: FontWeight.w600),
-          ),
-        ),
-        Text(player.position,
-            style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.8),
-                fontSize: 8,
-                fontWeight: FontWeight.w500)),
-      ],
-    );
-  }
-
-  // ─────────────────────────────────────────────────────────────
-  // 3D ISOMETRIC STADIUM PITCH BOARD (Interactive Real-Time Motion)
-  // ─────────────────────────────────────────────────────────────
-  Widget _build3dPitchBoard(List<model.PlayerLineup> starters, bool isHome) {
-    return _Interactive3dPitchBoard(starters: starters, isHome: isHome);
-  }
-
-  Widget _buildHorizontalGoalPost({required bool isLeft}) {
-    return Container(
-      width: 8,
-      height: 70,
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.2),
-        border: Border(
-          top: const BorderSide(color: Colors.white, width: 2),
-          bottom: const BorderSide(color: Colors.white, width: 2),
-          left: isLeft ? const BorderSide(color: Colors.white, width: 2.5) : BorderSide.none,
-          right: !isLeft ? const BorderSide(color: Colors.white, width: 2.5) : BorderSide.none,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBenchSection(List<model.PlayerLineup> bench) {
-    final surface = AppTheme.surfaceOf(context);
-    final borderColor = AppTheme.cardBorderOf(context);
-    final textPrimary = AppTheme.textPrimaryOf(context);
-    final textSecondary = AppTheme.textSecondaryOf(context);
-    final primary = Theme.of(context).primaryColor;
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: borderColor),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.airline_seat_recline_normal_rounded,
-                  color: primary, size: 18),
-              const SizedBox(width: 8),
-              Text(
-                'Bench / Substitutes (${bench.length})',
-                style: TextStyle(
-                    color: textPrimary,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          ...bench.map((player) {
-            Color ratingColor = textSecondary;
-            if (player.rating >= 75) { ratingColor = const Color(0xFFFFD700); }
-            else if (player.rating >= 65) { ratingColor = primary; }
-            else if (player.rating >= 50) { ratingColor = Colors.orangeAccent; }
-
-            return Container(
-              margin: const EdgeInsets.only(bottom: 8),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: textPrimary.withValues(alpha: 0.04),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: borderColor.withValues(alpha: 0.5)),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 30,
-                    height: 30,
-                    decoration: BoxDecoration(
-                      color: surface,
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(
-                          color: textPrimary.withValues(alpha: 0.1)),
-                    ),
-                    child: Center(
-                      child: Text(
-                        player.number.isNotEmpty ? '#${player.number}' : '-',
-                        style: TextStyle(
-                            color: textSecondary,
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(player.name,
-                            style: TextStyle(
-                                color: textPrimary,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600)),
-                        if (player.stats != null && player.stats!.isNotEmpty)
-                          Text('Games/Goals: ${player.stats}',
-                              style: TextStyle(
-                                  color: textSecondary,
-                                  fontSize: 11)),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: textPrimary.withValues(alpha: 0.07),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(player.position,
-                        style: TextStyle(
-                            color: textSecondary,
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold)),
-                  ),
-                  if (player.rating > 0) ...[
-                    const SizedBox(width: 6),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: ratingColor.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(
-                            color: ratingColor.withValues(alpha: 0.5)),
-                      ),
-                      child: Text('${player.rating}',
-                          style: TextStyle(
-                              color: ratingColor,
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold)),
-                    ),
-                  ],
-                ],
-              ),
-            );
-          }),
-        ],
-      ),
-    );
-  }
-}
-
-class _Interactive3dPitchBoard extends StatefulWidget {
-  final List<model.PlayerLineup> starters;
-  final bool isHome;
-
-  const _Interactive3dPitchBoard({
-    required this.starters,
-    required this.isHome,
-  });
-
-  @override
-  State<_Interactive3dPitchBoard> createState() => _Interactive3dPitchBoardState();
-}
-
-class _Interactive3dPitchBoardState extends State<_Interactive3dPitchBoard>
-    with SingleTickerProviderStateMixin {
-  static const double _defaultTiltX = 0.44;
-  static const double _defaultRotY = 0.0;
-  static const double _defaultScale = 1.0;
-
-  double _tiltX = _defaultTiltX;
-  double _rotY = _defaultRotY;
-  double _scale = _defaultScale;
-  double _baseScale = _defaultScale;
-
-  late AnimationController _resetController;
-  late Animation<double> _tiltAnimation;
-  late Animation<double> _rotAnimation;
-  late Animation<double> _scaleAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _resetController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 350),
-    )..addListener(() {
-        setState(() {
-          _tiltX = _tiltAnimation.value;
-          _rotY = _rotAnimation.value;
-          _scale = _scaleAnimation.value;
-        });
-      });
-  }
-
-  @override
-  void dispose() {
-    _resetController.dispose();
-    super.dispose();
-  }
-
-  void _resetToDefault() {
-    _tiltAnimation = Tween<double>(begin: _tiltX, end: _defaultTiltX).animate(
-      CurvedAnimation(parent: _resetController, curve: Curves.easeOutCubic),
-    );
-    _rotAnimation = Tween<double>(begin: _rotY, end: _defaultRotY).animate(
-      CurvedAnimation(parent: _resetController, curve: Curves.easeOutCubic),
-    );
-    _scaleAnimation = Tween<double>(begin: _scale, end: _defaultScale).animate(
-      CurvedAnimation(parent: _resetController, curve: Curves.easeOutCubic),
-    );
-    _resetController.forward(from: 0.0);
-  }
-
-  bool get _isModified =>
-      (_tiltX - _defaultTiltX).abs() > 0.03 ||
-      _rotY.abs() > 0.03 ||
-      (_scale - _defaultScale).abs() > 0.03;
-
-  @override
-  Widget build(BuildContext context) {
-    final gks = widget.starters.where((p) => p.position == 'GK').toList();
-    final dfs = widget.starters.where((p) => p.position == 'DF').toList();
-    final mfs = widget.starters.where((p) => p.position == 'MF').toList();
-    final fws = widget.starters
-        .where((p) => p.position == 'ST' || p.position == 'FW')
-        .toList();
-
-    // Left team faces right: GK -> DF -> MF -> FW
-    // Right team faces left: FW -> MF -> DF -> GK
-    final columns = widget.isHome
-        ? [
-            gks.isNotEmpty ? gks : widget.starters.skip(10).take(1).toList(),
-            dfs.isNotEmpty ? dfs : widget.starters.skip(6).take(4).toList(),
-            mfs.isNotEmpty ? mfs : widget.starters.skip(2).take(4).toList(),
-            fws.isNotEmpty ? fws : widget.starters.take(2).toList(),
-          ]
-        : [
-            fws.isNotEmpty ? fws : widget.starters.take(2).toList(),
-            mfs.isNotEmpty ? mfs : widget.starters.skip(2).take(4).toList(),
-            dfs.isNotEmpty ? dfs : widget.starters.skip(6).take(4).toList(),
-            gks.isNotEmpty ? gks : widget.starters.skip(10).take(1).toList(),
-          ];
-
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        gradient: const RadialGradient(
-          center: Alignment(0, -0.2),
-          radius: 0.95,
-          colors: [
-            Color(0xFF0F3A1B), // Stadium turf glow
-            Color(0xFF071B0D), // Night atmosphere
-          ],
-        ),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.3), width: 1.5),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.6),
-            blurRadius: 25,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          // 3D Stadium Interactive Header Bar
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.touch_app_rounded, color: Color(0xFF10B981), size: 16),
-                    const SizedBox(width: 6),
-                    const Text(
-                      '3D INTERACTIVE • DRAG TO ROTATE',
-                      style: TextStyle(
-                        color: Color(0xFF10B981),
-                        fontSize: 10.5,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.8,
-                      ),
-                    ),
-                    if (_isModified) ...[
-                      const SizedBox(width: 8),
-                      GestureDetector(
-                        onTap: _resetToDefault,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF10B981).withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(6),
-                            border: Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.5)),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: const [
-                              Icon(Icons.restart_alt_rounded, color: Color(0xFF10B981), size: 12),
-                              SizedBox(width: 3),
-                              Text(
-                                'Reset',
-                                style: TextStyle(color: Color(0xFF10B981), fontSize: 9.5, fontWeight: FontWeight.bold),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: Colors.black45,
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: Colors.white12),
-                  ),
-                  child: Text(
-                    widget.isHome ? 'LEFT ➡️ RIGHT' : 'RIGHT ⬅️ LEFT',
-                    style: TextStyle(
-                      color: widget.isHome ? const Color(0xFF38BDF8) : const Color(0xFFF472B6),
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Interactive 3D Perspective Pitch with Real-Time Motion
-          GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onScaleStart: (details) {
-              _resetController.stop();
-              _baseScale = _scale;
-            },
-            onScaleUpdate: (details) {
-              setState(() {
-                if (details.pointerCount == 1) {
-                  // 1-finger drag: pan/rotate
-                  _rotY = (_rotY + details.focalPointDelta.dx * 0.005).clamp(-0.55, 0.55);
-                  _tiltX = (_tiltX - details.focalPointDelta.dy * 0.004).clamp(0.12, 0.72);
-                } else if (details.pointerCount >= 2) {
-                  // 2-finger pinch: scale
-                  _scale = (_baseScale * details.scale).clamp(0.85, 1.30);
-                }
-              });
-            },
-            onDoubleTap: _resetToDefault,
-            child: SizedBox(
-              height: 380,
-              child: Transform(
-                alignment: Alignment.center,
-                transform: Matrix4.identity()
-                  ..setEntry(3, 2, 0.0016)
-                  ..scaleByDouble(_scale, _scale, 1.0, 1.0)
-                  ..rotateX(_tiltX)
-                  ..rotateY(_rotY),
-                child: Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1B5E20),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.white.withValues(alpha: 0.5), width: 2),
-                    boxShadow: [
-                      // 3D Turf thickness bevel shadow
-                      BoxShadow(
-                        color: const Color(0xFF09290D),
-                        offset: Offset(0, 14 * _scale),
-                        blurRadius: 0,
-                      ),
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.7),
-                        offset: Offset(0, 26 * _scale),
-                        blurRadius: 20,
-                      ),
-                    ],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(14),
-                    child: Stack(
-                      children: [
-                        // Alternating grass stripes & horizontal pitch lines
-                        Positioned.fill(
-                          child: const CustomPaint(
-                            painter: _PitchPainter(is3d: true),
-                          ),
-                        ),
-                        // Left Goal Post
-                        Positioned(
-                          left: 0,
-                          top: 0,
-                          bottom: 0,
-                          child: Center(child: _buildHorizontalGoalPost(isLeft: true)),
-                        ),
-                        // Right Goal Post
-                        Positioned(
-                          right: 0,
-                          top: 0,
-                          bottom: 0,
-                          child: Center(child: _buildHorizontalGoalPost(isLeft: false)),
-                        ),
-                        // Players positioned horizontally across pitch in 3D
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: columns.map(_build3dPlayerColumn).toList(),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          // Interactive Subtitle Tip
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8.0),
-            child: Text(
-              'Drag with finger to rotate & tilt • Pinch to zoom • Double-tap to reset',
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.45),
-                fontSize: 9.5,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHorizontalGoalPost({required bool isLeft}) {
-    return Container(
-      width: 8,
-      height: 70,
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.2),
-        border: Border(
-          top: const BorderSide(color: Colors.white, width: 2),
-          bottom: const BorderSide(color: Colors.white, width: 2),
-          left: isLeft ? const BorderSide(color: Colors.white, width: 2.5) : BorderSide.none,
-          right: !isLeft ? const BorderSide(color: Colors.white, width: 2.5) : BorderSide.none,
-        ),
-      ),
-    );
-  }
-
-  Widget _build3dPlayerColumn(List<model.PlayerLineup> players) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: players.map(_build3dPlayerNode).toList(),
-    );
-  }
-
-  Widget _build3dPlayerNode(model.PlayerLineup player) {
-    Color ratingColor = AppTheme.textSecondary;
-    if (player.rating >= 75) {
-      ratingColor = const Color(0xFFFFD700);
-    } else if (player.rating >= 65) {
-      ratingColor = const Color(0xFF38BDF8);
-    } else if (player.rating >= 50) {
-      ratingColor = Colors.orangeAccent;
-    }
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // Counter-tilt & counter-rotate player dynamically so it stands upright facing camera
-        Transform(
-          alignment: Alignment.bottomCenter,
-          transform: Matrix4.identity()
-            ..rotateX(-_tiltX)
-            ..rotateY(-_rotY),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // 3D Player Avatar Badge
-              Stack(
-                clipBehavior: Clip.none,
-                alignment: Alignment.center,
-                children: [
-                  Container(
-                    width: 38,
-                    height: 38,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: const LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [Color(0xFF2E7D32), Color(0xFF0F3A1B)],
-                      ),
-                      border: Border.all(color: Colors.white, width: 2),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.55),
-                          blurRadius: 6,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: Center(
-                      child: Text(
-                        player.number.isNotEmpty ? '#${player.number}' : player.position,
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w900,
-                            fontSize: 11),
-                      ),
-                    ),
-                  ),
-
-                  if (player.rating > 0)
-                    Positioned(
-                      right: -6,
-                      top: -4,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                        decoration: BoxDecoration(
-                          color: ratingColor,
-                          borderRadius: BorderRadius.circular(6),
-                          boxShadow: [
-                            BoxShadow(color: Colors.black.withValues(alpha: 0.4), blurRadius: 3),
-                          ],
-                        ),
-                        child: Text(
-                          '${player.rating}',
-                          style: const TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.w900,
-                            fontSize: 8,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 2),
-              // Floating Name Pill
-              Container(
-                constraints: const BoxConstraints(maxWidth: 68),
-                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.75),
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: Colors.white24, width: 0.5),
-                ),
-                child: Text(
-                  player.name.split(' ').last,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 9,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        // Elliptical turf drop shadow
-        Container(
-          width: 24,
-          height: 5,
-          decoration: BoxDecoration(
-            color: Colors.black.withValues(alpha: 0.45),
-            borderRadius: const BorderRadius.all(Radius.elliptical(24, 5)),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────
-// PITCH PAINTER
-// ─────────────────────────────────────────────────────────────
-class _PitchPainter extends CustomPainter {
-  final bool is3d;
-  const _PitchPainter({this.is3d = false});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.white.withValues(alpha: is3d ? 0.45 : 0.28)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = is3d ? 2.0 : 1.5;
-
-    // Alternating vertical grass mowing stripes
-    final stripePaint = Paint()
-      ..color = is3d
-          ? const Color(0xFF144D19).withValues(alpha: 0.35)
-          : Colors.black.withValues(alpha: 0.05)
-      ..style = PaintingStyle.fill;
-    const stripeCount = 10;
-    final stripeW = size.width / stripeCount;
-    for (int i = 0; i < stripeCount; i += 2) {
-      canvas.drawRect(
-          Rect.fromLTWH(i * stripeW, 0, stripeW, size.height), stripePaint);
-    }
-
-    // Outer pitch boundary
-    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paint);
-
-    // Halfway line (vertical down center)
-    canvas.drawLine(
-      Offset(size.width / 2, 0),
-      Offset(size.width / 2, size.height),
-      paint,
-    );
-
-    // Center circle & center spot
-    canvas.drawCircle(Offset(size.width / 2, size.height / 2), 40, paint);
-    paint.style = PaintingStyle.fill;
-    canvas.drawCircle(Offset(size.width / 2, size.height / 2), 2.5, paint);
-    paint.style = PaintingStyle.stroke;
-
-    // Left penalty box (Home)
-    const boxW = 52.0;
-    const boxH = 140.0;
-    final boxY = (size.height - boxH) / 2;
-    canvas.drawRect(Rect.fromLTWH(0, boxY, boxW, boxH), paint);
-
-    // Left 6-yard goal area
-    const goalBoxW = 20.0;
-    const goalBoxH = 70.0;
-    final goalBoxY = (size.height - goalBoxH) / 2;
-    canvas.drawRect(Rect.fromLTWH(0, goalBoxY, goalBoxW, goalBoxH), paint);
-
-    // Left penalty spot
-    paint.style = PaintingStyle.fill;
-    canvas.drawCircle(Offset(36, size.height / 2), 2, paint);
-    paint.style = PaintingStyle.stroke;
-
-    // Right penalty box (Away)
-    canvas.drawRect(Rect.fromLTWH(size.width - boxW, boxY, boxW, boxH), paint);
-
-    // Right 6-yard goal area
-    canvas.drawRect(Rect.fromLTWH(size.width - goalBoxW, goalBoxY, goalBoxW, goalBoxH), paint);
-
-    // Right penalty spot
-    paint.style = PaintingStyle.fill;
-    canvas.drawCircle(Offset(size.width - 36, size.height / 2), 2, paint);
-    paint.style = PaintingStyle.stroke;
-  }
-
-  @override
-  bool shouldRepaint(covariant _PitchPainter oldDelegate) => oldDelegate.is3d != is3d;
 }

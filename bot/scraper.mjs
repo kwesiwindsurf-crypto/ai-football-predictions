@@ -103,113 +103,503 @@ function amToDec(am) {
   return null;
 }
 
-// ─── Generate probabilities from ESPN moneyline decimal odds ──────────────────
-function oddsToProbs(hOdds, dOdds, aOdds) {
-  if (!hOdds || !aOdds) return { hp: 45, dp: 25, ap: 30 };
-  const rawH = 1 / hOdds;
-  const rawD = dOdds ? 1 / dOdds : 0;
-  const rawA = 1 / aOdds;
-  const total = rawH + rawD + rawA;
+const BIG_TEAMS = [
+  'manchester city',
+  'arsenal',
+  'liverpool',
+  'chelsea',
+  'manchester united',
+  'tottenham hotspur',
+  'newcastle united',
+  'aston villa',
+  'brighton & hove albion',
+  'west ham united',
+  'leeds united',
+  'leicester city',
+  'southampton',
+  'burnley',
+  'sheffield united',
+  'west bromwich albion',
+  'norwich city',
+  'middlesbrough',
+  'sunderland',
+  'coventry city',
+  'watford',
+  'hull city',
+  'birmingham city',
+  'wrexham',
+  'charlton athletic',
+  'huddersfield town',
+  'bolton wanderers',
+  'reading',
+  'peterborough united',
+  'barnsley',
+  'blackpool',
+  'wycombe wanderers',
+  'rotherham united',
+  'bradford city',
+  'chesterfield',
+  'mk dons',
+  'notts county',
+  'doncaster rovers',
+  'gillingham',
+  'port vale',
+  'carlisle united',
+  'walsall',
+  'afc wimbledon',
+  'tranmere rovers',
+  'real madrid',
+  'fc barcelona',
+  'atlético madrid',
+  'athletic club',
+  'real sociedad',
+  'villarreal',
+  'real betis',
+  'sevilla',
+  'girona',
+  'real zaragoza',
+  'sporting gijón',
+  'levante',
+  'real oviedo',
+  'deportivo la coruña',
+  'elche',
+  'granada',
+  'cádiz',
+  'racing santander',
+  'cd tenerife',
+  'sd eibar',
+  'albacete balompié',
+  'mallorca',
+  'osasuna',
+  'inter milan',
+  'juventus',
+  'ac milan',
+  'napoli',
+  'as roma',
+  'atalanta',
+  'ss lazio',
+  'fiorentina',
+  'bologna',
+  'sampdoria',
+  'palermo',
+  'sassuolo',
+  'frosinone',
+  'salernitana',
+  'cremonese',
+  'spezia',
+  'bari',
+  'brescia',
+  'modena',
+  'cesena',
+  'pisa',
+  'bayern munich',
+  'bayer leverkusen',
+  'borussia dortmund',
+  'rb leipzig',
+  'vfb stuttgart',
+  'eintracht frankfurt',
+  'vfl wolfsburg',
+  'sc freiburg',
+  'borussia mönchengladbach',
+  'hamburger sv',
+  'fc schalke 04',
+  '1. fc köln',
+  'hertha bsc',
+  'fortuna düsseldorf',
+  'hannover 96',
+  '1. fc nürnberg',
+  '1. fc kaiserslautern',
+  'karlsruher sc',
+  'sv darmstadt 98',
+  'sc paderborn',
+  'paris saint-germain',
+  'as monaco',
+  'olympique de marseille',
+  'olympique lyonnais',
+  'losc lille',
+  'ogc nice',
+  'rc lens',
+  'stade rennais',
+  'stade brestois',
+  'fc metz',
+  'fc lorient',
+  'sm caen',
+  'paris fc',
+  'ea guingamp',
+  'troyes',
+  'ac ajaccio',
+  'clermont foot',
+  'amiens sc',
+  'grenoble foot',
+  'fc nantes',
+  'toulouse fc',
+  'ajax',
+  'psv eindhoven',
+  'feyenoord',
+  'az alkmaar',
+  'fc twente',
+  'fc utrecht',
+  'sl benfica',
+  'fc porto',
+  'sporting cp',
+  'sc braga',
+  'vitória de guimarães',
+  'fc famalicão',
+  'galatasaray',
+  'fenerbahçe',
+  'beşiktaş',
+  'trabzonspor',
+  'i̇stanbul başakşehir',
+  'samsunspor',
+  'adana demirspor',
+  'antalyaspor',
+  'club brugge',
+  'rsc anderlecht',
+  'royale union saint-gilloise',
+  'krc genk',
+  'royal antwerp',
+  'kaa gent',
+  'standard liège',
+  'cercle brugge',
+  'celtic',
+  'rangers',
+  'aberdeen',
+  'heart of midlothian',
+  'hibernian',
+  'kilmarnock',
+  'olympiacos',
+  'panathinaikos',
+  'aek athens',
+  'paok thessaloniki',
+  'aris thessaloniki',
+  'atromitos',
+  'ofi crete',
+  'zenit saint petersburg',
+  'spartak moscow',
+  'cska moscow',
+  'fc krasnodar',
+  'dynamo moscow',
+  'lokomotiv moscow',
+  'fc rostov',
+  'rubin kazan',
+  'shakhtar donetsk',
+  'dynamo kyiv',
+  'kryvbas kryvyi rih',
+  'polissya zhytomyr',
+  'zorya luhansk',
+  'karpaty lviv',
+  'red bull salzburg',
+  'sk sturm graz',
+  'lask',
+  'sk rapid wien',
+  'fk austria wien',
+  'wolfsberger ac',
+  'bsc young boys',
+  'fc basel',
+  'fc zürich',
+  'servette fc',
+  'fc lugano',
+  'fc st. gallen',
+  'fc luzern',
+  'fc copenhagen',
+  'fc midtjylland',
+  'brøndby if',
+  'fc nordsjælland',
+  'agf aarhus',
+  'silkeborg if',
+  'fk bodø/glimt',
+  'molde fk',
+  'rosenborg bk',
+  'sk brann',
+  'viking fk',
+  'lillestrøm sk',
+  'malmö ff',
+  'aik',
+  'djurgårdens if',
+  'ifk göteborg',
+  'bk häcken',
+  'if elfsborg',
+  'hammarby if',
+  'ifk norrköping',
+  'legia warsaw',
+  'lech poznań',
+  'raków częstochowa',
+  'jagiellonia białystok',
+  'pogoń szczecin',
+  'górnik zabrze',
+  'śląsk wrocław',
+  'cracovia',
+  'slavia prague',
+  'sparta prague',
+  'fc viktoria plzeň',
+  'baník ostrava',
+  'fk mladá boleslav',
+  'fc slovan liberec',
+  'sigma olomouc',
+  'inter miami cf',
+  'columbus crew',
+  'los angeles fc',
+  'lafc',
+  'la galaxy',
+  'seattle sounders fc',
+  'fc cincinnati',
+  'philadelphia union',
+  'atlanta united',
+  'new york red bulls',
+  'new york city fc',
+  'houston dynamo',
+  'club américa',
+  'cruz azul',
+  'chivas guadalajara',
+  'tigres uanl',
+  'cf monterrey',
+  'deportivo toluca',
+  'cf pachuca',
+  'pumas unam',
+  'club león',
+  'santos laguna',
+  'flamengo',
+  'palmeiras',
+  'atlético mineiro',
+  'botafogo',
+  'são paulo fc',
+  'fluminense',
+  'internacional',
+  'grêmio',
+  'corinthians',
+  'cruzeiro',
+  'athletico paranaense',
+  'fortaleza',
+  'bahia',
+  'river plate',
+  'boca juniors',
+  'racing club',
+  'independiente',
+  'san lorenzo',
+  'estudiantes de la plata',
+  'vélez sarsfield',
+  'rosario central',
+  'talleres de córdoba',
+  'colo-colo',
+  'universidad de chile',
+  'universidad católica',
+  'unión española',
+  'palestino',
+  'everton de viña del mar',
+  'cobresal',
+  'cobreloa',
+  'atlético nacional',
+  'millonarios fc',
+  'américa de cali',
+  'junior fc',
+  'independiente santa fe',
+  'independiente medellín',
+  'deportivo cali',
+  'deportes tolima',
+  'al hilal',
+  'al nassr',
+  'al ittihad',
+  'al ahli',
+  'al shabab',
+  'al ettifaq',
+  'al taawoun',
+  'al fateh',
+  'mamelodi sundowns',
+  'orlando pirates',
+  'kaizer chiefs',
+  'stellenbosch fc',
+  'supersport united',
+  'sekhukhune united',
+  'cape town city fc',
+  'peñarol',
+  'nacional',
+  'independiente del valle',
+  'olimpia',
+  'cerro porteño',
+  'lanús',
+  'defensa y justicia',
+  'red bull bragantino',
+  'belgrano',
+  'ldu quito'
+];
+
+function isBigGame(homeTeam, awayTeam) {
+  const h = (homeTeam || '').toLowerCase();
+  const a = (awayTeam || '').toLowerCase();
+  return BIG_TEAMS.some(t => h.includes(t)) && BIG_TEAMS.some(t => a.includes(t));
+}
+
+function parseFormStr(formStr) {
+  if (!formStr || typeof formStr !== 'string') return 50; 
+  const clean = formStr.toUpperCase().replace(/[^WDL]/g, '');
+  if (clean.length === 0) return 50;
+  
+  let pts = 0;
+  for (const char of clean) {
+    if (char === 'W') pts += 3;
+    else if (char === 'D') pts += 1;
+  }
+  return Math.round((pts / (clean.length * 3)) * 100);
+}
+
+function parseH2HStr(summaryData, homeTeam, awayTeam) {
+  if (!summaryData || !summaryData.seasonseries || summaryData.seasonseries.length === 0) return null;
+  
+  // Extract string from seasonseries
+  const series = summaryData.seasonseries[0];
+  const summaryStr = series.summary || '';
+  if (!summaryStr) return null;
+
+  let hWins = 0, aWins = 0, draws = 0;
+  const cleanH2H = summaryStr.replace(/\s*\([\d\-,\s]+\)/g, '');
+
+  const wonMatches = [...cleanH2H.matchAll(/([A-Za-z0-9\s\.\-]+?)\s+won\s+(\d+)/gi)];
+  for (const match of wonMatches) {
+    const tName = (match[1] || '').trim().toLowerCase();
+    const count = parseInt(match[2] || '0', 10);
+    const homeClean = (homeTeam || '').toLowerCase();
+    const awayClean = (awayTeam || '').toLowerCase();
+    
+    if (tName.includes(homeClean) || homeClean.includes(tName)) {
+      hWins += count;
+    } else if (tName.includes(awayClean) || awayClean.includes(tName)) {
+      aWins += count;
+    }
+  }
+
+  const drawMatch = cleanH2H.match(/(\d+)\s+Draw/i);
+  if (drawMatch) {
+    draws = parseInt(drawMatch[1] || '0', 10);
+  }
+  
+  const total = hWins + aWins + draws;
+  if (total === 0) return null;
+  
   return {
-    hp: Math.round((rawH / total) * 100),
-    dp: Math.round((rawD / total) * 100),
-    ap: Math.round((rawA / total) * 100),
+    h: (hWins / total) * 100,
+    d: (draws / total) * 100,
+    a: (aWins / total) * 100,
+    summaryStr: cleanH2H
   };
 }
 
-// ─── Generate a synthetic rating from odds ────────────────────────────────────
-function oddsToRating(hOdds, aOdds) {
-  if (!hOdds || !aOdds) return 0;
-  const diff = (1 / hOdds) - (1 / aOdds);
-  return Math.max(-25, Math.min(25, Math.round(-(diff / 0.01))));
-}
-
-// ─── Staking options ──────────────────────────────────────────────────────────
-function generateStakingOptions(home, away, hp, ap, hOdds, dOdds, aOdds, primarySafe) {
-  const isHomeFav = hp >= ap;
-  const fav = isHomeFav ? home : away;
-  const favOdds = isHomeFav ? hOdds : aOdds;
-  const dnbOdds = favOdds ? Math.max(1.30, parseFloat((favOdds * 0.82).toFixed(2))) : 1.70;
-  return [
-    primarySafe || `Safe: ${isHomeFav ? '1X' : 'X2'} (${fav} or Draw)`,
-    `Value: ${fav} Draw No Bet (${dnbOdds})`,
-    `Risky: ${fav} to WIN by 2+ Goals (2.85)`,
-    `BTTS: Both Teams To Score - Yes (1.78)`,
-    `Goals: Over 1.5 Total Goals (1.34)`
-  ];
-}
-
 // ─── Prediction engine ────────────────────────────────────────────────────────
-function makePrediction(home, away, hOdds, dOdds, aOdds, league) {
+function makePrediction(home, away, hOdds, dOdds, aOdds, league, homeFormStr, awayFormStr, summaryData) {
   const hasOdds = hOdds > 0 && aOdds > 0;
-  const { hp, dp, ap } = oddsToProbs(hOdds, dOdds, aOdds);
-  const rating = oddsToRating(hOdds, aOdds);
-  const oddsDiff = hasOdds ? hOdds - aOdds : 0;
-
-  const isUCL = (league || '').toLowerCase().includes('champions league');
-  const isEvenOdds = hasOdds ? Math.abs(oddsDiff) <= 0.15 : rating === 0;
-  const isHomeFavorite = hasOdds ? hOdds <= 1.5 : rating <= -10;
-  const isHomeUnderdog = hasOdds ? hOdds >= aOdds + 1.5 : rating >= 10;
-  const isVolatileLeague = (league || '').toLowerCase().includes('mls') || (league || '').toLowerCase().includes('bundesliga');
-
-  let recommendation = '';
-  let strategyAnalysis = '';
-  let primarySafe = '';
-  let fHp = hp, fDp = dp, fAp = ap;
-
-  if (isUCL) {
-    recommendation = rating < 0 ? `${home} or Draw (1X)` : `${away} or Draw (X2)`;
-    primarySafe = rating < 0 ? `Safe: 1X (${home} or Draw)` : `Safe: X2 (${away} or Draw)`;
-    strategyAnalysis = `UCL: Stalemate protection active.`;
-    fDp = 35; fHp = rating < 0 ? 45 : 20; fAp = rating < 0 ? 20 : 45;
-  } else if (isEvenOdds) {
-    recommendation = `Over 0.5 Goals`;
-    primarySafe = `Safe: Over 0.5 Goals`;
-    strategyAnalysis = `Even Odds (Tight Match): Output Over 0.5 Goals.`;
-    fHp = 45; fDp = 10; fAp = 45;
-  } else if (isHomeFavorite) {
-    recommendation = `${home} or Draw & Over 1.5 Goals (1X + Over 1.5)`;
-    primarySafe = `Safe: 1X + Over 1.5 Goals (${home} or Draw & Over 1.5 Goals)`;
-    strategyAnalysis = `Home Favorite (Odds ≤ 1.50): Compound 1X + Over 1.5 Goals.`;
-    fHp = Math.max(hp, 65); fDp = 22; fAp = 13;
-  } else if (isHomeUnderdog) {
-    if (isVolatileLeague) {
-      recommendation = `Over 0.5 Goals`;
-      primarySafe = `Safe: Over 0.5 Goals`;
-      strategyAnalysis = `Home Underdog in volatile league: Over 0.5 Goals.`;
-      fHp = 42; fDp = 10; fAp = 48;
-    } else {
-      recommendation = `${away} or Draw (X2)`;
-      primarySafe = `Safe: X2 (${away} or Draw)`;
-      strategyAnalysis = `Away Favored / Home Underdog: Output X2.`;
-      fAp = Math.max(ap, 60); fDp = 25; fHp = 15;
-    }
-  } else {
-    if (!hasOdds || hOdds < aOdds) {
-      recommendation = `${home} or Draw (1X)`;
-      primarySafe = `Safe: 1X (${home} or Draw)`;
-      strategyAnalysis = `Standard Market: Home team favored.`;
-      fHp = 55; fDp = 27; fAp = 18;
-    } else if (aOdds < hOdds) {
-      recommendation = `${away} or Draw (X2)`;
-      primarySafe = `Safe: X2 (${away} or Draw)`;
-      strategyAnalysis = `Standard Market: Away team favored.`;
-      fHp = 18; fDp = 27; fAp = 55;
-    } else {
-      recommendation = `Over 0.5 Goals`;
-      primarySafe = `Safe: Over 0.5 Goals`;
-      strategyAnalysis = `Standard Market: Balanced match, Over 0.5 Goals.`;
-      fHp = 45; fDp = 10; fAp = 45;
+  
+  // 1. Odds (40% or 50%)
+  let oddsHp = 45, oddsDp = 25, oddsAp = 30;
+  if (hasOdds) {
+    const rawH = 1 / hOdds;
+    const rawD = dOdds ? 1 / dOdds : (1 - rawH - (1 / aOdds) > 0 ? 1 - rawH - (1 / aOdds) : 0.25);
+    const rawA = 1 / aOdds;
+    const total = rawH + rawD + rawA;
+    oddsHp = (rawH / total) * 100;
+    oddsDp = (rawD / total) * 100;
+    oddsAp = (rawA / total) * 100;
+  }
+  
+  // 2. Form (30% or 40%)
+  const hForm = parseFormStr(homeFormStr);
+  const aForm = parseFormStr(awayFormStr);
+  let formHp = 38, formDp = 24, formAp = 38;
+  if (hForm !== 50 || aForm !== 50) {
+    const totalF = hForm + aForm;
+    if (totalF > 0) {
+      formHp = (hForm / totalF) * 100;
+      formAp = (aForm / totalF) * 100;
+      const gap = Math.abs(formHp - formAp);
+      formDp = Math.max(5, 30 - gap); 
+      const fTotal = formHp + formAp + formDp;
+      formHp = (formHp / fTotal) * 100;
+      formAp = (formAp / fTotal) * 100;
+      formDp = (formDp / fTotal) * 100;
     }
   }
+
+  // 3. H2H (20% or 0%)
+  const h2h = parseH2HStr(summaryData, home, away);
+  const hasH2H = h2h !== null;
+  
+  // 4. Weights
+  const isUCL = (league || '').toLowerCase().includes('champions league') || (league || '').toLowerCase().includes('europa');
+  
+  const wOdds = hasH2H ? 0.40 : 0.50;
+  const wForm = hasH2H ? 0.30 : 0.40;
+  const wH2H  = hasH2H ? 0.20 : 0.00;
+  const wHome = 0.10;
+  
+  // Home Adv (10%)
+  const homeAdvHp = 60, homeAdvDp = 20, homeAdvAp = 20;
+  
+  // Final Probabilities
+  let fHp = (oddsHp * wOdds) + (formHp * wForm) + (hasH2H ? h2h.h * wH2H : 0) + (homeAdvHp * wHome);
+  let fDp = (oddsDp * wOdds) + (formDp * wForm) + (hasH2H ? h2h.d * wH2H : 0) + (homeAdvDp * wHome);
+  let fAp = (oddsAp * wOdds) + (formAp * wForm) + (hasH2H ? h2h.a * wH2H : 0) + (homeAdvAp * wHome);
+  
+  const fTotal = fHp + fDp + fAp;
+  fHp = Math.round((fHp / fTotal) * 100);
+  fDp = Math.round((fDp / fTotal) * 100);
+  fAp = Math.round((fAp / fTotal) * 100);
+
+  // Decision logic
+  const isBig = isBigGame(home, away);
+  const maxProb = Math.max(fHp, fDp, fAp);
+  const isHomeFav = fHp >= fAp;
+  const fav = isHomeFav ? home : away;
+  const favOdds = isHomeFav ? hOdds : aOdds;
+  
+  let recommendation = '';
+  let primarySafe = '';
+  let strategyAnalysis = '';
+  
+  if (isBig && maxProb < 55) {
+    recommendation = `${fav} or Draw (Double Chance)`;
+    primarySafe = `Safe: ${isHomeFav ? '1X' : 'X2'} (${fav} or Draw)`;
+    strategyAnalysis = `Big Game + Tight Match: Double Chance / Over 1.5 Goals.`;
+  } else if (maxProb >= 60) {
+    if (fHp >= 60) {
+      recommendation = `${home} to Win (1)`;
+      primarySafe = `Safe: 1X (${home} or Draw)`;
+    } else {
+      recommendation = `${away} to Win (2)`;
+      primarySafe = `Safe: X2 (${away} or Draw)`;
+    }
+    strategyAnalysis = `Clear Favorite (Prob >= 60%): Direct Win.`;
+  } else if (maxProb >= 50) {
+    recommendation = `${fav} or Draw (Double Chance) or -0.5 Handicap`;
+    primarySafe = `Safe: ${isHomeFav ? '1X' : 'X2'} (${fav} or Draw)`;
+    strategyAnalysis = `Moderate Favorite (Prob 50-59%): Double Chance or -0.5.`;
+  } else if (maxProb >= 40) {
+    recommendation = `${fav} Draw No Bet (DNB)`;
+    primarySafe = `Safe: Over 1.5 Goals`;
+    strategyAnalysis = `Tight Match (Prob 40-49%): Draw No Bet.`;
+  } else {
+    recommendation = `Draw (X) or Under 2.5 Goals`;
+    primarySafe = `Safe: Under 3.5 Goals`;
+    strategyAnalysis = `Very Tight/Inconsistent: Expect a Draw.`;
+  }
+  
+  const dnbOdds = favOdds ? Math.max(1.30, parseFloat((favOdds * 0.82).toFixed(2))) : 1.70;
+  const stakingOptions = [
+    primarySafe,
+    `Value: ${fav} Draw No Bet (${dnbOdds})`,
+    (isBig && maxProb < 55) ? `Goals: Over 1.5 Total Goals (1.30)` : `Risky: ${fav} to WIN by 2+ Goals (2.85)`,
+    `BTTS: Both Teams To Score - Yes (1.78)`,
+    maxProb < 45 ? `Alternative: Under 2.5 Goals (1.80)` : `Alternative: Over 2.5 Total Goals (1.70)`
+  ];
+  
+  const aiRating = Math.round(fAp - fHp);
 
   return {
     homeWinProbability: fHp,
     drawProbability: fDp,
     awayWinProbability: fAp,
+    oddsRating: aiRating,
+    h2hSummary: hasH2H ? h2h.summaryStr : null,
     recommendation,
-    analysis: `${strategyAnalysis}\nRating: ${rating}.`,
-    stakingOptions: generateStakingOptions(home, away, fHp, fAp, hOdds, dOdds, aOdds, primarySafe)
+    analysis: `${strategyAnalysis}\nHomeForm: ${hForm}%, AwayForm: ${aForm}%, BigGame: ${isBig}`,
+    stakingOptions
   };
 }
 
@@ -220,7 +610,17 @@ async function fetchEspnLeagueFixtures(slug, dateStr) {
   if (!res) return [];
   try {
     const data = await res.json();
-    return data.events || [];
+    if (!data.events) return [];
+    
+    // Process sequentially with a 1-second delay to avoid rate limiting
+    for (const ev of data.events) {
+      await new Promise(r => setTimeout(r, 1000));
+      const summary = await fetchEspnSummary(slug, ev.id);
+      if (summary) {
+        ev.summaryData = summary;
+      }
+    }
+    return data.events;
   } catch {
     return [];
   }
@@ -295,6 +695,24 @@ function parseEspnEvent(ev, leagueLabel, leagueSlug) {
   const homePoints = parsePoints(homeComp.records);
   const awayPoints = parsePoints(awayComp.records);
 
+  // AI Prediction & Rating logic
+  const ai = makePrediction(homeTeam, awayTeam, hOdds, dOdds, aOdds, leagueLabel, homeForm, awayForm, ev.summaryData);
+
+  // Parse Lineups
+  let homeLineup = [];
+  let awayLineup = [];
+  if (ev.summaryData && ev.summaryData.rosters) {
+    const homeRoster = ev.summaryData.rosters.find(r => r.homeAway === 'home');
+    const awayRoster = ev.summaryData.rosters.find(r => r.homeAway === 'away');
+    
+    if (homeRoster && homeRoster.roster) {
+      homeLineup = homeRoster.roster.map(p => \`\${p.athlete?.displayName || 'Unknown'} (\${p.position?.name || 'Unknown'})\`);
+    }
+    if (awayRoster && awayRoster.roster) {
+      awayLineup = awayRoster.roster.map(p => \`\${p.athlete?.displayName || 'Unknown'} (\${p.position?.name || 'Unknown'})\`);
+    }
+  }
+
   return {
     id,
     espnEventId: ev.id,
@@ -311,7 +729,7 @@ function parseEspnEvent(ev, leagueLabel, leagueSlug) {
     homeOdds: hOdds,
     drawOdds: dOdds,
     awayOdds: aOdds,
-    oddsRating: oddsToRating(hOdds, aOdds),
+    oddsRating: ai.oddsRating,
     espnLeagueSlug: leagueSlug, // Internal use
     homeRank: null,
     awayRank: null,
@@ -319,11 +737,18 @@ function parseEspnEvent(ev, leagueLabel, leagueSlug) {
     awayForm,
     homePoints,
     awayPoints,
-    homeLineup: null,
-    awayLineup: null,
-    h2hSummary: null,
+    homeLineup: homeLineup.length ? homeLineup : null,
+    awayLineup: awayLineup.length ? awayLineup : null,
+    h2hSummary: ai.h2hSummary,
     matchUrl: null,
-    prediction: makePrediction(homeTeam, awayTeam, hOdds, dOdds, aOdds, leagueLabel)
+    prediction: {
+      homeWinProbability: ai.homeWinProbability,
+      drawProbability: ai.drawProbability,
+      awayWinProbability: ai.awayWinProbability,
+      recommendation: ai.recommendation,
+      analysis: ai.analysis,
+      stakingOptions: ai.stakingOptions
+    }
   };
 }
 
@@ -467,10 +892,14 @@ async function main() {
   const dates = [...new Set(matches.map(m => m.date.substring(0, 10)))].sort();
   console.log('Dates included:', dates.join(', '));
 
-  // 2. Fetch Lineups for Today's and Live Matches
-  console.log('\nFetching lineups for matches happening today or live...');
-  const todayStr = new Date().toISOString().slice(0, 10);
-  const matchesToEnrich = matches.filter(m => m.date.startsWith(todayStr) || m.status === 'live');
+  // 2. Fetch Lineups for Yesterday's, Today's and Live Matches
+  console.log('\nFetching lineups for matches happening yesterday, today or live...');
+  const today = new Date();
+  const todayStr = today.toISOString().slice(0, 10);
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+  const yesterdayStr = yesterday.toISOString().slice(0, 10);
+  const matchesToEnrich = matches.filter(m => m.date.startsWith(todayStr) || m.date.startsWith(yesterdayStr) || m.status === 'live');
   
   // Process in small batches to avoid spamming the API
   const batchSize = 10;
@@ -478,33 +907,81 @@ async function main() {
     const batch = matchesToEnrich.slice(i, i + batchSize);
     await Promise.all(batch.map(async (m) => {
       const summary = await fetchEspnSummary(m.espnLeagueSlug, m.espnEventId);
-      if (!summary || !summary.rosters || summary.rosters.length < 2) return;
-      
-      const parseLineup = (rosterObj) => {
-        if (!rosterObj || !rosterObj.roster) return null;
-        const startingXI = [];
-        const bench = [];
-        rosterObj.roster.forEach(p => {
-          const player = {
-            number: p.athlete?.jersey || '?',
-            name: p.athlete?.displayName || 'Unknown',
-            position: p.position?.abbreviation || 'N/A',
-            rating: 0,
-            stats: ''
-          };
-          if (p.starter) startingXI.push(player);
-          else bench.push(player);
-        });
-        return { avgRating: 0, startingXI, bench };
-      };
-      
-      // Match roster to home/away
-      const r1 = summary.rosters[0];
-      const r2 = summary.rosters[1];
-      const r1IsHome = r1.homeAway === 'home';
-      
-      m.homeLineup = parseLineup(r1IsHome ? r1 : r2);
-      m.awayLineup = parseLineup(r1IsHome ? r2 : r1);
+      if (!summary) return;
+
+      // -- Parse Lineups (only if rosters are available) ----------------------
+      if (summary.rosters && summary.rosters.length >= 2) {
+        const parseLineup = (rosterObj) => {
+          if (!rosterObj || !rosterObj.roster) return null;
+          const startingXI = [];
+          const bench = [];
+          rosterObj.roster.forEach(p => {
+            const player = {
+              number: p.athlete?.jersey || '?',
+              name: p.athlete?.displayName || 'Unknown',
+              position: p.position?.abbreviation || 'N/A',
+              rating: 0,
+              stats: ''
+            };
+            if (p.starter) startingXI.push(player);
+            else bench.push(player);
+          });
+          return { avgRating: 0, startingXI, bench };
+        };
+        const r1 = summary.rosters[0];
+        const r2 = summary.rosters[1];
+        const r1IsHome = r1.homeAway === 'home';
+        m.homeLineup = parseLineup(r1IsHome ? r1 : r2);
+        m.awayLineup = parseLineup(r1IsHome ? r2 : r1);
+      }
+
+      // -- Parse Real H2H from ESPN seasonseries --------------------------------
+      // ESPN structure: seasonseries[0].events[] each with competitions[0].competitors[]
+      const seriesList = summary.seasonseries;
+      if (Array.isArray(seriesList) && seriesList.length > 0) {
+        const h2hEvents = seriesList[0].events || [];
+        let hWins = 0, aWins = 0, draws = 0;
+        const recentResults = [];
+
+        for (const event of h2hEvents) {
+          const comps = event.competitions?.[0];
+          if (!comps) continue;
+          const homeComp = comps.competitors?.find(c => c.homeAway === 'home');
+          const awayComp = comps.competitors?.find(c => c.homeAway === 'away');
+          if (!homeComp || !awayComp) continue;
+
+          const hScore = parseInt(homeComp.score, 10);
+          const aScore = parseInt(awayComp.score, 10);
+          const hName = homeComp.team?.displayName || homeComp.team?.name || '';
+          const dateStr = event.date ? event.date.slice(0, 10) : '';
+
+          // Map to our match home/away perspective
+          const isOurHome = hName.toLowerCase().includes(m.homeTeam.toLowerCase()) ||
+                            m.homeTeam.toLowerCase().includes(hName.toLowerCase());
+
+          const ourHomeScore = isOurHome ? hScore : aScore;
+          const ourAwayScore = isOurHome ? aScore : hScore;
+
+          if (ourHomeScore > ourAwayScore) hWins++;
+          else if (ourAwayScore > ourHomeScore) aWins++;
+          else draws++;
+
+          recentResults.push(`${m.homeTeam} ${ourHomeScore}-${ourAwayScore} ${m.awayTeam} (${dateStr})`);
+        }
+
+        if (hWins + aWins + draws > 0) {
+          const total = hWins + aWins + draws;
+          const parts = [];
+          if (hWins > 0) parts.push(`${m.homeTeam} won ${hWins}`);
+          if (aWins > 0) parts.push(`${m.awayTeam} won ${aWins}`);
+          if (draws > 0) parts.push(`${draws} Draw${draws > 1 ? 's' : ''}`);
+          m.h2hSummary = parts.join(', ') + ` of last ${total} meetings. ` +
+                         recentResults.slice(0, 5).join(' | ');
+        }
+      }
+
+      // Re-calculate prediction now that we have H2H data
+      m.prediction = makePrediction(m.homeTeam, m.awayTeam, m.homeOdds, m.drawOdds, m.awayOdds, m.league, m.homeForm, m.awayForm, m.h2hSummary);
     }));
   }
   
