@@ -10,6 +10,7 @@ import '../../../match_details/presentation/pages/match_details_screen.dart';
 import '../../../../core/services/api_service.dart';
 import '../../../../core/services/notification_service.dart';
 import '../../../../core/services/analytics_service.dart';
+import '../../../../core/services/betting_tracker_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -130,6 +131,7 @@ class _HomeScreenState extends State<HomeScreen> {
     // 1. Try to load cached matches immediately
     final cached = await _apiService.getCachedMatches();
     if (cached != null && cached.isNotEmpty && mounted) {
+      BettingTrackerService.instance.syncMatches(cached);
       setState(() {
         _matches = cached;
         _updateSelectedDate(cached);
@@ -143,6 +145,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final freshMatches = await _apiService.fetchMatches();
       if (mounted) {
         _checkNotifications(freshMatches);
+        BettingTrackerService.instance.syncMatches(freshMatches);
         setState(() {
           _matches = freshMatches;
           _updateSelectedDate(freshMatches);
