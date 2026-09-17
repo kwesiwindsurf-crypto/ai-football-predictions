@@ -289,9 +289,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     const Icon(Icons.cloud_off_rounded, color: Colors.redAccent, size: 48),
                     const SizedBox(height: 12),
                     Text(
-                      'Error loading matches\n$_error',
+                      'Unable to load latest matches.\nPlease check your connection and tap retry.',
                       textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.redAccent),
+                      style: TextStyle(color: Colors.white70, fontSize: 14),
                     ),
                     const SizedBox(height: 16),
                     ElevatedButton.icon(

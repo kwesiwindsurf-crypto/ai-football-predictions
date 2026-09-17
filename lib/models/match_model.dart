@@ -165,9 +165,23 @@ class Match {
       awayOdds: aOdds,
       oddsRating: rating,
       matchUrl: json['matchUrl'],
-      homeLineup: (json['homeLineup'] as List<dynamic>?)?.map((e) => e.toString()).toList(),
-      awayLineup: (json['awayLineup'] as List<dynamic>?)?.map((e) => e.toString()).toList(),
+      homeLineup: _parseLineupList(json['homeLineup']),
+      awayLineup: _parseLineupList(json['awayLineup']),
     );
+  }
+
+  static List<String>? _parseLineupList(dynamic raw) {
+    if (raw == null) return null;
+    if (raw is List) {
+      return raw.map((e) => e.toString()).toList();
+    }
+    if (raw is Map) {
+      final list = raw['players'] ?? raw['roster'] ?? raw['lineup'];
+      if (list is List) {
+        return list.map((e) => e.toString()).toList();
+      }
+    }
+    return null;
   }
 }
 
@@ -217,16 +231,16 @@ class TeamLineupData {
   });
 
   factory TeamLineupData.fromJson(Map<String, dynamic> json) {
+    final rawXI = json['startingXI'];
+    final rawBench = json['bench'];
     return TeamLineupData(
       avgRating: json['avgRating'] is int ? json['avgRating'] : int.tryParse(json['avgRating']?.toString() ?? ''),
-      startingXI: (json['startingXI'] as List<dynamic>?)
-              ?.map((e) => PlayerLineup.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          [],
-      bench: (json['bench'] as List<dynamic>?)
-              ?.map((e) => PlayerLineup.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          [],
+      startingXI: (rawXI is List)
+              ? rawXI.whereType<Map>().map((e) => PlayerLineup.fromJson(Map<String, dynamic>.from(e))).toList()
+              : [],
+      bench: (rawBench is List)
+              ? rawBench.whereType<Map>().map((e) => PlayerLineup.fromJson(Map<String, dynamic>.from(e))).toList()
+              : [],
     );
   }
 
@@ -257,10 +271,10 @@ class RecentMatch {
 
   factory RecentMatch.fromJson(Map<String, dynamic> json) {
     return RecentMatch(
-      opponent: json['opponent'],
-      goalsFor: json['goalsFor'],
-      goalsAgainst: json['goalsAgainst'],
-      result: json['result'],
+      opponent: json['opponent']?.toString() ?? '',
+      goalsFor: (json['goalsFor'] as num?)?.toInt() ?? 0,
+      goalsAgainst: (json['goalsAgainst'] as num?)?.toInt() ?? 0,
+      result: json['result']?.toString() ?? 'D',
       isHome: json['isHome'] ?? true,
     );
   }
@@ -284,13 +298,18 @@ class AIPrediction {
   });
 
   factory AIPrediction.fromJson(Map<String, dynamic> json) {
+    final rawStaking = json['stakingOptions'];
+    List<String> staking = [];
+    if (rawStaking is List) {
+      staking = rawStaking.map((e) => e.toString()).toList();
+    }
     return AIPrediction(
-      homeWinProbability: (json['homeWinProbability'] as num).toDouble(),
-      drawProbability: (json['drawProbability'] as num).toDouble(),
-      awayWinProbability: (json['awayWinProbability'] as num).toDouble(),
-      recommendation: json['recommendation'],
-      analysis: json['analysis'],
-      stakingOptions: List<String>.from(json['stakingOptions']),
+      homeWinProbability: (json['homeWinProbability'] as num?)?.toDouble() ?? 33.3,
+      drawProbability: (json['drawProbability'] as num?)?.toDouble() ?? 33.3,
+      awayWinProbability: (json['awayWinProbability'] as num?)?.toDouble() ?? 33.3,
+      recommendation: json['recommendation']?.toString() ?? '',
+      analysis: json['analysis']?.toString() ?? '',
+      stakingOptions: staking,
     );
   }
 
