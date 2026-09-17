@@ -738,7 +738,7 @@ class AIPrediction {
     
     final isBig = _isBigGame(homeTeam, awayTeam);
     final maxProb = [fHp, fDp, fAp].reduce((a, b) => a > b ? a : b);
-    final isHomeFav = fHp >= fAp;
+    final isHomeFav = fHp > fAp || ((fHp - fAp).abs() <= 3.0 && hForm >= aForm);
     final fav = isHomeFav ? homeTeam : awayTeam;
     final favOdds = isHomeFav ? realHomeOdds : realAwayOdds;
 

@@ -545,7 +545,7 @@ function makePrediction(home, away, hOdds, dOdds, aOdds, league, homeFormStr, aw
   // Decision logic
   const isBig = isBigGame(home, away);
   const maxProb = Math.max(fHp, fDp, fAp);
-  const isHomeFav = fHp >= fAp;
+  const isHomeFav = fHp > fAp || (Math.abs(fHp - fAp) <= 3.0 && hForm >= aForm);
   const fav = isHomeFav ? home : away;
   const favOdds = isHomeFav ? hOdds : aOdds;
 
