@@ -818,6 +818,8 @@ class MockData {
         drawOdds: 4.00,
         awayOdds: 5.50,
         prediction: AIPrediction.generateLocal('Arsenal', 'Chelsea', 'WWWWL', 'LWDLL', 'Arsenal won 3 of last 5 meetings.', homeRank: 2, homePts: 58, awayRank: 6, awayPts: 41, realHomeOdds: 1.65, realDrawOdds: 4.00, realAwayOdds: 5.50),
+        homeLineup: ['Raya (GK)', 'White (DF)', 'Saliba (DF)', 'Gabriel (DF)', 'Zinchenko (DF)', 'Rice (MF)', 'Odegaard (MF)', 'Partey (MF)', 'Saka (FW)', 'Havertz (FW)', 'Martinelli (FW)'],
+        awayLineup: ['Petrovic (GK)', 'Gusto (DF)', 'Disasi (DF)', 'Badiashile (DF)', 'Cucurella (DF)', 'Caicedo (MF)', 'Fernandez (MF)', 'Gallagher (MF)', 'Palmer (FW)', 'Jackson (FW)', 'Sterling (FW)'],
       ),
       Match(
         id: '2',
