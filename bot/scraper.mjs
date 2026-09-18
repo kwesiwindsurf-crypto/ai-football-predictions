@@ -5,8 +5,8 @@
 const CF_ACCOUNT_ID = process.env.CF_ACCOUNT_ID;
 const CF_API_TOKEN  = process.env.CF_API_TOKEN;
 const CF_KV_NS_ID   = process.env.CF_KV_NAMESPACE_ID;
-const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8999449179:AAGX1qsjFa9SyHNSWIpffapaRDB5mvIfSEA';
+const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || '-1001738283594';
 const KV_KEY        = 'latest_soccer_data';
 
 // ─── Keywords used to filter out women's / youth / irrelevant matches ─────────
@@ -875,10 +875,65 @@ async function postPickOfTheDayToTelegram(matches) {
       console.error('Telegram API error:', result.description);
     } else {
       console.log('✅ Successfully posted Pick of the Day to Telegram!');
+      return bestMatch;
     }
   } catch (e) {
     console.error('Error posting to Telegram:', e.message);
   }
+  return null;
+}
+
+function evaluatePrediction(rec, hScore, aScore, hTeam, aTeam) {
+  const h = parseInt(hScore);
+  const a = parseInt(aScore);
+  if (isNaN(h) || isNaN(a)) return 'PENDING';
+  
+  if (rec.includes('to Win (1)')) return h > a ? 'WON' : 'LOST';
+  if (rec.includes('to Win (2)')) return a > h ? 'WON' : 'LOST';
+  if (rec.includes('or Draw (Double Chance)')) {
+    if (rec.includes(hTeam)) return h >= a ? 'WON' : 'LOST';
+    if (rec.includes(aTeam)) return a >= h ? 'WON' : 'LOST';
+  }
+  if (rec.includes('Over 0.5 Goals')) {
+    const total = h + a;
+    if (total > 0) return 'WON';
+    return 'LOST';
+  }
+  return 'UNKNOWN';
+}
+
+async function checkAndPostMatchResult(activePick, matches) {
+  if (!activePick || !TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) return false;
+  
+  // Find the match in freshly scraped data
+  const match = matches.find(m => m.id === activePick.id);
+  if (!match || match.status !== 'FT') return false; // Not finished yet
+
+  const hScore = match.homeScore;
+  const aScore = match.awayScore;
+  const result = evaluatePrediction(activePick.prediction.recommendation, hScore, aScore, match.homeTeam, match.awayTeam);
+  
+  const msg = `🚨 *FULL TIME RESULT* 🚨\n\n` +
+              `⚽ *${match.homeTeam} ${hScore} - ${aScore} ${match.awayTeam}*\n\n` +
+              `💡 *Our Pick:* ${activePick.prediction.recommendation}\n` +
+              `${result === 'WON' ? '✅ *RESULT: WON*' : '❌ *RESULT: LOST*'}\n\n` +
+              `📲 _Check the app for tomorrow's predictions!_`;
+
+  const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: msg, parse_mode: 'Markdown' })
+    });
+    if (res.ok) {
+      console.log(`✅ Successfully posted Result for ${match.homeTeam} vs ${match.awayTeam} to Telegram!`);
+      return true; // Indicates we should clear activePick
+    }
+  } catch (e) {
+    console.error('Error posting result to Telegram:', e.message);
+  }
+  return false;
 }
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
@@ -989,17 +1044,29 @@ async function main() {
   // Clean up internal slug before upload
   matches.forEach(m => delete m.espnLeagueSlug);
 
-  // 3. Telegram Broadcast (Once per day)
-  // Use the same todayStr already defined above
+  // 3. Telegram Broadcast (Once per day) & Result Monitoring
   let lastTelegramPostDate = null;
+  let activeTelegramPick = null;
   const currentKvData = await getCloudflareKV();
-  if (currentKvData && currentKvData.lastTelegramPostDate) {
-    lastTelegramPostDate = currentKvData.lastTelegramPostDate;
+  if (currentKvData) {
+    if (currentKvData.lastTelegramPostDate) lastTelegramPostDate = currentKvData.lastTelegramPostDate;
+    if (currentKvData.activeTelegramPick) activeTelegramPick = currentKvData.activeTelegramPick;
+  }
+
+  // Check if we have an active pick that just finished
+  if (activeTelegramPick) {
+    const handled = await checkAndPostMatchResult(activeTelegramPick, matches);
+    if (handled) {
+      activeTelegramPick = null; // Clear it so we don't post result again
+    }
   }
 
   if (lastTelegramPostDate !== todayStr) {
     console.log(`\nNew day detected! Attempting to post Pick of the Day to Telegram...`);
-    await postPickOfTheDayToTelegram(matches);
+    const postedMatch = await postPickOfTheDayToTelegram(matches);
+    if (postedMatch) {
+      activeTelegramPick = postedMatch; // Save it to monitor for result
+    }
     lastTelegramPostDate = todayStr; // Update flag
   } else {
     console.log(`\nTelegram: Already posted today (${todayStr}).`);
@@ -1012,7 +1079,8 @@ async function main() {
       matches
     },
     standingsData: null,
-    lastTelegramPostDate
+    lastTelegramPostDate,
+    activeTelegramPick
   });
 
   console.log('\nPushing to Cloudflare KV...');

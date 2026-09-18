@@ -11,6 +11,7 @@ import '../../../../core/services/api_service.dart';
 import '../../../../core/services/notification_service.dart';
 import '../../../../core/services/analytics_service.dart';
 import '../../../../core/services/betting_tracker_service.dart';
+import '../../../../core/services/app_settings_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -231,8 +232,11 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     final availableDates = _getAvailableDates(matches);
 
-    return Scaffold(
-      appBar: AppBar(
+    return ListenableBuilder(
+      listenable: AppSettingsService.instance,
+      builder: (context, _) {
+        return Scaffold(
+          appBar: AppBar(
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -244,13 +248,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.filter_list_rounded),
-            onPressed: () => _showFiltersBottomSheet(context),
-            tooltip: 'Filter Matches',
-          ),
-        ],
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -263,12 +260,13 @@ class _HomeScreenState extends State<HomeScreen> {
               style: Theme.of(context).textTheme.titleLarge,
             ),
           ),
-          Expanded(
-            child: _buildMatchesContent(availableDates),
-          ),
-        ],
-      ),
-    );
+            Expanded(
+              child: _buildMatchesContent(availableDates),
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   Widget _buildMatchesContent(List<DateTime> availableDates) {
@@ -336,7 +334,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
     // Filter matches by the selected date
     final selectedDate = _selectedDate ?? dates.first;
+    final hideFinished = AppSettingsService.instance.hideFinishedMatches;
+    
     final filteredMatches = matches.where((match) {
+      if (hideFinished && match.status == model.MatchStatus.finished) {
+        return false;
+      }
       final localDate = match.date.toLocal();
       return localDate.year == selectedDate.year &&
              localDate.month == selectedDate.month &&
@@ -550,7 +553,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Container(
       height: 60,
-      margin: const EdgeInsets.symmetric(vertical: 8),
+      margin: const EdgeInsets.only(top: 8, bottom: 12),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: availableDates.length,
@@ -577,15 +580,37 @@ class _HomeScreenState extends State<HomeScreen> {
                 _leagueExpandedState.clear();
               });
             },
-            child: Container(
-              margin: const EdgeInsets.only(right: 12),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOutCubic,
+              margin: const EdgeInsets.only(right: 12, bottom: 8), // Bottom margin for shadow
+              padding: const EdgeInsets.symmetric(horizontal: 24),
               decoration: BoxDecoration(
-                color: isSelected ? AppTheme.primary : AppTheme.surface,
-                borderRadius: BorderRadius.circular(20),
+                gradient: isSelected
+                    ? LinearGradient(
+                        colors: [
+                          AppTheme.primary,
+                          AppTheme.primary.withValues(alpha: 0.7),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      )
+                    : null,
+                color: isSelected ? null : AppTheme.surfaceOf(context),
+                borderRadius: BorderRadius.circular(30), // Fully rounded pill shape
                 border: Border.all(
-                  color: isSelected ? AppTheme.primary : AppTheme.textSecondary.withValues(alpha: 0.1),
+                  color: isSelected ? Colors.transparent : AppTheme.textPrimaryOf(context).withValues(alpha: 0.05),
+                  width: 1,
                 ),
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color: AppTheme.primary.withValues(alpha: 0.4),
+                          blurRadius: 8,
+                          offset: const Offset(0, 3),
+                        )
+                      ]
+                    : [],
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -593,8 +618,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   Text(
                     label,
                     style: TextStyle(
-                      color: isSelected ? Colors.black : AppTheme.textPrimary,
-                      fontWeight: FontWeight.bold,
+                      color: isSelected ? Colors.black : AppTheme.textPrimaryOf(context),
+                      fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                      letterSpacing: 0.3,
                     ),
                   ),
                 ],

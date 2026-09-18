@@ -31,6 +31,8 @@ class Match {
   final String? matchUrl;
   final List<String>? homeLineup;
   final List<String>? awayLineup;
+  final TeamLineupData? homeLineupData;
+  final TeamLineupData? awayLineupData;
 
   Match({
     required this.id,
@@ -60,6 +62,8 @@ class Match {
     this.matchUrl,
     this.homeLineup,
     this.awayLineup,
+    this.homeLineupData,
+    this.awayLineupData,
   });
 
   factory Match.fromJson(Map<String, dynamic> json, [Map<String, dynamic>? standingsData]) {
@@ -136,6 +140,15 @@ class Match {
       );
     }
 
+    TeamLineupData? hLineupData;
+    TeamLineupData? aLineupData;
+    if (json['homeLineup'] is Map && json['homeLineup']['startingXI'] != null) {
+      try { hLineupData = TeamLineupData.fromJson(Map<String, dynamic>.from(json['homeLineup'])); } catch (_) {}
+    }
+    if (json['awayLineup'] is Map && json['awayLineup']['startingXI'] != null) {
+      try { aLineupData = TeamLineupData.fromJson(Map<String, dynamic>.from(json['awayLineup'])); } catch (_) {}
+    }
+
     return Match(
       id: json['id'],
       homeTeam: homeName,
@@ -167,6 +180,8 @@ class Match {
       matchUrl: json['matchUrl'],
       homeLineup: _parseLineupList(json['homeLineup']),
       awayLineup: _parseLineupList(json['awayLineup']),
+      homeLineupData: hLineupData,
+      awayLineupData: aLineupData,
     );
   }
 
@@ -176,6 +191,16 @@ class Match {
       return raw.map((e) => e.toString()).toList();
     }
     if (raw is Map) {
+      if (raw['startingXI'] is List) {
+        return (raw['startingXI'] as List).map((e) {
+          if (e is Map) {
+            final name = e['name'] ?? 'Unknown';
+            final pos = e['position'] ?? '';
+            return pos.isNotEmpty ? '$name ($pos)' : name.toString();
+          }
+          return e.toString();
+        }).toList();
+      }
       final list = raw['players'] ?? raw['roster'] ?? raw['lineup'];
       if (list is List) {
         return list.map((e) => e.toString()).toList();
@@ -313,8 +338,33 @@ class AIPrediction {
     );
   }
 
-  static bool _isBigGame(String home, String away) {
-    const bigTeams = [
+  static bool _isEliteGame(String home, String away) {
+    const eliteTeams = [
+      'manchester city',
+      'arsenal',
+      'liverpool',
+      'chelsea',
+      'manchester united',
+      'tottenham hotspur',
+      'real madrid',
+      'fc barcelona',
+      'atlético madrid',
+      'inter milan',
+      'juventus',
+      'ac milan',
+      'napoli',
+      'bayern munich',
+      'borussia dortmund',
+      'bayer leverkusen',
+      'paris saint-germain',
+    ];
+    final h = home.toLowerCase();
+    final a = away.toLowerCase();
+    return eliteTeams.any((t) => h.contains(t)) && eliteTeams.any((t) => a.contains(t));
+  }
+
+  static bool _isMajorGame(String home, String away) {
+    const majorTeams = [
   'manchester city',
   'arsenal',
   'liverpool',
@@ -635,7 +685,7 @@ class AIPrediction {
 ];
     final h = home.toLowerCase();
     final a = away.toLowerCase();
-    return bigTeams.any((t) => h.contains(t)) && bigTeams.any((t) => a.contains(t));
+    return majorTeams.any((t) => h.contains(t)) && majorTeams.any((t) => a.contains(t));
   }
 
   static double _parseForm(String? formStr) {
@@ -736,17 +786,15 @@ class AIPrediction {
     fDp = (fDp / fTotal) * 100;
     fAp = (fAp / fTotal) * 100;
     
-    final isBig = _isBigGame(homeTeam, awayTeam);
+    final isElite = _isEliteGame(homeTeam, awayTeam);
+    final isMajor = _isMajorGame(homeTeam, awayTeam);
+    
     final maxProb = [fHp, fDp, fAp].reduce((a, b) => a > b ? a : b);
     final isHomeFav = fHp > fAp || ((fHp - fAp).abs() <= 3.0 && hForm >= aForm);
     final fav = isHomeFav ? homeTeam : awayTeam;
     final favOdds = isHomeFav ? realHomeOdds : realAwayOdds;
 
-    final formGap = (hForm - aForm).abs();
-    final isFormFav = formGap >= 25 || hForm >= 60 || aForm >= 60;
-    final formFav = hForm >= aForm ? homeTeam : awayTeam;
-    final isHomeFormFav = hForm >= aForm;
-    
+
     String rec = '';
     String strategyAnalysis = '';
     String primarySafe = '';
@@ -760,25 +808,29 @@ class AIPrediction {
         primarySafe = 'Safe: X2 ($awayTeam or Draw)';
       }
       strategyAnalysis = 'Clear Favorite (Prob >= 60%): Direct Win.';
-    } else if (isBig) {
-      rec = '$fav or Draw (Double Chance)';
-      primarySafe = 'Safe: ${isHomeFav ? '1X' : 'X2'} ($fav or Draw)';
-      strategyAnalysis = 'Big Game + Tight Match: Double Chance / Over 1.5 Goals.';
+    } else if (isElite) {
+      rec = '$homeTeam or $awayTeam to Win (12) or Over 0.5 Goals';
+      primarySafe = 'Safe: Over 0.5 Goals';
+      strategyAnalysis = 'Elite Big Game: Often produces a winner (No Draw) or at least 1 goal.';
     } else if (maxProb >= 55) {
       rec = '$fav or Draw (Double Chance)';
       primarySafe = 'Safe: ${isHomeFav ? '1X' : 'X2'} ($fav or Draw)';
       strategyAnalysis = 'Moderate Favorite (Prob 55-59%): Double Chance.';
+    } else if (isMajor) {
+      rec = 'Over 0.5 Goals or Under 2.5 Goals';
+      primarySafe = 'Safe: Over 0.5 Goals';
+      strategyAnalysis = 'Tier 2 Tight Match: Goals Market (Under 2.5 / Over 0.5).';
     } else {
       rec = 'Over 0.5 Goals or Under 2.5 Goals';
       primarySafe = 'Safe: Over 0.5 Goals';
-      strategyAnalysis = 'Not Big Teams & Tight: Goals Market (Under 2.5 / Over 0.5).';
+      strategyAnalysis = 'Lower Tier & Tight: Goals Market (Under 2.5 / Over 0.5).';
     }
     
     final dnbOdds = favOdds != null ? (favOdds * 0.82).clamp(1.30, 9.99) : 1.70;
     final stakingOptions = [
       primarySafe,
       'Value: $fav Draw No Bet (${dnbOdds.toStringAsFixed(2)})',
-      (isBig && maxProb < 55) ? 'Goals: Over 1.5 Total Goals (1.30)' : 'Risky: $fav to WIN by 2+ Goals (2.85)',
+      (isElite && maxProb < 55) ? 'Goals: Over 1.5 Total Goals (1.30)' : 'Risky: $fav to WIN by 2+ Goals (2.85)',
       'BTTS: Both Teams To Score - Yes (1.78)',
       maxProb < 45 ? 'Alternative: Under 2.5 Goals (1.80)' : 'Alternative: Over 2.5 Total Goals (1.70)'
     ];
@@ -788,7 +840,7 @@ class AIPrediction {
       drawProbability: fDp.roundToDouble(),
       awayWinProbability: fAp.roundToDouble(),
       recommendation: rec,
-      analysis: '$strategyAnalysis\nHomeForm: ${hForm.round()}%, AwayForm: ${aForm.round()}%, BigGame: $isBig',
+      analysis: '$strategyAnalysis\nHomeForm: ${hForm.round()}%, AwayForm: ${aForm.round()}%, BigGame: ${isElite || isMajor}',
       stakingOptions: stakingOptions,
     );
   }

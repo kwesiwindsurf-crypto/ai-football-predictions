@@ -5,6 +5,7 @@ import '../../../../models/match_model.dart' as model;
 import '../../../../core/theme/app_theme.dart';
 
 import '../../../../core/services/analytics_service.dart';
+import '../../../../core/services/app_settings_service.dart';
 
 
 class MatchDetailsScreen extends StatefulWidget {
@@ -20,6 +21,9 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
   late final TabController _tabController;
   late final AnimationController _headerAnim;
   late final Animation<double> _fadeIn;
+
+  double _pitchRotateX = 0.8;
+  double _pitchRotateZ = 0.0;
 
   @override
   void initState() {
@@ -1174,6 +1178,18 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
   // ─────────────────────────────────────────────────────────────
   Widget _buildLineupsTab() {
     final m = widget.match;
+
+    if (m.homeLineupData != null && m.awayLineupData != null) {
+      return ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          _buildHeroHeader(),
+          const SizedBox(height: 24),
+          _buildRichLineupView(m.homeTeam, m.homeLogo, m.homeLineupData!, m.awayTeam, m.awayLogo, m.awayLineupData!),
+        ],
+      );
+    }
+
     if (m.homeLineup == null || m.awayLineup == null || m.homeLineup!.isEmpty || m.awayLineup!.isEmpty) {
       return ListView(
         padding: const EdgeInsets.all(16),
@@ -1264,6 +1280,391 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
         ),
       ],
     );
+  }
+
+  Widget _buildRichLineupView(
+    String homeName, String homeLogo, model.TeamLineupData homeData,
+    String awayName, String awayLogo, model.TeamLineupData awayData,
+  ) {
+    return Column(
+      children: [
+        // Header
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppTheme.surfaceOf(context),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppTheme.textPrimaryOf(context).withValues(alpha: 0.05)),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Row(
+                  children: [
+                    _buildTeamLogo(homeLogo, homeName),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(homeName,
+                          style: TextStyle(color: AppTheme.textPrimaryOf(context), fontWeight: FontWeight.bold),
+                          maxLines: 1, overflow: TextOverflow.ellipsis),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Expanded(
+                      child: Text(awayName,
+                          textAlign: TextAlign.right,
+                          style: TextStyle(color: AppTheme.textPrimaryOf(context), fontWeight: FontWeight.bold),
+                          maxLines: 1, overflow: TextOverflow.ellipsis),
+                    ),
+                    const SizedBox(width: 8),
+                    _buildTeamLogo(awayLogo, awayName),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 24),
+        
+        // Tactical Pitch Toggle
+        AnimatedBuilder(
+          animation: AppSettingsService.instance,
+          builder: (context, _) {
+            final is2d = AppSettingsService.instance.use2dPitch;
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'TACTICAL PITCH',
+                  style: TextStyle(
+                    color: AppTheme.textPrimaryOf(context),
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+                Row(
+                  children: [
+                    Text('3D', style: TextStyle(color: !is2d ? AppTheme.primaryOf(context) : AppTheme.textSecondaryOf(context), fontSize: 12, fontWeight: FontWeight.bold)),
+                    Switch(
+                      value: is2d,
+                      onChanged: (val) => AppSettingsService.instance.setUse2dPitch(val),
+                      activeColor: AppTheme.primaryOf(context),
+                      inactiveThumbColor: AppTheme.textSecondaryOf(context),
+                      inactiveTrackColor: AppTheme.surfaceOf(context),
+                    ),
+                    Text('2D', style: TextStyle(color: is2d ? AppTheme.primaryOf(context) : AppTheme.textSecondaryOf(context), fontSize: 12, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+              ],
+            );
+          },
+        ),
+        const SizedBox(height: 16),
+        
+        // Tactical Pitch
+        _buildTacticalPitch(homeName, homeLogo, homeData.startingXI, awayName, awayLogo, awayData.startingXI),
+        
+        // Bench
+        if (homeData.bench.isNotEmpty || awayData.bench.isNotEmpty) ...[
+          const SizedBox(height: 24),
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+            decoration: BoxDecoration(
+              color: AppTheme.textPrimaryOf(context).withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.event_seat, size: 16, color: AppTheme.textSecondaryOf(context)),
+                const SizedBox(width: 8),
+                Text('SUBSTITUTES', style: TextStyle(color: AppTheme.textSecondaryOf(context), fontWeight: FontWeight.w900, fontSize: 12, letterSpacing: 1.2)),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppTheme.surfaceOf(context),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: AppTheme.textPrimaryOf(context).withValues(alpha: 0.05)),
+            ),
+            child: _buildPlayerListGrid(homeData.bench, awayData.bench),
+          ),
+        ],
+      ],
+    );
+  }
+
+  List<List<model.PlayerLineup>> _groupPlayersByLine(List<model.PlayerLineup> players) {
+    List<model.PlayerLineup> gks = [];
+    List<model.PlayerLineup> defs = [];
+    List<model.PlayerLineup> mids = [];
+    List<model.PlayerLineup> fwds = [];
+
+    for (var p in players) {
+      final pos = p.position.toUpperCase();
+      if (pos.contains('G')) {
+        gks.add(p);
+      } else if (pos.contains('D') || pos.endsWith('B') || pos == 'SW') {
+        defs.add(p);
+      } else if (pos.contains('M')) {
+        mids.add(p);
+      } else {
+        fwds.add(p);
+      }
+    }
+    return [gks, defs, mids, fwds];
+  }
+
+  Widget _buildTacticalPitch(
+    String homeName, String homeLogo, List<model.PlayerLineup> homeXI,
+    String awayName, String awayLogo, List<model.PlayerLineup> awayXI,
+  ) {
+    return AnimatedBuilder(
+      animation: AppSettingsService.instance,
+      builder: (context, _) {
+        final is2d = AppSettingsService.instance.use2dPitch;
+
+        Widget pitch = Container(
+          width: double.infinity,
+          height: 500, // Fixed height for pitch
+          decoration: BoxDecoration(
+            color: const Color(0xFF2E7D32), // Grass green
+            border: Border.all(color: Colors.white.withValues(alpha: 0.8), width: 2),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Stack(
+            children: [
+              // Pitch lines (center line, circle)
+              Center(
+                child: Container(
+                  width: double.infinity,
+                  height: 2,
+                  color: Colors.white.withValues(alpha: 0.6),
+                ),
+              ),
+              Center(
+                child: Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.6), width: 2),
+                  ),
+                ),
+              ),
+              // Home Penalty Box (Top)
+              Positioned(
+                top: 0,
+                left: 60,
+                right: 60,
+                child: Container(
+                  height: 80,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.6), width: 2),
+                  ),
+                ),
+              ),
+              // Away Penalty Box (Bottom)
+              Positioned(
+                bottom: 0,
+                left: 60,
+                right: 60,
+                child: Container(
+                  height: 80,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.6), width: 2),
+                  ),
+                ),
+              ),
+
+              // Players
+              Column(
+                children: [
+                  Expanded(child: _buildTeamHalf(homeXI, true, AppTheme.primary)),
+                  Expanded(child: _buildTeamHalf(awayXI, false, AppTheme.secondary)),
+                ],
+              ),
+            ],
+          ),
+        );
+
+        if (!is2d) {
+          pitch = GestureDetector(
+            onPanUpdate: (details) {
+              setState(() {
+                _pitchRotateX -= details.delta.dy * 0.01;
+                _pitchRotateZ -= details.delta.dx * 0.01;
+                _pitchRotateX = _pitchRotateX.clamp(0.0, 1.5);
+              });
+            },
+            child: Transform(
+              alignment: FractionalOffset.center,
+              transform: Matrix4.identity()
+                ..setEntry(3, 2, 0.001) // perspective
+                ..rotateX(_pitchRotateX) // tilt
+                ..rotateZ(_pitchRotateZ) // spin
+                ..scale(0.85) // scale down to prevent clipping
+                ..translate(0.0, -30.0),
+              child: pitch,
+            ),
+          );
+        }
+
+        return Container(
+          width: double.infinity,
+          height: 500, // Match inner pitch height
+          clipBehavior: Clip.none, // allow 3d overflow
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            color: Colors.black.withValues(alpha: 0.1), // Background behind pitch
+          ),
+          child: Center(child: pitch),
+        );
+      }
+    );
+  }
+
+  Widget _buildTeamHalf(List<model.PlayerLineup> players, bool isHome, Color teamColor) {
+    final lines = _groupPlayersByLine(players);
+    if (!isHome) {
+      lines.setAll(0, lines.reversed.toList()); // Reverse for away team so GK is at the bottom
+    }
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: lines.map((linePlayers) {
+        if (linePlayers.isEmpty) return const SizedBox();
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: linePlayers.map((p) => _buildPitchPlayer(p, teamColor)).toList(),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildPitchPlayer(model.PlayerLineup p, Color teamColor) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 24,
+          height: 24,
+          decoration: BoxDecoration(
+            color: teamColor,
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.white, width: 1.5),
+            boxShadow: [
+              BoxShadow(color: Colors.black.withValues(alpha: 0.5), blurRadius: 4, offset: const Offset(0, 2)),
+            ]
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            p.number == '?' || p.number.isEmpty ? '-' : p.number,
+            style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+          ),
+        ),
+        const SizedBox(height: 2),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.6),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Text(
+            p.name.split(' ').last, // Use last name for pitch
+            style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPlayerListGrid(List<model.PlayerLineup> homeList, List<model.PlayerLineup> awayList) {
+    final int maxLen = max(homeList.length, awayList.length);
+    List<Widget> rows = [];
+    for (int i = 0; i < maxLen; i++) {
+      final homeP = i < homeList.length ? homeList[i] : null;
+      final awayP = i < awayList.length ? awayList[i] : null;
+      rows.add(
+        Padding(
+          padding: const EdgeInsets.only(bottom: 12.0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(child: homeP != null ? _buildPlayerRow(homeP, true) : const SizedBox()),
+              Container(width: 1, height: 20, margin: const EdgeInsets.symmetric(horizontal: 4), color: AppTheme.textPrimaryOf(context).withValues(alpha: 0.1)),
+              Expanded(child: awayP != null ? _buildPlayerRow(awayP, false) : const SizedBox()),
+            ],
+          ),
+        ),
+      );
+    }
+    return Column(children: rows);
+  }
+
+  Widget _buildPlayerRow(model.PlayerLineup p, bool isHome) {
+    Widget numBadge = p.number.isNotEmpty && p.number != '?' 
+      ? Container(
+          width: 20,
+          height: 20,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: AppTheme.textPrimaryOf(context).withValues(alpha: 0.05),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Text(p.number, style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.textSecondaryOf(context))),
+        )
+      : const SizedBox(width: 20);
+
+    Color posColor = Colors.grey;
+    final String pos = p.position.toUpperCase();
+    if (pos.contains('G')) posColor = Colors.orange;
+    else if (pos.contains('D') || pos.contains('C') && !pos.contains('M')) posColor = Colors.blue;
+    else if (pos.contains('M')) posColor = Colors.green;
+    else if (pos.contains('F') || pos.contains('S') || pos.contains('W')) posColor = Colors.red;
+
+    Widget posBadge = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+      decoration: BoxDecoration(
+        color: posColor.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(pos.isEmpty ? '-' : pos, style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: posColor)),
+    );
+
+    if (isHome) {
+      return Row(
+        children: [
+          numBadge,
+          const SizedBox(width: 6),
+          posBadge,
+          const SizedBox(width: 6),
+          Expanded(child: Text(p.name, style: TextStyle(color: AppTheme.textPrimaryOf(context), fontSize: 12, fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis)),
+        ],
+      );
+    } else {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Expanded(child: Text(p.name, textAlign: TextAlign.right, style: TextStyle(color: AppTheme.textPrimaryOf(context), fontSize: 12, fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis)),
+          const SizedBox(width: 6),
+          posBadge,
+          const SizedBox(width: 6),
+          numBadge,
+        ],
+      );
+    }
   }
 
   // ─────────────────────────────────────────────────────────────
