@@ -1066,8 +1066,8 @@ async function main() {
     const postedMatch = await postPickOfTheDayToTelegram(matches);
     if (postedMatch) {
       activeTelegramPick = postedMatch; // Save it to monitor for result
+      lastTelegramPostDate = todayStr; // Update flag ONLY on successful post
     }
-    lastTelegramPostDate = todayStr; // Update flag
   } else {
     console.log(`\nTelegram: Already posted today (${todayStr}).`);
   }
