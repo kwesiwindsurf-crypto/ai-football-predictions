@@ -568,17 +568,17 @@ function makePrediction(home, away, hOdds, dOdds, aOdds, league, homeFormStr, aw
     }
     strategyAnalysis = `Clear Favorite (Prob >= 60%): Direct Win.`;
   } else if (isBig) {
-    recommendation = `${fav} or Draw (Double Chance)`;
-    primarySafe = `Safe: ${isHomeFav ? '1X' : 'X2'} (${fav} or Draw)`;
-    strategyAnalysis = `Big Game + Tight Match: Double Chance / Over 1.5 Goals.`;
+    recommendation = `12 (Home/Away) or Under 3.5 Goals`;
+    primarySafe = `Safe: Under 3.5 Goals`;
+    strategyAnalysis = `Big Game + Tight Match: Any Team to Win (12) / Under 3.5 Goals.`;
   } else if (maxProb >= 55) {
     recommendation = `${fav} or Draw (Double Chance)`;
     primarySafe = `Safe: ${isHomeFav ? '1X' : 'X2'} (${fav} or Draw)`;
     strategyAnalysis = `Moderate Favorite (Prob 55-59%): Double Chance.`;
   } else {
-    recommendation = `Over 0.5 Goals or Under 2.5 Goals`;
-    primarySafe = `Safe: Over 0.5 Goals`;
-    strategyAnalysis = `Not Big Teams & Tight: Goals Market (Under 2.5 / Over 0.5).`;
+    recommendation = `12 (Home/Away) or Under 3.5 Goals`;
+    primarySafe = `Safe: Under 3.5 Goals`;
+    strategyAnalysis = `Not Big Teams & Tight: Goals Market (Under 3.5) or Any Team to Win (12).`;
   }
   
   const dnbOdds = favOdds ? Math.max(1.30, parseFloat((favOdds * 0.82).toFixed(2))) : 1.70;
@@ -939,6 +939,17 @@ async function checkAndPostMatchResult(activePick, matches) {
 // ─── Main ─────────────────────────────────────────────────────────────────────
 async function main() {
   console.log('Starting ESPN-only scraper...');
+
+  // 0. Load existing KV data so we can preserve predictions
+  console.log('Loading existing matches from KV to preserve predictions...');
+  const currentKvData = await getCloudflareKV();
+  const existingMatchesMap = new Map();
+  if (currentKvData && currentKvData.matchesData && currentKvData.matchesData.matches) {
+    for (const m of currentKvData.matchesData.matches) {
+      existingMatchesMap.set(m.id, m);
+    }
+  }
+
   console.log(`Fetching fixtures for yesterday → +6 days from ESPN...`);
 
   const matches = await fetchAllEspnFixtures();
@@ -1044,10 +1055,23 @@ async function main() {
   // Clean up internal slug before upload
   matches.forEach(m => delete m.espnLeagueSlug);
 
+  // -- Preserve Previous Predictions --
+  // Freeze predictions for ALL existing matches so the first prediction is locked in forever
+  for (const m of matches) {
+    const existing = existingMatchesMap.get(m.id);
+    if (existing && existing.prediction) {
+      m.prediction = existing.prediction;
+      if (existing.homeOdds !== undefined) m.homeOdds = existing.homeOdds;
+      if (existing.drawOdds !== undefined) m.drawOdds = existing.drawOdds;
+      if (existing.awayOdds !== undefined) m.awayOdds = existing.awayOdds;
+      if (existing.oddsRating !== undefined) m.oddsRating = existing.oddsRating;
+      if (existing.h2hSummary !== undefined && existing.h2hSummary !== null) m.h2hSummary = existing.h2hSummary;
+    }
+  }
+
   // 3. Telegram Broadcast (Once per day) & Result Monitoring
   let lastTelegramPostDate = null;
   let activeTelegramPick = null;
-  const currentKvData = await getCloudflareKV();
   if (currentKvData) {
     if (currentKvData.lastTelegramPostDate) lastTelegramPostDate = currentKvData.lastTelegramPostDate;
     if (currentKvData.activeTelegramPick) activeTelegramPick = currentKvData.activeTelegramPick;
