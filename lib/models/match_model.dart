@@ -98,29 +98,10 @@ class Match {
     final aOdds = json['awayOdds'] != null ? (json['awayOdds'] as num).toDouble() : null;
     final rating = json['oddsRating'] is int ? json['oddsRating'] : int.tryParse(json['oddsRating']?.toString() ?? '0');
 
-    // Always recompute prediction locally using current strategy engine
+    // Use the prediction provided by the backend, or fallback to local generation if missing.
     AIPrediction pred;
     if (json['prediction'] != null) {
-      try {
-        pred = AIPrediction.generateLocal(
-          homeName,
-          awayName,
-          hForm,
-          aForm,
-          h2h,
-          homeRank: hRank,
-          homePts: hPts,
-          awayRank: aRank,
-          awayPts: aPts,
-          realHomeOdds: hOdds,
-          realDrawOdds: dOdds,
-          realAwayOdds: aOdds,
-          league: leagueName,
-          oddsRating: rating,
-        );
-      } catch (_) {
-        pred = AIPrediction.fromJson(json['prediction']);
-      }
+      pred = AIPrediction.fromJson(json['prediction']);
     } else {
       pred = AIPrediction.generateLocal(
         homeName,
@@ -699,9 +680,12 @@ class AIPrediction {
         pts += 3;
       } else if (clean[i] == 'D') {
         pts += 1;
+      } else if (clean[i] == 'L') {
+        pts -= 1; // Penalize losses
       }
     }
-    return (pts / (clean.length * 3)) * 100.0;
+    double percentage = (pts / (clean.length * 3)) * 100.0;
+    return percentage < 0 ? 0 : percentage;
   }
 
   factory AIPrediction.generateLocal(String homeTeam, String awayTeam, String? homeForm, String? awayForm, String? h2hSummary, {int? homeRank, int? homePts, int? awayRank, int? awayPts, double? realHomeOdds, double? realDrawOdds, double? realAwayOdds, String league = '', int? oddsRating}) {
@@ -770,10 +754,10 @@ class AIPrediction {
     
     
     
-    final wOdds = hasH2H ? 0.40 : 0.50;
+    final wOdds = hasH2H ? 0.45 : 0.55;
     final wForm = hasH2H ? 0.30 : 0.40;
     final wH2H  = hasH2H ? 0.20 : 0.00;
-    final wHome = 0.10;
+    final wHome = 0.05;
     
     const double homeAdvHp = 60.0, homeAdvDp = 20.0, homeAdvAp = 20.0;
     
@@ -817,13 +801,13 @@ class AIPrediction {
       primarySafe = 'Safe: ${isHomeFav ? '1X' : 'X2'} ($fav or Draw)';
       strategyAnalysis = 'Moderate Favorite (Prob 55-59%): Double Chance.';
     } else if (isMajor) {
-      rec = 'Over 0.5 Goals or Under 2.5 Goals';
-      primarySafe = 'Safe: Over 0.5 Goals';
-      strategyAnalysis = 'Tier 2 Tight Match: Goals Market (Under 2.5 / Over 0.5).';
+      rec = 'Over 1.5 Goals';
+      primarySafe = 'Safe: Over 1.5 Goals';
+      strategyAnalysis = 'Big Game + Tight Match: Expecting goals (Over 1.5).';
     } else {
-      rec = 'Over 0.5 Goals or Under 2.5 Goals';
-      primarySafe = 'Safe: Over 0.5 Goals';
-      strategyAnalysis = 'Lower Tier & Tight: Goals Market (Under 2.5 / Over 0.5).';
+      rec = 'Over 1.5 Goals';
+      primarySafe = 'Safe: Over 1.5 Goals';
+      strategyAnalysis = 'Not Big Teams & Tight: Goals Market (Over 1.5).';
     }
     
     final dnbOdds = favOdds != null ? (favOdds * 0.82).clamp(1.30, 9.99) : 1.70;

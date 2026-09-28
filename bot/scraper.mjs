@@ -438,8 +438,12 @@ function parseFormStr(formStr) {
   for (const char of clean) {
     if (char === 'W') pts += 3;
     else if (char === 'D') pts += 1;
+    else if (char === 'L') pts -= 1; // Penalize losses
   }
-  return Math.round((pts / (clean.length * 3)) * 100);
+  
+  // Calculate percentage and ensure it doesn't drop below 0%
+  const percentage = Math.round((pts / (clean.length * 3)) * 100);
+  return Math.max(0, percentage);
 }
 
 function parseH2HStr(summaryData, homeTeam, awayTeam) {
@@ -524,12 +528,12 @@ function makePrediction(home, away, hOdds, dOdds, aOdds, league, homeFormStr, aw
   // 4. Weights
   const isUCL = (league || '').toLowerCase().includes('champions league') || (league || '').toLowerCase().includes('europa');
   
-  const wOdds = hasH2H ? 0.40 : 0.50;
+  const wOdds = hasH2H ? 0.45 : 0.55;
   const wForm = hasH2H ? 0.30 : 0.40;
   const wH2H  = hasH2H ? 0.20 : 0.00;
-  const wHome = 0.10;
+  const wHome = 0.05;
   
-  // Home Adv (10%)
+  // Home Adv (5%)
   const homeAdvHp = 60, homeAdvDp = 20, homeAdvAp = 20;
   
   // Final Probabilities
@@ -568,17 +572,22 @@ function makePrediction(home, away, hOdds, dOdds, aOdds, league, homeFormStr, aw
     }
     strategyAnalysis = `Clear Favorite (Prob >= 60%): Direct Win.`;
   } else if (isBig) {
-    recommendation = `12 (Home/Away) or Under 3.5 Goals`;
-    primarySafe = `Safe: Under 3.5 Goals`;
-    strategyAnalysis = `Big Game + Tight Match: Any Team to Win (12) / Under 3.5 Goals.`;
+    recommendation = `Over 1.5 Goals`;
+    primarySafe = `Safe: Over 1.5 Goals`;
+    strategyAnalysis = `Big Game + Tight Match: Expecting goals (Over 1.5).`;
   } else if (maxProb >= 55) {
-    recommendation = `${fav} or Draw (Double Chance)`;
-    primarySafe = `Safe: ${isHomeFav ? '1X' : 'X2'} (${fav} or Draw)`;
-    strategyAnalysis = `Moderate Favorite (Prob 55-59%): Double Chance.`;
+    if (isHomeFav) {
+      recommendation = `${home} to Win (1)`;
+      primarySafe = `Safe: 1X (${home} or Draw)`;
+    } else {
+      recommendation = `${away} to Win (2)`;
+      primarySafe = `Safe: X2 (${away} or Draw)`;
+    }
+    strategyAnalysis = `Moderate Favorite (Prob 55-59%): Direct Win.`;
   } else {
-    recommendation = `12 (Home/Away) or Under 3.5 Goals`;
-    primarySafe = `Safe: Under 3.5 Goals`;
-    strategyAnalysis = `Not Big Teams & Tight: Goals Market (Under 3.5) or Any Team to Win (12).`;
+    recommendation = `Over 1.5 Goals`;
+    primarySafe = `Safe: Over 1.5 Goals`;
+    strategyAnalysis = `Not Big Teams & Tight: Goals Market (Over 1.5).`;
   }
   
   const dnbOdds = favOdds ? Math.max(1.30, parseFloat((favOdds * 0.82).toFixed(2))) : 1.70;
