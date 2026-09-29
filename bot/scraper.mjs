@@ -13,7 +13,7 @@ const KV_KEY        = 'latest_soccer_data';
 const EXCLUDED_LEAGUE_KEYWORDS = [
   'women', 'woman', 'femenino', 'feminine', 'frauen', 'dames',
   'femmes', 'nwsl', 'wsl', 'nwsl', 'u17', 'u19', 'u20', 'u21', 'u23',
-  'youth', 'reserve', 'friendlies', 'international friendly',
+  'youth', 'reserve',
   'ncaa', 'college'
 ];
 
@@ -66,6 +66,13 @@ const ESPN_LEAGUES = [
   { slug: 'uefa.europa.conf',      label: 'UEFA - Conference League' },
   { slug: 'conmebol.libertadores', label: 'Copa Libertadores' },
   { slug: 'conmebol.sudamericana', label: 'Copa Sudamericana' },
+  { slug: 'fifa.world',            label: 'FIFA - World Cup' },
+  { slug: 'uefa.euro',             label: 'UEFA - Euro' },
+  { slug: 'uefa.nations',          label: 'UEFA - Nations League' },
+  { slug: 'caf.nations',           label: 'CAF - Africa Cup of Nations' },
+  { slug: 'conmebol.america',      label: 'CONMEBOL - Copa America' },
+  { slug: 'concacaf.gold',         label: 'CONCACAF - Gold Cup' },
+  { slug: 'afc.asian',             label: 'AFC - Asian Cup' },
 ];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
