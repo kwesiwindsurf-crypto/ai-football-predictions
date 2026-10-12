@@ -899,10 +899,38 @@ async function pushToCloudflareKV(data) {
 }
 
 // ─── Telegram Broadcasting ────────────────────────────────────────────────────
-async function postPickOfTheDayToTelegram(matches) {
+async function sendTelegramMessage(text) {
+  if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) return false;
+  const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text, parse_mode: 'Markdown' })
+    });
+    const result = await res.json();
+    if (!result.ok) {
+      console.warn('Telegram Markdown error, retrying without formatting:', result.description);
+      const plainText = text.replace(/[*_`]/g, '');
+      const retryRes = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: plainText })
+      });
+      const retryResult = await retryRes.json();
+      return retryResult.ok;
+    }
+    return true;
+  } catch (e) {
+    console.error('Error posting to Telegram:', e.message);
+    return false;
+  }
+}
+
+async function postDailyDigestToTelegram(matches) {
   if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
     console.log('Skipping Telegram: Missing TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID');
-    return;
+    return [];
   }
   
   const todayStr = new Date().toISOString().slice(0, 10);
@@ -910,93 +938,235 @@ async function postPickOfTheDayToTelegram(matches) {
   
   if (todaysMatches.length === 0) {
     console.log('No matches today to post to Telegram.');
-    return;
+    return [];
   }
 
-  // Find the most confident pick based on highest absolute oddsRating
-  todaysMatches.sort((a, b) => Math.abs(b.oddsRating || 0) - Math.abs(a.oddsRating || 0));
-  const bestMatch = todaysMatches[0];
+  // Sort by kickoff time
+  todaysMatches.sort((a, b) => new Date(a.date) - new Date(b.date));
 
-  const safeOption = bestMatch.prediction.stakingOptions?.find(o => o.risk === 'Safe')?.pick || bestMatch.prediction.recommendation;
-  const time = new Date(bestMatch.date).toLocaleTimeString('en-US', { hour: '2-digit', minute:'2-digit', timeZone: 'UTC' }) + ' UTC';
+  // Determine the Pick of the Day (highest model confidence)
+  const sortedByConf = [...todaysMatches].sort((a, b) => Math.abs(b.oddsRating || 0) - Math.abs(a.oddsRating || 0));
+  const bestMatch = sortedByConf[0];
 
-  const msg = `🏆 *PICK OF THE DAY* 🏆\n\n` +
-              `⚽ *${bestMatch.homeTeam} vs ${bestMatch.awayTeam}*\n` +
-              `🌍 ${bestMatch.league}\n` +
-              `⏰ ${time}\n\n` +
-              `💡 *AI Prediction:* ${bestMatch.prediction.recommendation}\n` +
-              `🛡️ *Safe Option:* ${safeOption}\n\n` +
-              `📲 _Get all our daily picks inside the app!_`;
+  // Group matches by league
+  const leaguesMap = new Map();
+  for (const m of todaysMatches) {
+    const lg = m.league || 'Other';
+    if (!leaguesMap.has(lg)) leaguesMap.set(lg, []);
+    leaguesMap.get(lg).push(m);
+  }
 
-  const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-  try {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: msg, parse_mode: 'Markdown' })
-    });
-    const result = await res.json();
-    if (!result.ok) {
-      console.error('Telegram API error:', result.description);
-    } else {
-      console.log('✅ Successfully posted Pick of the Day to Telegram!');
-      return bestMatch;
+  const dateFormatted = new Date().toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'short',
+    day: 'numeric'
+  });
+
+  const header = `⚽ *AI MATCH PREDICTIONS — TODAY* ⚽\n` +
+                 `📅 *${dateFormatted}*\n\n` +
+                 (bestMatch ? `⭐ *PICK OF THE DAY*\n` +
+                              `🔥 *${bestMatch.homeTeam} vs ${bestMatch.awayTeam}*\n` +
+                              `🏆 ${bestMatch.league}\n` +
+                              `💡 *Prediction:* ${bestMatch.prediction.recommendation}\n\n` +
+                              `────────────────────\n\n` : '');
+
+  const messagesToSend = [];
+  let currentMsg = header;
+  let partIndex = 1;
+
+  for (const [league, lgMatches] of leaguesMap.entries()) {
+    let section = `🏆 *${league}*\n`;
+    for (const m of lgMatches) {
+      const time = new Date(m.date).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) + ' UTC';
+      const isStar = bestMatch && m.id === bestMatch.id ? ' ⭐' : '';
+      const rec = m.prediction.recommendation;
+      const prob = Math.max(m.prediction.homeWinProbability || 0, m.prediction.drawProbability || 0, m.prediction.awayWinProbability || 0);
+      section += `• *${m.homeTeam} vs ${m.awayTeam}* (${time})${isStar}\n` +
+                 `  💡 *Pick:* ${rec} (${prob}%)\n`;
     }
-  } catch (e) {
-    console.error('Error posting to Telegram:', e.message);
+    section += `\n`;
+
+    if ((currentMsg + section).length > 3500) {
+      currentMsg += `📲 _(Continued below...)_`;
+      messagesToSend.push(currentMsg);
+      partIndex++;
+      currentMsg = `⚽ *TODAY'S PREDICTIONS (Part ${partIndex})* ⚽\n\n` + section;
+    } else {
+      currentMsg += section;
+    }
   }
-  return null;
+
+  currentMsg += `────────────────────\n` +
+                `📲 _Get live scores, player stats & full analysis in the app!_`;
+  messagesToSend.push(currentMsg);
+
+  let allSent = true;
+  for (const msg of messagesToSend) {
+    const ok = await sendTelegramMessage(msg);
+    if (!ok) allSent = false;
+    await sleep(600);
+  }
+
+  if (allSent) {
+    console.log(`✅ Successfully posted daily digest (${todaysMatches.length} matches) to Telegram!`);
+    return todaysMatches.map(m => ({
+      id: m.id,
+      homeTeam: m.homeTeam,
+      awayTeam: m.awayTeam,
+      league: m.league,
+      recommendation: m.prediction.recommendation,
+      isPickOfTheDay: bestMatch && m.id === bestMatch.id,
+      date: m.date
+    }));
+  }
+  return [];
 }
 
 function evaluatePrediction(rec, hScore, aScore, hTeam, aTeam) {
-  const h = parseInt(hScore);
-  const a = parseInt(aScore);
-  if (isNaN(h) || isNaN(a)) return 'PENDING';
+  const h = parseInt(hScore, 10);
+  const a = parseInt(aScore, 10);
+  if (isNaN(h) || isNaN(a)) return { result: 'PENDING', isDraw: false };
   
-  if (rec.includes('to Win (1)')) return h > a ? 'WON' : 'LOST';
-  if (rec.includes('to Win (2)')) return a > h ? 'WON' : 'LOST';
-  if (rec.includes('or Draw (Double Chance)')) {
-    if (rec.includes(hTeam)) return h >= a ? 'WON' : 'LOST';
-    if (rec.includes(aTeam)) return a >= h ? 'WON' : 'LOST';
+  const total = h + a;
+  const isDraw = (h === a);
+  const recStr = rec || '';
+
+  let result = 'UNKNOWN';
+
+  if (recStr.includes('to Win (1)')) {
+    result = h > a ? 'WON' : 'LOST';
+  } else if (recStr.includes('to Win (2)')) {
+    result = a > h ? 'WON' : 'LOST';
+  } else if (recStr.includes('or Draw') || recStr.includes('Double Chance') || recStr.includes('1X') || recStr.includes('X2')) {
+    const isHome = recStr.includes(hTeam) || recStr.includes('1X');
+    const isAway = recStr.includes(aTeam) || recStr.includes('X2');
+    if (isHome && !isAway) result = h >= a ? 'WON' : 'LOST';
+    else if (isAway && !isHome) result = a >= h ? 'WON' : 'LOST';
+    else if (recStr.includes('12')) result = h !== a ? 'WON' : 'LOST';
+  } else if (recStr.includes('Over 0.5')) {
+    result = total >= 1 ? 'WON' : 'LOST';
+  } else if (recStr.includes('Over 1.5')) {
+    result = total >= 2 ? 'WON' : 'LOST';
+  } else if (recStr.includes('Over 2.5')) {
+    result = total >= 3 ? 'WON' : 'LOST';
+  } else if (recStr.includes('Over 3.5')) {
+    result = total >= 4 ? 'WON' : 'LOST';
+  } else if (recStr.includes('Under 1.5')) {
+    result = total < 2 ? 'WON' : 'LOST';
+  } else if (recStr.includes('Under 2.5')) {
+    result = total < 3 ? 'WON' : 'LOST';
+  } else if (recStr.includes('Under 3.5')) {
+    result = total < 4 ? 'WON' : 'LOST';
+  } else if (recStr.includes('Both Teams To Score') || recStr.includes('BTTS')) {
+    result = (h > 0 && a > 0) ? 'WON' : 'LOST';
+  } else if (recStr.toLowerCase().includes('draw')) {
+    result = h === a ? 'WON' : 'LOST';
   }
-  if (rec.includes('Over 0.5 Goals')) {
-    const total = h + a;
-    if (total > 0) return 'WON';
-    return 'LOST';
-  }
-  return 'UNKNOWN';
+
+  return { result, isDraw };
 }
 
-async function checkAndPostMatchResult(activePick, matches) {
-  if (!activePick || !TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) return false;
-  
-  // Find the match in freshly scraped data
-  const match = matches.find(m => m.id === activePick.id);
-  if (!match || match.status !== 'FT') return false; // Not finished yet
+async function checkAndPostMatchResults(activePicks, matches, todayResults = []) {
+  if (!activePicks || activePicks.length === 0 || !TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
+    return { remainingPicks: activePicks || [], updatedTodayResults: todayResults };
+  }
 
-  const hScore = match.homeScore;
-  const aScore = match.awayScore;
-  const result = evaluatePrediction(activePick.prediction.recommendation, hScore, aScore, match.homeTeam, match.awayTeam);
-  
-  const msg = `🚨 *FULL TIME RESULT* 🚨\n\n` +
-              `⚽ *${match.homeTeam} ${hScore} - ${aScore} ${match.awayTeam}*\n\n` +
-              `💡 *Our Pick:* ${activePick.prediction.recommendation}\n` +
-              `${result === 'WON' ? '✅ *RESULT: WON*' : '❌ *RESULT: LOST*'}\n\n` +
-              `📲 _Check the app for tomorrow's predictions!_`;
+  const remainingPicks = [];
+  const updatedTodayResults = [...todayResults];
 
-  const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-  try {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: msg, parse_mode: 'Markdown' })
-    });
-    if (res.ok) {
-      console.log(`✅ Successfully posted Result for ${match.homeTeam} vs ${match.awayTeam} to Telegram!`);
-      return true; // Indicates we should clear activePick
+  for (const pick of activePicks) {
+    const match = matches.find(m => m.id === pick.id);
+    if (!match || match.status !== 'FT') {
+      remainingPicks.push(pick);
+      continue;
     }
-  } catch (e) {
-    console.error('Error posting result to Telegram:', e.message);
+
+    const hScore = match.homeScore;
+    const aScore = match.awayScore;
+    const { result, isDraw } = evaluatePrediction(pick.recommendation, hScore, aScore, match.homeTeam, match.awayTeam);
+
+    const isPod = pick.isPickOfTheDay ? '⭐ *PICK OF THE DAY RESULT* ⭐\n\n' : '🚨 *FULL TIME RESULT* 🚨\n\n';
+    let statusLine = '🏁 *FINAL*';
+    if (result === 'WON') {
+      statusLine = isDraw ? '✅ *RESULT: WON (Draw Covered)*' : '✅ *RESULT: WON*';
+    } else if (result === 'LOST') {
+      statusLine = isDraw ? '❌ *RESULT: LOST (Match Ended Draw)*' : '❌ *RESULT: LOST*';
+    }
+
+    const msg = `${isPod}` +
+                `⚽ *${match.homeTeam} ${hScore} - ${aScore} ${match.awayTeam}*\n` +
+                `🏆 ${match.league || pick.league || ''}\n\n` +
+                `💡 *Our Pick:* ${pick.recommendation}\n` +
+                `${statusLine}\n\n` +
+                `📲 _Check the app for live results & upcoming predictions!_`;
+
+    const success = await sendTelegramMessage(msg);
+    if (!success) {
+      remainingPicks.push(pick);
+    } else {
+      console.log(`✅ Posted result for ${match.homeTeam} vs ${match.awayTeam} (${result}, ${hScore}-${aScore}) to Telegram!`);
+      updatedTodayResults.push({
+        id: match.id,
+        homeTeam: match.homeTeam,
+        awayTeam: match.awayTeam,
+        league: match.league || pick.league || '',
+        homeScore: hScore,
+        awayScore: aScore,
+        recommendation: pick.recommendation,
+        isPickOfTheDay: !!pick.isPickOfTheDay,
+        result,
+        isDraw
+      });
+      await sleep(600);
+    }
+  }
+
+  return { remainingPicks, updatedTodayResults };
+}
+
+async function postDailyDashboardToTelegram(todayResults) {
+  if (!todayResults || todayResults.length === 0 || !TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
+    return false;
+  }
+
+  const total = todayResults.length;
+  const wins = todayResults.filter(r => r.result === 'WON').length;
+  const draws = todayResults.filter(r => r.isDraw).length;
+  const losses = todayResults.filter(r => r.result === 'LOST').length;
+  const decided = wins + losses;
+  const winRate = decided > 0 ? Math.round((wins / decided) * 100) : (total > 0 ? Math.round((wins / total) * 100) : 0);
+
+  const dateFormatted = new Date().toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'short',
+    day: 'numeric'
+  });
+
+  let msg = `📊 *DAILY PERFORMANCE DASHBOARD* 📊\n` +
+            `📅 *${dateFormatted}*\n\n` +
+            `🎯 *Today's Scorecard:*\n` +
+            `✅ *Wins:* ${wins}\n` +
+            `🤝 *Draws:* ${draws} match${draws === 1 ? '' : 'es'}\n` +
+            `❌ *Losses:* ${losses}\n` +
+            `📈 *Accuracy:* ${winRate}% (${wins}/${decided || total})\n\n` +
+            `────────────────────\n` +
+            `📋 *Matches Breakdown:*\n`;
+
+  for (const r of todayResults) {
+    const icon = r.result === 'WON' ? '✅' : r.result === 'LOST' ? '❌' : '🏁';
+    const pod = r.isPickOfTheDay ? ' ⭐' : '';
+    const drawTag = r.isDraw ? ' (Draw)' : '';
+    msg += `• *${r.homeTeam} ${r.homeScore} - ${r.awayScore} ${r.awayTeam}*${pod}\n` +
+           `  Pick: ${r.recommendation} ➔ ${icon} *${r.result}*${drawTag}\n`;
+  }
+
+  msg += `────────────────────\n` +
+         `📲 _Check tomorrow's fixtures & early predictions in the app!_`;
+
+  const success = await sendTelegramMessage(msg);
+  if (success) {
+    console.log(`✅ Successfully posted Daily Performance Dashboard (${total} matches) to Telegram!`);
+    return true;
   }
   return false;
 }
@@ -1134,32 +1304,72 @@ async function main() {
     }
   }
 
-  // 3. Telegram Broadcast (Once per day) & Result Monitoring
+  // 3. Telegram Broadcast & Result Monitoring
+  const FORCE_TELEGRAM = process.env.FORCE_TELEGRAM === 'true' || process.argv.includes('--push-telegram');
+  const FORCE_DASHBOARD = process.env.FORCE_DASHBOARD === 'true' || process.argv.includes('--post-dashboard');
+
   let lastTelegramPostDate = null;
-  let activeTelegramPick = null;
+  let lastDashboardDate = null;
+  let activeTelegramPicks = [];
+  let todayResults = [];
+
   if (currentKvData) {
     if (currentKvData.lastTelegramPostDate) lastTelegramPostDate = currentKvData.lastTelegramPostDate;
-    if (currentKvData.activeTelegramPick) activeTelegramPick = currentKvData.activeTelegramPick;
-  }
-
-  // Check if we have an active pick that just finished
-  if (activeTelegramPick) {
-    const handled = await checkAndPostMatchResult(activeTelegramPick, matches);
-    if (handled) {
-      activeTelegramPick = null; // Clear it so we don't post result again
+    if (currentKvData.lastDashboardDate) lastDashboardDate = currentKvData.lastDashboardDate;
+    if (Array.isArray(currentKvData.activeTelegramPicks)) {
+      activeTelegramPicks = currentKvData.activeTelegramPicks;
+    } else if (currentKvData.activeTelegramPick) {
+      activeTelegramPicks = [currentKvData.activeTelegramPick];
+    }
+    // Only keep todayResults if they are from today
+    if (Array.isArray(currentKvData.todayResults) && currentKvData.lastTelegramPostDate === todayStr) {
+      todayResults = currentKvData.todayResults;
     }
   }
 
-  if (lastTelegramPostDate !== todayStr) {
-    console.log(`\nNew day detected! Attempting to post Pick of the Day to Telegram...`);
-    const postedMatch = await postPickOfTheDayToTelegram(matches);
-    if (postedMatch) {
-      activeTelegramPick = postedMatch; // Save it to monitor for result
+  // A. Check if any active picks have finished and post individual FT results
+  if (activeTelegramPicks.length > 0) {
+    console.log(`\nChecking results for ${activeTelegramPicks.length} active Telegram pick(s)...`);
+    const { remainingPicks, updatedTodayResults } = await checkAndPostMatchResults(activeTelegramPicks, matches, todayResults);
+    activeTelegramPicks = remainingPicks;
+    todayResults = updatedTodayResults;
+  }
+
+  // B. Post Daily Digest of all games once per day (or if forced)
+  if (lastTelegramPostDate !== todayStr || FORCE_TELEGRAM) {
+    console.log(`\nNew day detected! Attempting to post Daily Digest of all games to Telegram...`);
+    const newActivePicks = await postDailyDigestToTelegram(matches);
+    if (newActivePicks && newActivePicks.length > 0) {
+      const existingIds = new Set(activeTelegramPicks.map(p => p.id));
+      for (const p of newActivePicks) {
+        if (!existingIds.has(p.id)) {
+          activeTelegramPicks.push(p);
+        }
+      }
       lastTelegramPostDate = todayStr; // Update flag ONLY on successful post
+      todayResults = []; // Reset results for new day
+      lastDashboardDate = null;
     }
   } else {
-    console.log(`\nTelegram: Already posted today (${todayStr}).`);
+    console.log(`\nTelegram: Already posted today's digest (${todayStr}). Active picks being monitored: ${activeTelegramPicks.length}`);
   }
+
+  // C. Post Daily Dashboard when all today's matches have concluded
+  // Condition: we have results for today, no remaining active picks for today, and dashboard hasn't been posted yet today
+  const remainingTodayPicks = activeTelegramPicks.filter(p => p.date && p.date.startsWith(todayStr));
+  const shouldPostDashboard = (todayResults.length > 0 && remainingTodayPicks.length === 0 && lastDashboardDate !== todayStr) || (FORCE_DASHBOARD && todayResults.length > 0);
+
+  if (shouldPostDashboard) {
+    console.log(`\nAll today's matches have finished! Posting Daily Performance Dashboard...`);
+    const dashboardSent = await postDailyDashboardToTelegram(todayResults);
+    if (dashboardSent) {
+      lastDashboardDate = todayStr;
+    }
+  }
+
+  // Prune any picks older than 48 hours to avoid indefinite buildup
+  const twoDaysAgo = new Date(Date.now() - 48 * 3600 * 1000).toISOString();
+  activeTelegramPicks = activeTelegramPicks.filter(p => !p.date || p.date >= twoDaysAgo);
 
   const finalData = JSON.stringify({
     matchesData: {
@@ -1169,7 +1379,9 @@ async function main() {
     },
     standingsData: null,
     lastTelegramPostDate,
-    activeTelegramPick
+    lastDashboardDate,
+    activeTelegramPicks,
+    todayResults
   });
 
   console.log('\nPushing to Cloudflare KV...');
