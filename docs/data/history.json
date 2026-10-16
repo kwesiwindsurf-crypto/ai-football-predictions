@@ -42,6 +42,706 @@
     }
   },
   {
+    "id": "Los-Chankas-ADT",
+    "espnEventId": "401886168",
+    "homeTeam": "Los Chankas",
+    "awayTeam": "ADT",
+    "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/22168.png",
+    "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/21314.png",
+    "league": "Peruvian Liga 1",
+    "date": "2026-10-16T20:30Z",
+    "status": "finished",
+    "statusShort": "FT",
+    "homeScore": 2,
+    "awayScore": 1,
+    "homeOdds": 2.25,
+    "drawOdds": 3.3,
+    "awayOdds": 2.9,
+    "oddsRating": 31,
+    "homeRank": null,
+    "awayRank": null,
+    "homeForm": "DDDLL",
+    "awayForm": "DDWLL",
+    "homePoints": 12,
+    "awayPoints": 6,
+    "homeLineup": {
+      "avgRating": 0,
+      "startingXI": [
+        {
+          "number": "?",
+          "name": "Hairo Camacho",
+          "position": "G",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Gonzalo Rizzo",
+          "position": "CD-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Hector González",
+          "position": "CD-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Kenyi Barrios",
+          "position": "LB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Carlos Pimienta",
+          "position": "RB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Juan Ospina",
+          "position": "CM-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Marlon Torres",
+          "position": "CM-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jorge Palomino",
+          "position": "LM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Oshiro Takeuchi",
+          "position": "RM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Franco Torres",
+          "position": "CF-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jarlín Quintero",
+          "position": "CF-R",
+          "rating": 0,
+          "stats": ""
+        }
+      ],
+      "bench": [
+        {
+          "number": "?",
+          "name": "Kelvin Sánchez",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Félix Espinoza",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Michel Kaufman",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Christian Velarde",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Brayan Guevara",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jeizon Chacón",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jorge Pretel",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "David González",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Accel Campos",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        }
+      ]
+    },
+    "awayLineup": {
+      "avgRating": 0,
+      "startingXI": [
+        {
+          "number": "?",
+          "name": "Juan Valencia",
+          "position": "G",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Horacio Benincasa",
+          "position": "CD-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Joaquín Pereira",
+          "position": "CD-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Orlando Nuñez",
+          "position": "LB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Elías Ramos",
+          "position": "RB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "João Rojas",
+          "position": "AM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Luis Pérez",
+          "position": "LM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Angel Ojeda",
+          "position": "RM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Said Peralta",
+          "position": "F",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Aylton Mazzo",
+          "position": "AM-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Juan Lucumí",
+          "position": "AM-R",
+          "rating": 0,
+          "stats": ""
+        }
+      ],
+      "bench": [
+        {
+          "number": "?",
+          "name": "José Rugel",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Marco Rodríguez",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Josué Alvino",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jhojan Garcilazo",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Alexander Hidalgo",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jonatan Bauman",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jerry Navarro",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jhair Soto",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Carlos Martín Solís",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        }
+      ]
+    },
+    "h2hSummary": null,
+    "matchUrl": "https://www.espn.com/soccer/match/_/gameId/401886168/adt-los-chankas",
+    "prediction": {
+      "homeWinProbability": 25,
+      "drawProbability": 18,
+      "awayWinProbability": 56,
+      "oddsRating": 31,
+      "h2hSummary": null,
+      "recommendation": "ADT to Win (2)",
+      "analysis": "Moderate Favorite (Prob 55-59%): Direct Win.\nHomeForm: 0%, AwayForm: 7%, BigGame: false",
+      "stakingOptions": [
+        "Safe: X2 (ADT or Draw)",
+        "Value: ADT Draw No Bet (2.38)",
+        "Risky: ADT to WIN by 2+ Goals (2.85)",
+        "BTTS: Both Teams To Score - Yes (1.78)",
+        "Alternative: Over 2.5 Total Goals (1.70)"
+      ]
+    }
+  },
+  {
+    "id": "Deportivo-Cuenca-Técnico-Universitario",
+    "espnEventId": "401921380",
+    "homeTeam": "Deportivo Cuenca",
+    "awayTeam": "Técnico Universitario",
+    "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/4812.png",
+    "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/9292.png",
+    "league": "LigaPro Ecuador",
+    "date": "2026-10-16T20:30Z",
+    "status": "finished",
+    "statusShort": "FT",
+    "homeScore": 2,
+    "awayScore": 1,
+    "homeOdds": 1.8,
+    "drawOdds": 3.45,
+    "awayOdds": 4.3,
+    "oddsRating": -28,
+    "homeRank": null,
+    "awayRank": null,
+    "homeForm": "DDDDL",
+    "awayForm": "DLDWL",
+    "homePoints": 0,
+    "awayPoints": 0,
+    "homeLineup": {
+      "avgRating": 0,
+      "startingXI": [
+        {
+          "number": "?",
+          "name": "Facundo Ferrero",
+          "position": "G",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Santiago Postel",
+          "position": "CD-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Patricio Boolsen",
+          "position": "CD-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Mateo Maccari",
+          "position": "DM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Carlos Arboleda",
+          "position": "LB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Eddie Guevara",
+          "position": "RB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Yeltzin Erique",
+          "position": "CM-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jeremy Mejía",
+          "position": "CM-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Melvin Díaz",
+          "position": "LM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Lucas Mancinelli",
+          "position": "RM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Matías Klimowicz",
+          "position": "F",
+          "rating": 0,
+          "stats": ""
+        }
+      ],
+      "bench": [
+        {
+          "number": "?",
+          "name": "Édison Vega",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Ethan Minda",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Bryan García",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "David González",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Ignacio Mosquera",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Germán Rivero",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Marcos Lopez",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Cristhian Alexander Benalcazar Folleco",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jorge Ordóñez",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Gian Nardelli",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jeremy Chacon",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Mateo Piedra",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        }
+      ]
+    },
+    "awayLineup": {
+      "avgRating": 0,
+      "startingXI": [
+        {
+          "number": "?",
+          "name": "Santiago Razzeto",
+          "position": "G",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Julian Anaya",
+          "position": "CD",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Stiwar Mena",
+          "position": "CD-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Edwin Mesa",
+          "position": "CD-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jonathan Majao",
+          "position": "SW",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Matheo Gómez",
+          "position": "CM-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Johan Bocanegra",
+          "position": "CM-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Bagner Delgado",
+          "position": "LM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Yorlin Arce",
+          "position": "RM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Diego Armas",
+          "position": "CF-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Wagner Caicedo",
+          "position": "CF-R",
+          "rating": 0,
+          "stats": ""
+        }
+      ],
+      "bench": [
+        {
+          "number": "?",
+          "name": "Adrián Cela",
+          "position": "N/A",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Heuyín Guardia",
+          "position": "N/A",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Kener Arce",
+          "position": "N/A",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Rafael Chila",
+          "position": "N/A",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Marco Carrasco",
+          "position": "N/A",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Carlos Cuero",
+          "position": "N/A",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Anthony Castilo",
+          "position": "N/A",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Luis Estupiñan",
+          "position": "N/A",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Ayrton Morales",
+          "position": "N/A",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Felipe Castillo",
+          "position": "N/A",
+          "rating": 0,
+          "stats": ""
+        }
+      ]
+    },
+    "h2hSummary": null,
+    "matchUrl": "https://www.espn.com/soccer/match/_/gameId/401921380/tecnico-universitario-deportivo-cuenca",
+    "prediction": {
+      "homeWinProbability": 55,
+      "drawProbability": 18,
+      "awayWinProbability": 27,
+      "oddsRating": -28,
+      "h2hSummary": null,
+      "recommendation": "Deportivo Cuenca to Win (1)",
+      "analysis": "Moderate Favorite (Prob 55-59%): Direct Win.\nHomeForm: 33%, AwayForm: 20%, BigGame: false",
+      "stakingOptions": [
+        "Safe: 1X (Deportivo Cuenca or Draw)",
+        "Value: Deportivo Cuenca Draw No Bet (1.48)",
+        "Risky: Deportivo Cuenca to WIN by 2+ Goals (2.85)",
+        "BTTS: Both Teams To Score - Yes (1.78)",
+        "Alternative: Over 2.5 Total Goals (1.70)"
+      ]
+    }
+  },
+  {
     "id": "Burnley-Wolverhampton-Wanderers",
     "espnEventId": "401880218",
     "homeTeam": "Burnley",
@@ -1787,14 +2487,14 @@
         },
         {
           "number": "?",
-          "name": "Cristian Cásseres Jr.",
+          "name": "Niko Sigur",
           "position": "CM-L",
           "rating": 0,
           "stats": ""
         },
         {
           "number": "?",
-          "name": "Niko Sigur",
+          "name": "Cristian Cásseres Jr.",
           "position": "CM-R",
           "rating": 0,
           "stats": ""
@@ -1815,14 +2515,14 @@
         },
         {
           "number": "?",
-          "name": "Jacen Russell-Rowe",
+          "name": "Casper Tengstedt",
           "position": "CF-L",
           "rating": 0,
           "stats": ""
         },
         {
           "number": "?",
-          "name": "Casper Tengstedt",
+          "name": "Jacen Russell-Rowe",
           "position": "CF-R",
           "rating": 0,
           "stats": ""
@@ -7530,6 +8230,50 @@
         "Safe: Over 1.5 Goals",
         "Value: FC Collina D'Oro Draw No Bet (1.7)",
         "Risky: FC Collina D'Oro to WIN by 2+ Goals (2.85)",
+        "BTTS: Both Teams To Score - Yes (1.78)",
+        "Alternative: Over 2.5 Total Goals (1.70)"
+      ]
+    }
+  },
+  {
+    "id": "AZ-Alkmaar-FC-Utrecht",
+    "espnEventId": "401922301",
+    "homeTeam": "AZ Alkmaar",
+    "awayTeam": "FC Utrecht",
+    "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/21977.png",
+    "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/21978.png",
+    "league": "Dutch KNVB Beker Vrouwen",
+    "date": "2026-10-16T17:30Z",
+    "status": "finished",
+    "statusShort": "FT",
+    "homeScore": 1,
+    "awayScore": 0,
+    "homeOdds": null,
+    "drawOdds": null,
+    "awayOdds": null,
+    "oddsRating": -48,
+    "homeRank": null,
+    "awayRank": null,
+    "homeForm": "DLLLW",
+    "awayForm": "DLLLL",
+    "homePoints": 0,
+    "awayPoints": 0,
+    "homeLineup": null,
+    "awayLineup": null,
+    "h2hSummary": null,
+    "matchUrl": "https://www.espn.com/soccer/match/_/gameId/401922301/fc-utrecht-az-alkmaar",
+    "prediction": {
+      "homeWinProbability": 66,
+      "drawProbability": 17,
+      "awayWinProbability": 18,
+      "oddsRating": -48,
+      "h2hSummary": null,
+      "recommendation": "AZ Alkmaar to Win (1)",
+      "analysis": "Clear Favorite (Prob >= 60%): Direct Win.\nHomeForm: 20%, AwayForm: 0%, BigGame: true",
+      "stakingOptions": [
+        "Safe: 1X (AZ Alkmaar or Draw)",
+        "Value: AZ Alkmaar Draw No Bet (1.7)",
+        "Risky: AZ Alkmaar to WIN by 2+ Goals (2.85)",
         "BTTS: Both Teams To Score - Yes (1.78)",
         "Alternative: Over 2.5 Total Goals (1.70)"
       ]
