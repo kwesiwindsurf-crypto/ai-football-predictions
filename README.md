@@ -7,7 +7,7 @@ Automated real-time AI football predictions, match probabilities, live scores, a
 ## 🌐 Live Web Dashboard
 
 You can access the live prediction dashboard directly in your browser:
-👉 **`https://<your-username>.github.io/ai-football-predictions/`**
+👉 **`https://kwesiwindsurf-crypto.github.io/ai-football-predictions/`**
 
 ### 📊 Features on the Web Dashboard:
 * 🎯 **Dynamic Win Rate & Scorecard**: Real-time accuracy percentage, wins, losses, and draw-covered bets calculated automatically as matches finish.
@@ -50,7 +50,7 @@ The system uses a smart **dual-stream architecture** so the mobile app stays lig
 
 ### 2. Static Git Archive (GitHub Pages)
 * **File path**: `docs/data/history.json`
-* **URL**: `https://<your-username>.github.io/ai-football-predictions/data/history.json`
+* **URL**: `https://kwesiwindsurf-crypto.github.io/ai-football-predictions/data/history.json`
 * **Purpose**: Auto-commits completed matches after full time so match history grows permanently on GitHub as days progress (`days ++`).
 
 ---
@@ -71,7 +71,7 @@ The system uses a smart **dual-stream architecture** so the mobile app stays lig
      * **Folder**: `/docs`
    * Click **Save**.
 3. Within 1–2 minutes, your website will be live at:
-   **`https://<your-username>.github.io/ai-football-predictions/`**
+   **`https://kwesiwindsurf-crypto.github.io/ai-football-predictions/`**
 
 ---
 
