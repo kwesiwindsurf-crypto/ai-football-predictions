@@ -7,6 +7,11 @@ on:
     # Hourly overnight (00:00 - 09:00 UTC) = 10 runs/day
     # Total = 52 runs/day * 30 = ~1,560 mins/month (stays well under the 2,000 monthly limit)
     - cron: '0 0-9 * * *'
+  push:
+    branches:
+      - main
+    paths:
+      - 'bot/**'
   # Allow manual trigger from GitHub UI
   workflow_dispatch:
 
@@ -15,6 +20,8 @@ jobs:
     name: Scrape & Push to Cloudflare KV
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout repository
@@ -39,6 +46,13 @@ jobs:
           SPORTS_API_KEY: ${{ secrets.SPORTS_API_KEY || '3d923c01afee89b7b9ae92761979ef56' }}
         run: node scraper.mjs
         working-directory: bot
+
+      - name: Commit updated match history for GitHub Pages
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action Bot"
+          git add docs/data/history.json
+          git diff --quiet && git diff --staged --quiet || (git commit -m "chore(history): auto-archive finished matches [skip ci]" && git push)
 
       - name: Report success
         if: success()

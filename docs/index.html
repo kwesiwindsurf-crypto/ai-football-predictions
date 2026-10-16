@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Football Predictions &amp; Live Match Analytics</title>
+  <meta name="description" content="Real-time AI football predictions, match probabilities, live scores, accuracy tracker, and betting analytics powered by deep match data.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #030712;
+      --card-bg: rgba(15, 23, 42, 0.65);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --card-hover-border: rgba(56, 189, 248, 0.35);
+      --primary: #38bdf8;
+      --primary-glow: rgba(56, 189, 248, 0.25);
+      --accent: #818cf8;
+      --win: #10b981;
+      --win-glow: rgba(16, 185, 129, 0.2);
+      --loss: #f43f5e;
+      --loss-glow: rgba(244, 63, 94, 0.2);
+      --pending: #f59e0b;
+      --live: #ef4444;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: radial-gradient(circle at 10% 10%, #0f172a 0%, #030712 60%);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      padding-bottom: 4rem;
+    }
+
+    /* Ambient background glow */
+    .glow-orb {
+      position: fixed;
+      top: -150px;
+      right: -150px;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.12) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .glow-orb-2 {
+      position: fixed;
+      bottom: -150px;
+      left: -150px;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(129, 140, 248, 0.1) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Top Navigation / Header */
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .brand-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #0284c7, #6366f1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      box-shadow: 0 8px 24px var(--primary-glow);
+    }
+
+    .brand-title {
+      font-size: 1.8rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #f8fafc 40%, #38bdf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-subtitle {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .live-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: var(--win);
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--win);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--win);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.3); }
+    }
+
+    .btn {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(12px);
+    }
+
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: var(--primary);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #0284c7, #4f46e5);
+      border: none;
+      box-shadow: 0 4px 15px rgba(2, 132, 199, 0.3);
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #0369a1, #4338ca);
+      box-shadow: 0 6px 20px rgba(2, 132, 199, 0.45);
+    }
+
+    /* Scorecard Tracker Dashboard */
+    .tracker-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 1.5rem 2rem;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.3);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 1.5rem;
+      align-items: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 800;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .stat-value.accuracy {
+      background: linear-gradient(135deg, #38bdf8, #818cf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .stat-value.wins { color: var(--win); }
+    .stat-value.losses { color: var(--loss); }
+    .stat-value.pending { color: var(--pending); }
+
+    /* Filter & Controls Toolbar */
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .search-box {
+      position: relative;
+      flex: 1;
+      min-width: 260px;
+    }
+
+    .search-input {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 10px 16px 10px 42px;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .search-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-glow);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-dim);
+      font-size: 1rem;
+    }
+
+    .filter-group {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .filter-btn:hover {
+      color: var(--text);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .filter-btn.active {
+      background: var(--primary);
+      color: #030712;
+      border-color: var(--primary);
+      box-shadow: 0 4px 12px var(--primary-glow);
+    }
+
+    .select-dropdown {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 0.85rem;
+      outline: none;
+      cursor: pointer;
+    }
+
+    /* League Section */
+    .league-section {
+      margin-bottom: 2.5rem;
+    }
+
+    .league-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .league-name {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .league-badge {
+      font-size: 0.75rem;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 3px 8px;
+      border-radius: 6px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    /* Match Cards Grid */
+    .matches-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .match-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 1.25rem;
+      backdrop-filter: blur(14px);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      position: relative;
+    }
+
+    .match-card:hover {
+      border-color: var(--card-hover-border);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .match-time {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .match-status-badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .status-live {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: var(--live);
+      animation: pulse 1.5s infinite;
+    }
+
+    .status-ft {
+      background: rgba(148, 163, 184, 0.12);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      color: var(--text-muted);
+    }
+
+    .status-ns {
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      color: var(--primary);
+    }
+
+    /* Teams vs Teams Row */
+    .teams-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 0.75rem;
+      margin: 0.25rem 0;
+    }
+
+    .team-col {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .team-col.away {
+      justify-content: flex-end;
+      text-align: right;
+    }
+
+    .team-logo {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 2px;
+    }
+
+    .team-name {
+      font-size: 0.95rem;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .score-badge {
+      font-size: 1.25rem;
+      font-weight: 800;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 4px 12px;
+      background: rgba(0, 0, 0, 0.35);
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      text-align: center;
+      min-width: 54px;
+    }
+
+    /* AI Prediction Box inside card */
+    .prediction-box {
+      background: rgba(2, 6, 23, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 0.85rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .pred-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .pred-tag-title {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-dim);
+      font-weight: 700;
+    }
+
+    .result-badge {
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .result-won {
+      background: var(--win-glow);
+      color: var(--win);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .result-lost {
+      background: var(--loss-glow);
+      color: var(--loss);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+    }
+
+    .result-pending {
+      background: rgba(245, 158, 11, 0.12);
+      color: var(--pending);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+    }
+
+    .pred-recommendation {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #38bdf8;
+    }
+
+    /* Win Probability Bar */
+    .prob-container {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .prob-bar {
+      height: 6px;
+      border-radius: 9999px;
+      display: flex;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .prob-seg-home { background: #38bdf8; }
+    .prob-seg-draw { background: #94a3b8; }
+    .prob-seg-away { background: #818cf8; }
+
+    .prob-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-muted);
+    }
+
+    /* Card Footer: Match Site Link */
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 0.75rem;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+
+    .match-site-link {
+      color: var(--primary);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 600;
+      transition: color 0.15s;
+    }
+
+    .match-site-link:hover {
+      color: #7dd3fc;
+      text-decoration: underline;
+    }
+
+    /* Loading and Empty States */
+    .state-banner {
+      text-align: center;
+      padding: 4rem 1rem;
+      color: var(--text-muted);
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(56, 189, 248, 0.2);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      margin: 0 auto 1.5rem;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      margin-top: 4rem;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      color: var(--text-dim);
+      font-size: 0.85rem;
+    }
+
+    @media (max-width: 768px) {
+      .brand-title { font-size: 1.4rem; }
+      .tracker-card { grid-template-columns: 1fr 1fr; gap: 1rem; }
+      .matches-grid { grid-template-columns: 1fr; }
+      .controls { flex-direction: column; align-items: stretch; }
+      .search-box { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="glow-orb"></div>
+  <div class="glow-orb-2"></div>
+
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <div class="brand">
+        <div class="brand-icon">⚽</div>
+        <div>
+          <h1 class="brand-title">AI Football Predictions</h1>
+          <p class="brand-subtitle">Automated match probabilities, predictions, and verification tracker</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="live-pill">
+          <span class="pulse-dot"></span>
+          <span>LIVE CLOUD SYNC</span>
+        </div>
+        <button class="btn" id="btn-refresh" onclick="loadData(true)">
+          <span>🔄 Refresh</span>
+        </button>
+        <a href="https://t.me/ai_football_predictions" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
+          <span>📢 Telegram Channel</span>
+        </a>
+      </div>
+    </header>
+
+    <!-- Performance Scorecard -->
+    <section class="tracker-card" id="tracker" aria-label="Performance Scorecard">
+      <div class="stat-item">
+        <span class="stat-label">Model Win Rate</span>
+        <span class="stat-value accuracy" id="tracker-accuracy">--%</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Wins</span>
+        <span class="stat-value wins" id="tracker-wins">0</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Draws (Covered)</span>
+        <span class="stat-value" id="tracker-draws" style="color: #38bdf8;">0</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Losses</span>
+        <span class="stat-value losses" id="tracker-losses">0</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Pending / Live</span>
+        <span class="stat-value pending" id="tracker-pending">0</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Total Matches</span>
+        <span class="stat-value" id="tracker-total" style="color: var(--text);">0</span>
+      </div>
+    </section>
+
+    <!-- Toolbar: Search, Date Filter, Status Filter -->
+    <div class="controls">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search-input" class="search-input" placeholder="Search by team or league..." oninput="handleSearch()">
+      </div>
+
+      <div class="filter-group">
+        <button class="filter-btn active" data-date="all" onclick="setDateFilter('all', this)">All Days</button>
+        <button class="filter-btn" data-date="yesterday" onclick="setDateFilter('yesterday', this)">Yesterday</button>
+        <button class="filter-btn" data-date="today" onclick="setDateFilter('today', this)">Today</button>
+        <button class="filter-btn" data-date="tomorrow" onclick="setDateFilter('tomorrow', this)">Tomorrow</button>
+      </div>
+
+      <select id="league-select" class="select-dropdown" onchange="handleLeagueFilter()">
+        <option value="all">All Leagues</option>
+      </select>
+
+      <select id="status-select" class="select-dropdown" onchange="handleStatusFilter()">
+        <option value="all">All Statuses</option>
+        <option value="live">🟢 Live Now</option>
+        <option value="finished">🏁 Finished Only</option>
+        <option value="upcoming">⏳ Upcoming Only</option>
+      </select>
+    </div>
+
+    <!-- Main Content Area -->
+    <main id="content-area">
+      <div class="state-banner" id="loading-state">
+        <div class="spinner"></div>
+        <p>Fetching real-time predictions from Cloudflare KV...</p>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+      <p>AI Football Predictions Engine &bull; Powered by Cloudflare Workers &amp; ESPN Data &bull; Auto-syncs every 20 mins</p>
+    </footer>
+  </div>
+
+  <script>
+    const API_URL = 'https://ai-football-bot.xantechs00.workers.dev';
+    let allMatches = [];
+    let currentDateFilter = 'all';
+    let currentStatusFilter = 'all';
+    let currentLeagueFilter = 'all';
+    let searchQuery = '';
+
+    // Evaluate prediction against scores
+    function evaluatePrediction(rec, hScore, aScore, hTeam, aTeam) {
+      const h = parseInt(hScore, 10);
+      const a = parseInt(aScore, 10);
+      if (isNaN(h) || isNaN(a)) return { result: 'PENDING', isDraw: false };
+
+      const total = h + a;
+      const isDraw = (h === a);
+      const recStr = rec || '';
+
+      let result = 'UNKNOWN';
+
+      if (recStr.includes('to Win (1)')) {
+        result = h > a ? 'WON' : 'LOST';
+      } else if (recStr.includes('to Win (2)')) {
+        result = a > h ? 'WON' : 'LOST';
+      } else if (recStr.includes('or Draw') || recStr.includes('Double Chance') || recStr.includes('1X') || recStr.includes('X2')) {
+        const isHome = recStr.includes(hTeam) || recStr.includes('1X');
+        const isAway = recStr.includes(aTeam) || recStr.includes('X2');
+        if (isHome && !isAway) result = h >= a ? 'WON' : 'LOST';
+        else if (isAway && !isHome) result = a >= h ? 'WON' : 'LOST';
+        else if (recStr.includes('12')) result = h !== a ? 'WON' : 'LOST';
+      } else if (recStr.includes('Over 0.5')) {
+        result = total >= 1 ? 'WON' : 'LOST';
+      } else if (recStr.includes('Over 1.5')) {
+        result = total >= 2 ? 'WON' : 'LOST';
+      } else if (recStr.includes('Over 2.5')) {
+        result = total >= 3 ? 'WON' : 'LOST';
+      } else if (recStr.includes('Over 3.5')) {
+        result = total >= 4 ? 'WON' : 'LOST';
+      } else if (recStr.includes('Under 1.5')) {
+        result = total < 2 ? 'WON' : 'LOST';
+      } else if (recStr.includes('Under 2.5')) {
+        result = total < 3 ? 'WON' : 'LOST';
+      } else if (recStr.includes('Under 3.5')) {
+        result = total < 4 ? 'WON' : 'LOST';
+      } else if (recStr.includes('Both Teams To Score') || recStr.includes('BTTS')) {
+        result = (h > 0 && a > 0) ? 'WON' : 'LOST';
+      } else if (recStr.toLowerCase().includes('draw')) {
+        result = h === a ? 'WON' : 'LOST';
+      }
+
+      return { result, isDraw };
+    }
+
+    async function loadData(force = false) {
+      const loading = document.getElementById('loading-state');
+      if (loading) loading.style.display = 'block';
+
+      try {
+        const res = await fetch(API_URL);
+        const json = await res.json();
+        const rollingMatches = json.matchesData?.matches || json.matches || [];
+        const historicalMatches = Array.isArray(json.historicalMatches) ? json.historicalMatches : [];
+
+        // Also fetch static history archive if available
+        let staticHistory = [];
+        try {
+          const sRes = await fetch('./data/history.json');
+          if (sRes.ok) staticHistory = await sRes.json();
+        } catch (_) {}
+
+        // Merge all matches (static history + Cloudflare historical + live rolling)
+        const matchMap = new Map();
+
+        // 1. Add historical records
+        [...staticHistory, ...historicalMatches].forEach(m => {
+          if (m && m.id) matchMap.set(m.id, m);
+        });
+
+        // 2. Add / overwrite with live rolling records
+        rollingMatches.forEach(m => {
+          if (m && m.id) matchMap.set(m.id, m);
+        });
+
+        const rawMatches = Array.from(matchMap.values());
+
+        allMatches = rawMatches.map(m => {
+          const rec = m.prediction?.recommendation || '';
+          const evalRes = (m.status === 'finished' || m.statusShort === 'FT')
+            ? evaluatePrediction(rec, m.homeScore, m.awayScore, m.homeTeam, m.awayTeam)
+            : { result: 'PENDING', isDraw: false };
+          return {
+            ...m,
+            evalResult: evalRes.result,
+            isDraw: evalRes.isDraw
+          };
+        });
+
+        populateLeagueDropdown();
+        updateScorecard();
+        renderMatches();
+      } catch (e) {
+        console.error('Fetch error:', e);
+        document.getElementById('content-area').innerHTML = `
+          <div class="state-banner">
+            <p style="color: var(--loss);">⚠️ Failed to load matches from Cloudflare KV.</p>
+            <p style="font-size: 0.85rem; margin-top: 8px;">Please check your connection and click Refresh.</p>
+          </div>
+        `;
+      }
+    }
+
+    function populateLeagueDropdown() {
+      const select = document.getElementById('league-select');
+      const leagues = [...new Set(allMatches.map(m => m.league).filter(Boolean))].sort();
+      select.innerHTML = '<option value="all">All Leagues (' + leagues.length + ')</option>';
+      leagues.forEach(l => {
+        const count = allMatches.filter(m => m.league === l).length;
+        const opt = document.createElement('option');
+        opt.value = l;
+        opt.innerText = `${l} (${count})`;
+        select.appendChild(opt);
+      });
+    }
+
+    function updateScorecard() {
+      let wins = 0, losses = 0, draws = 0, pending = 0;
+      allMatches.forEach(m => {
+        if (m.evalResult === 'WON') {
+          wins++;
+          if (m.isDraw) draws++;
+        } else if (m.evalResult === 'LOST') {
+          losses++;
+        } else {
+          pending++;
+        }
+      });
+
+      const decided = wins + losses;
+      const accuracy = decided > 0 ? Math.round((wins / decided) * 100) : 0;
+
+      document.getElementById('tracker-accuracy').innerText = `${accuracy}%`;
+      document.getElementById('tracker-wins').innerText = wins;
+      document.getElementById('tracker-draws').innerText = draws;
+      document.getElementById('tracker-losses').innerText = losses;
+      document.getElementById('tracker-pending').innerText = pending;
+      document.getElementById('tracker-total').innerText = allMatches.length;
+    }
+
+    function setDateFilter(filter, el) {
+      currentDateFilter = filter;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      el.classList.add('active');
+      renderMatches();
+    }
+
+    function handleSearch() {
+      searchQuery = document.getElementById('search-input').value.trim().toLowerCase();
+      renderMatches();
+    }
+
+    function handleLeagueFilter() {
+      currentLeagueFilter = document.getElementById('league-select').value;
+      renderMatches();
+    }
+
+    function handleStatusFilter() {
+      currentStatusFilter = document.getElementById('status-select').value;
+      renderMatches();
+    }
+
+    function renderMatches() {
+      const content = document.getElementById('content-area');
+      content.innerHTML = '';
+
+      const now = new Date();
+      const todayIso = now.toISOString().slice(0, 10);
+      const yesterday = new Date(now.getTime() - 86400000).toISOString().slice(0, 10);
+      const tomorrow = new Date(now.getTime() + 86400000).toISOString().slice(0, 10);
+
+      const filtered = allMatches.filter(m => {
+        // Date filter
+        const matchIso = (m.date || '').slice(0, 10);
+        if (currentDateFilter === 'yesterday' && matchIso !== yesterday) return false;
+        if (currentDateFilter === 'today' && matchIso !== todayIso) return false;
+        if (currentDateFilter === 'tomorrow' && matchIso !== tomorrow) return false;
+
+        // Status filter
+        if (currentStatusFilter === 'live' && m.status !== 'live') return false;
+        if (currentStatusFilter === 'finished' && m.status !== 'finished' && m.statusShort !== 'FT') return false;
+        if (currentStatusFilter === 'upcoming' && (m.status === 'live' || m.status === 'finished' || m.statusShort === 'FT')) return false;
+
+        // League filter
+        if (currentLeagueFilter !== 'all' && m.league !== currentLeagueFilter) return false;
+
+        // Search text
+        if (searchQuery) {
+          const hay = `${m.homeTeam} ${m.awayTeam} ${m.league}`.toLowerCase();
+          if (!hay.includes(searchQuery)) return false;
+        }
+
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        content.innerHTML = `
+          <div class="state-banner">
+            <p>No matches found matching your filters.</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Group by League
+      const byLeague = {};
+      filtered.forEach(m => {
+        const l = m.league || 'International / Cups';
+        if (!byLeague[l]) byLeague[l] = [];
+        byLeague[l].push(m);
+      });
+
+      const sortedLeagues = Object.keys(byLeague).sort((a, b) => a.localeCompare(b));
+
+      sortedLeagues.forEach(leagueName => {
+        const matches = byLeague[leagueName];
+        const section = document.createElement('div');
+        section.className = 'league-section';
+        section.innerHTML = `
+          <div class="league-header">
+            <div class="league-name">
+              <span>🏆</span>
+              <span>${leagueName}</span>
+            </div>
+            <span class="league-badge">${matches.length} match${matches.length === 1 ? '' : 'es'}</span>
+          </div>
+          <div class="matches-grid"></div>
+        `;
+
+        const grid = section.querySelector('.matches-grid');
+
+        matches.forEach(m => {
+          const card = document.createElement('div');
+          card.className = 'match-card';
+
+          const dateObj = new Date(m.date);
+          const timeStr = !isNaN(dateObj) ? dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+          const dateStr = !isNaN(dateObj) ? dateObj.toLocaleDateString([], { month: 'short', day: 'numeric' }) : '';
+
+          const isLive = m.status === 'live';
+          const isFT = m.status === 'finished' || m.statusShort === 'FT';
+          const statusClass = isLive ? 'status-live' : (isFT ? 'status-ft' : 'status-ns');
+          const statusLabel = isLive ? (m.statusShort || 'LIVE') : (isFT ? 'FINAL (FT)' : timeStr);
+
+          // Prediction Result Badge
+          let resBadgeHtml = '';
+          if (m.evalResult === 'WON') {
+            resBadgeHtml = `<span class="result-badge result-won">✅ WON</span>`;
+          } else if (m.evalResult === 'LOST') {
+            resBadgeHtml = `<span class="result-badge result-lost">❌ LOST</span>`;
+          } else {
+            resBadgeHtml = `<span class="result-badge result-pending">⏳ PENDING</span>`;
+          }
+
+          const hp = m.prediction?.homeWinProbability || 33;
+          const dp = m.prediction?.drawProbability || 34;
+          const ap = m.prediction?.awayWinProbability || 33;
+
+          const rec = m.prediction?.recommendation || 'AI Analysis in Progress';
+
+          // Match Site Link
+          const siteUrl = m.matchUrl || (m.espnEventId ? `https://www.espn.com/soccer/match/_/gameId/${m.espnEventId}` : null);
+          const siteLinkHtml = siteUrl
+            ? `<a href="${siteUrl}" target="_blank" rel="noopener noreferrer" class="match-site-link">Match Overview ↗</a>`
+            : `<span style="color: var(--text-dim);">No web link</span>`;
+
+          const scoreText = (isLive || isFT) ? `${m.homeScore ?? 0} : ${m.awayScore ?? 0}` : 'vs';
+
+          card.innerHTML = `
+            <div class="card-top">
+              <span class="match-time">${dateStr} &bull; ${timeStr}</span>
+              <span class="match-status-badge ${statusClass}">${statusLabel}</span>
+            </div>
+
+            <div class="teams-row">
+              <div class="team-col">
+                <img class="team-logo" src="${m.homeLogo || 'https://a.espncdn.com/i/teamlogos/soccer/500/default-team-logo.png'}" alt="${m.homeTeam}" onerror="this.src='https://a.espncdn.com/i/teamlogos/soccer/500/default-team-logo.png'">
+                <span class="team-name">${m.homeTeam}</span>
+              </div>
+              <div class="score-badge">${scoreText}</div>
+              <div class="team-col away">
+                <span class="team-name">${m.awayTeam}</span>
+                <img class="team-logo" src="${m.awayLogo || 'https://a.espncdn.com/i/teamlogos/soccer/500/default-team-logo.png'}" alt="${m.awayTeam}" onerror="this.src='https://a.espncdn.com/i/teamlogos/soccer/500/default-team-logo.png'">
+              </div>
+            </div>
+
+            <div class="prediction-box">
+              <div class="pred-row">
+                <span class="pred-tag-title">AI Recommendation</span>
+                ${resBadgeHtml}
+              </div>
+              <div class="pred-recommendation">${rec}</div>
+
+              <div class="prob-container">
+                <div class="prob-bar">
+                  <div class="prob-seg-home" style="width: ${hp}%;"></div>
+                  <div class="prob-seg-draw" style="width: ${dp}%;"></div>
+                  <div class="prob-seg-away" style="width: ${ap}%;"></div>
+                </div>
+                <div class="prob-labels">
+                  <span>1: ${hp}%</span>
+                  <span>X: ${dp}%</span>
+                  <span>2: ${ap}%</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-footer">
+              <span>Odds Rating: ${m.oddsRating !== null && m.oddsRating !== undefined ? (m.oddsRating > 0 ? '+' + m.oddsRating : m.oddsRating) : 'N/A'}</span>
+              ${siteLinkHtml}
+            </div>
+          `;
+
+          grid.appendChild(card);
+        });
+
+        content.appendChild(section);
+      });
+    }
+
+    // Auto-load on page start
+    loadData();
+  </script>
+</body>
+</html>

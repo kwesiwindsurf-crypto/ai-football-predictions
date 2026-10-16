@@ -1,6 +1,8 @@
-// GitHub Actions Full Scraper — ESPN Only
-// Fetches ALL matches, scores, and odds exclusively from ESPN.
-// Pushes the result to Cloudflare KV for the Flutter app to consume.
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const CF_ACCOUNT_ID = process.env.CF_ACCOUNT_ID;
 const CF_API_TOKEN  = process.env.CF_API_TOKEN;
@@ -61,7 +63,7 @@ const ESPN_LEAGUES = [
   { slug: 'col.1',  label: 'Colombia - Primera A' },
   { slug: 'sau.1',  label: 'Saudi Arabia - Pro League' },
   { slug: 'zaf.1',  label: 'South Africa - Premier League' },
-  { slug: 'uefa.champions_league', label: 'UEFA - Champions League' },
+  { slug: 'uefa.champions',        label: 'UEFA - Champions League' },
   { slug: 'uefa.europa',           label: 'UEFA - Europa League' },
   { slug: 'uefa.europa.conf',      label: 'UEFA - Conference League' },
   { slug: 'conmebol.libertadores', label: 'Copa Libertadores' },
@@ -779,6 +781,10 @@ function parseEspnEvent(ev, leagueLabel, leagueSlug) {
     }
   }
 
+  // Extract match website link from ESPN links or build canonical URL
+  const matchUrl = ev.links?.find(l => l.rel?.includes('summary') || l.rel?.includes('desktop'))?.href 
+    || (ev.id ? `https://www.espn.com/soccer/match/_/gameId/${ev.id}` : null);
+
   return {
     id,
     espnEventId: ev.id,
@@ -806,7 +812,7 @@ function parseEspnEvent(ev, leagueLabel, leagueSlug) {
     homeLineup: homeLineup.length ? homeLineup : null,
     awayLineup: awayLineup.length ? awayLineup : null,
     h2hSummary: ai.h2hSummary,
-    matchUrl: null,
+    matchUrl,
     prediction: {
       homeWinProbability: ai.homeWinProbability,
       drawProbability: ai.drawProbability,
@@ -865,7 +871,31 @@ async function fetchAllEspnFixtures() {
     await sleep(50); // gentle throttle between leagues
   }
 
-  console.log(`  ESPN: fetched ${totalFetched} unique matches across ${ESPN_LEAGUES.length} leagues`);
+  // Also query scorepanel for key dates to discover unlisted leagues (cups, friendlies, other regional divisions)
+  for (const d of dates.slice(0, 3)) {
+    try {
+      const spUrl = `https://site.api.espn.com/apis/site/v2/sports/soccer/scorepanel?dates=${d}`;
+      const spRes = await safeFetch(spUrl, 1);
+      if (!spRes) continue;
+      const spData = await spRes.json();
+      for (const block of (spData.scores || [])) {
+        const lName = block.leagues?.[0]?.name || 'Soccer';
+        const lSlug = block.leagues?.[0]?.slug || 'soccer';
+        if (isExcludedLeague(lName)) continue;
+        for (const ev of (block.events || [])) {
+          if (isExcludedLeague(ev.name || '')) continue;
+          const match = parseEspnEvent(ev, lName, lSlug);
+          if (!match) continue;
+          if (!matchesMap.has(match.id)) {
+            matchesMap.set(match.id, match);
+            totalFetched++;
+          }
+        }
+      }
+    } catch (_) {}
+  }
+
+  console.log(`  ESPN: fetched ${totalFetched} unique matches across leagues`);
   return Array.from(matchesMap.values());
 }
 
@@ -1175,8 +1205,8 @@ async function postDailyDashboardToTelegram(todayResults) {
 async function main() {
   console.log('Starting ESPN-only scraper...');
 
-  // 0. Load existing KV data so we can preserve predictions
-  console.log('Loading existing matches from KV to preserve predictions...');
+  // 0. Load existing KV data so we can preserve predictions & historical matches
+  console.log('Loading existing matches from KV to preserve predictions & historical archive...');
   const currentKvData = await getCloudflareKV();
   const existingMatchesMap = new Map();
   if (currentKvData && currentKvData.matchesData && currentKvData.matchesData.matches) {
@@ -1184,6 +1214,27 @@ async function main() {
       existingMatchesMap.set(m.id, m);
     }
   }
+
+  // Load permanent historical archive from KV
+  const historicalMatchesMap = new Map();
+  if (currentKvData && Array.isArray(currentKvData.historicalMatches)) {
+    for (const hm of currentKvData.historicalMatches) {
+      historicalMatchesMap.set(hm.id, hm);
+    }
+  }
+
+  // Also load local history file if present
+  try {
+    const localHistPath = path.join(__dirname, '..', 'docs', 'data', 'history.json');
+    if (fs.existsSync(localHistPath)) {
+      const localHist = JSON.parse(fs.readFileSync(localHistPath, 'utf8'));
+      if (Array.isArray(localHist)) {
+        for (const hm of localHist) {
+          if (!historicalMatchesMap.has(hm.id)) historicalMatchesMap.set(hm.id, hm);
+        }
+      }
+    }
+  } catch (_) {}
 
   console.log(`Fetching fixtures for yesterday → +6 days from ESPN...`);
 
@@ -1301,6 +1352,7 @@ async function main() {
       if (existing.awayOdds !== undefined) m.awayOdds = existing.awayOdds;
       if (existing.oddsRating !== undefined) m.oddsRating = existing.oddsRating;
       if (existing.h2hSummary !== undefined && existing.h2hSummary !== null) m.h2hSummary = existing.h2hSummary;
+      if (!m.matchUrl && existing.matchUrl) m.matchUrl = existing.matchUrl;
     }
   }
 
@@ -1371,12 +1423,42 @@ async function main() {
   const twoDaysAgo = new Date(Date.now() - 48 * 3600 * 1000).toISOString();
   activeTelegramPicks = activeTelegramPicks.filter(p => !p.date || p.date >= twoDaysAgo);
 
+  // 4. Accumulate permanent historical matches for the website (days ++)
+  for (const m of matches) {
+    if (m.status === 'finished' || m.statusShort === 'FT') {
+      historicalMatchesMap.set(m.id, m);
+    }
+  }
+  for (const em of existingMatchesMap.values()) {
+    if (em.status === 'finished' || em.statusShort === 'FT') {
+      if (!historicalMatchesMap.has(em.id)) {
+        historicalMatchesMap.set(em.id, em);
+      }
+    }
+  }
+
+  const historicalMatches = Array.from(historicalMatchesMap.values());
+  historicalMatches.sort((a, b) => new Date(b.date) - new Date(a.date));
+  console.log(`\n  Permanent historical archive: ${historicalMatches.length} total matches preserved for the website.`);
+
+  // Write history to docs/data/history.json for persistent Git storage
+  try {
+    const docsDataDir = path.join(__dirname, '..', 'docs', 'data');
+    if (!fs.existsSync(docsDataDir)) fs.mkdirSync(docsDataDir, { recursive: true });
+    const historyFilePath = path.join(docsDataDir, 'history.json');
+    fs.writeFileSync(historyFilePath, JSON.stringify(historicalMatches, null, 2));
+    console.log(`  Updated ${historyFilePath}`);
+  } catch (err) {
+    console.warn('  Could not write docs/data/history.json:', err.message);
+  }
+
   const finalData = JSON.stringify({
     matchesData: {
       lastUpdated: new Date().toISOString(),
       scrapedBy: 'espn-only',
-      matches
+      matches // Rolling 7-day window for the Flutter app
     },
+    historicalMatches, // Accumulated permanent history for the website
     standingsData: null,
     lastTelegramPostDate,
     lastDashboardDate,
@@ -1386,7 +1468,7 @@ async function main() {
 
   console.log('\nPushing to Cloudflare KV...');
   await pushToCloudflareKV(finalData);
-  console.log(`Done! ${matches.length} matches live in KV.`);
+  console.log(`Done! ${matches.length} rolling matches and ${historicalMatches.length} historical matches live in KV.`);
 }
 
 main().catch(e => { console.error('Fatal:', e); process.exit(1); });

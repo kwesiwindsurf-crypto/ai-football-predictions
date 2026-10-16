@@ -5,6 +5,8 @@
 !/bot/
 !/.github/
 !/.gitignore
+!/docs/
+!/README.md
 
 # Ignore node_modules inside the bot
 /bot/node_modules/

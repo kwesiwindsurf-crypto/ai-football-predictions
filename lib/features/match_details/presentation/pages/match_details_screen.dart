@@ -6,6 +6,7 @@ import '../../../../core/theme/app_theme.dart';
 
 import '../../../../core/services/analytics_service.dart';
 import '../../../../core/services/app_settings_service.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 
 class MatchDetailsScreen extends StatefulWidget {
@@ -82,6 +83,27 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
           ),
         ),
         centerTitle: true,
+        actions: [
+          if (widget.match.matchUrl != null && widget.match.matchUrl!.isNotEmpty)
+            IconButton(
+              tooltip: 'Open Match Page',
+              icon: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: textPrimary.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(Icons.open_in_new_rounded, size: 16, color: textPrimary),
+              ),
+              onPressed: () async {
+                final uri = Uri.tryParse(widget.match.matchUrl!);
+                if (uri != null && await canLaunchUrl(uri)) {
+                  await launchUrl(uri, mode: LaunchMode.externalApplication);
+                }
+              },
+            ),
+          const SizedBox(width: 8),
+        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(48),
           child: Container(
