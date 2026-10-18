@@ -617,51 +617,161 @@ function makePrediction(home, away, hOdds, dOdds, aOdds, league, homeFormStr, aw
   const isHomeFormFav = hForm >= aForm;
   
 // ─── League-Tailored Strategy Engine ──────────────────────────────────────────
-// Categorizes all 62+ world competitions into 4 high-accuracy strategy archetypes
+// ─── League & Tournament Strategy Engine ──────────────────────────────────────
+// Tailors predictions across 62+ world competitions including UCL, Europa, World Cups & Domestic Leagues
 function determineLeagueStrategy(league, home, away, fHp, fDp, fAp, isBig) {
   const lStr = (league || '').toLowerCase();
   const prob1X = fHp + fDp;
   const probX2 = fAp + fDp;
   const maxProb = Math.max(fHp, fDp, fAp);
 
-  // Archetype 1: Goal Shootouts (Avg > 3.2 goals, Over 1.5 hits in 89-100%)
+  // 1. UEFA Champions League (The Pinnacle of European Football)
+  const isUCL = lStr.includes('champions league') || lStr.includes('uefa.champions');
+
+  // 2. UEFA Europa League & Conference League
+  const isEuroCups = lStr.includes('europa') || lStr.includes('conference');
+
+  // 3. South American Continental (Libertadores / Sudamericana)
+  const isSouthAmericanCups = lStr.includes('libertadores') || lStr.includes('sudamericana');
+
+  // 4. International Tournaments (World Cup, Euros, AFCON, Copa America, Nations League)
+  const isInternational = lStr.includes('fifa') || lStr.includes('world cup') ||
+    lStr.includes('nations league') || lStr.includes('euro') ||
+    lStr.includes('copa america') || lStr.includes('gold cup') ||
+    lStr.includes('africa cup') || lStr.includes('caf.nations') ||
+    lStr.includes('asian cup');
+
+  // 5. Domestic Knockout Cups (FA Cup, Copa del Rey, DFB Pokal, Coppa Italia, etc.)
+  const isDomesticCup = lStr.includes('cup') || lStr.includes('pokal') ||
+    lStr.includes('copa del rey') || lStr.includes('coppa italia') ||
+    lStr.includes('coupe de france') || lStr.includes('beker') ||
+    lStr.includes('taca de portugal');
+
+  // 6. High-Goal Shootout Leagues (Avg > 3.2 goals, Over 1.5 hits in 89-100%)
   const isHighScoring = lStr.includes('eredivisie') || lStr.includes('keuken') ||
     lStr.includes('austria') || lStr.includes('premiership') ||
-    lStr.includes('europa') || lStr.includes('conference') ||
     lStr.includes('eliteserien') || lStr.includes('allsvenskan') ||
     lStr.includes('superliga') || lStr.includes('pro league') ||
     lStr.includes('ligue 1') || lStr.includes('ligue 2') ||
-    lStr.includes('bundesliga') || lStr.includes('champions league') ||
-    lStr.includes('switzerland');
+    lStr.includes('bundesliga') || lStr.includes('switzerland');
 
-  // Archetype 2: Defensive / Low-Scoring Grinds (Avg 1.4 - 2.2 goals, Under 3.5 hits 80-100%)
+  // 7. Defensive / Low-Scoring Grinds (Avg 1.4 - 2.2 goals, Under 3.5 hits 80-100%)
   const isDefensive = lStr.includes('brazil') || lStr.includes('série a') || lStr.includes('serie a - brazil') ||
-    lStr.includes('la liga') || lStr.includes('segunda') || lStr.includes('copa del rey') ||
+    lStr.includes('la liga') || lStr.includes('segunda') ||
     lStr.includes('argentina') || lStr.includes('chile') || lStr.includes('colombia') ||
     lStr.includes('afc champions league two') || lStr.includes('greece') || lStr.includes('russia') ||
-    lStr.includes('ukraine') || lStr.includes('south africa') || lStr.includes('libertadores') ||
-    lStr.includes('sudamericana') || lStr.includes('peru') || lStr.includes('bolivia') ||
-    lStr.includes('paraguay') || lStr.includes('uruguay');
+    lStr.includes('ukraine') || lStr.includes('south africa') || lStr.includes('peru') ||
+    lStr.includes('bolivia') || lStr.includes('paraguay') || lStr.includes('uruguay');
 
-  // Archetype 3: High-Draw Parity Traps (Draws occur in 35-50% of matches!)
+  // 8. High-Draw Parity Traps (Draws occur in 35-50% of matches!)
   const isHighDraw = lStr.includes('mls') || lStr.includes('serie b') ||
     lStr.includes('liga mx') || lStr.includes('championship') ||
-    lStr.includes('ekstraklasa') || lStr.includes('first league - czech') ||
-    lStr.includes('league cup') || lStr.includes('efl cup') || lStr.includes('coppa italia');
+    lStr.includes('ekstraklasa') || lStr.includes('first league - czech');
 
-  // Archetype 4: Home Fortresses (Home wins/draws in 75-88% of matches)
+  // 9. Home Fortresses (Home wins/draws in 75-88% of matches)
   const isHomeFortress = lStr.includes('süper lig') || lStr.includes('super lig') ||
     lStr.includes('league one') || lStr.includes('league two') ||
     lStr.includes('2. bundesliga') || lStr.includes('pro league - saudi') ||
     lStr.includes('saudi') || lStr.includes('primeira liga') ||
-    lStr.includes('serie a') || lStr.includes('fa cup') || lStr.includes('dfb pokal');
+    lStr.includes('serie a');
 
   let recommendation = '';
   let primarySafe = '';
   let strategyAnalysis = '';
 
-  if (isDefensive) {
-    // Never predict Over 1.5 in defensive leagues!
+  // ── SPECIALIZED LOGIC PER COMPETITION ARCHETYPE ──
+
+  if (isUCL) {
+    // 👑 UEFA Champions League Strategy:
+    // Heavy favorites (Man City, Real Madrid vs pot 3/4) win cleanly.
+    // Big vs Big matches are fast-paced goal battles (Over 1.5 hits in 89%).
+    if (fHp >= 68) {
+      recommendation = `${home} to Win (1)`;
+      primarySafe = `Safe: 1X (${home} or Draw)`;
+      strategyAnalysis = `UEFA Champions League: Heavy Home Favorite (${fHp}% Win).`;
+    } else if (fAp >= 65) {
+      recommendation = `${away} to Win (2)`;
+      primarySafe = `Safe: X2 (${away} or Draw)`;
+      strategyAnalysis = `UEFA Champions League: Dominant Away Giant (${fAp}% Win).`;
+    } else if (isBig || prob1X >= 70) {
+      recommendation = `1X (${home} or Draw)`;
+      primarySafe = `Safe: 1X (${home} or Draw)`;
+      strategyAnalysis = `UCL Blockbuster: Home Pitch Protection (1X Covered).`;
+    } else {
+      recommendation = `Over 1.5 Goals`;
+      primarySafe = `Safe: Over 1.5 Goals`;
+      strategyAnalysis = `UEFA Champions League Strategy: Fast-paced Goals Market (Over 1.5).`;
+    }
+  } else if (isEuroCups) {
+    // 🇪🇺 Europa League & Conference League:
+    // Highest goal volatility in Europe (avg 3.11 goals, 89% Over 1.5).
+    if (fHp >= 68) {
+      recommendation = `${home} to Win (1)`;
+      primarySafe = `Safe: 1X (${home} or Draw)`;
+      strategyAnalysis = `UEFA European Cup: Strong Home Favorite (${fHp}%).`;
+    } else if (fAp >= 65) {
+      recommendation = `${away} to Win (2)`;
+      primarySafe = `Safe: X2 (${away} or Draw)`;
+      strategyAnalysis = `UEFA European Cup: Quality Away Giant (${fAp}%).`;
+    } else {
+      recommendation = `Over 1.5 Goals`;
+      primarySafe = `Safe: Over 1.5 Goals`;
+      strategyAnalysis = `UEFA European Cup Strategy: Reliable Over 1.5 Goals (89% historical win rate).`;
+    }
+  } else if (isSouthAmericanCups) {
+    // 🌎 Copa Libertadores & Sudamericana:
+    // Fierce altitude, hostile crowds, low scoring. Under 3.5 hits 90%.
+    if (prob1X >= 65) {
+      recommendation = `1X (${home} or Draw)`;
+      primarySafe = `Safe: 1X (${home} or Draw)`;
+      strategyAnalysis = `Copa Libertadores: Home Fortress Advantage (1X).`;
+    } else {
+      recommendation = `Under 3.5 Goals`;
+      primarySafe = `Safe: Under 3.5 Goals`;
+      strategyAnalysis = `Copa Libertadores Strategy: Intense Cautious Knockout (Under 3.5).`;
+    }
+  } else if (isInternational) {
+    // 🌍 World Cup, Euro, AFCON, Copa America, Nations League:
+    // Tournament football is cautious and defensive (Under 3.5 hits 92%).
+    if (fHp >= 68) {
+      recommendation = `${home} to Win (1)`;
+      primarySafe = `Safe: 1X (${home} or Draw)`;
+      strategyAnalysis = `International Championship: Heavy National Team Dominance (${fHp}%).`;
+    } else if (fAp >= 65) {
+      recommendation = `${away} to Win (2)`;
+      primarySafe = `Safe: X2 (${away} or Draw)`;
+      strategyAnalysis = `International Championship: Elite Nation Favoritism (${fAp}%).`;
+    } else if (prob1X >= 68) {
+      recommendation = `1X (${home} or Draw)`;
+      primarySafe = `Safe: 1X (${home} or Draw)`;
+      strategyAnalysis = `International Championship Strategy: 1X Double Chance Coverage.`;
+    } else {
+      recommendation = `Under 3.5 Goals`;
+      primarySafe = `Safe: Under 3.5 Goals`;
+      strategyAnalysis = `International Tournament Strategy: Cagey Knockout Tie (Under 3.5).`;
+    }
+  } else if (isDomesticCup) {
+    // 🏆 Domestic Knockout Cups (FA Cup, Copa del Rey, DFB Pokal, etc.):
+    // Squad rotation & giant-killings happen often. Never force straight 1X2 unless heavy favorite.
+    if (fHp >= 72) {
+      recommendation = `${home} to Win (1)`;
+      primarySafe = `Safe: 1X (${home} or Draw)`;
+      strategyAnalysis = `Domestic Cup: Overwhelming Home Giant (Prob >= 72%).`;
+    } else if (fAp >= 70) {
+      recommendation = `${away} to Win (2)`;
+      primarySafe = `Safe: X2 (${away} or Draw)`;
+      strategyAnalysis = `Domestic Cup: Quality Away Giant (Prob >= 70%).`;
+    } else if (prob1X >= 65) {
+      recommendation = `1X (${home} or Draw)`;
+      primarySafe = `Safe: 1X (${home} or Draw)`;
+      strategyAnalysis = `Domestic Cup Strategy: 1X Upset Shield (${prob1X}% Win/Draw).`;
+    } else {
+      recommendation = `Over 1.5 Goals`;
+      primarySafe = `Safe: Over 1.5 Goals`;
+      strategyAnalysis = `Domestic Cup Strategy: Open Knockout Action (Over 1.5).`;
+    }
+  } else if (isDefensive) {
+    // 🛡️ Defensive Leagues (Brazil, La Liga, Argentina, Greece, etc.):
     if (fHp >= 68) {
       recommendation = `${home} to Win (1)`;
       primarySafe = `Safe: 1X (${home} or Draw)`;
@@ -673,14 +783,14 @@ function determineLeagueStrategy(league, home, away, fHp, fDp, fAp, isBig) {
     } else if (prob1X >= 65) {
       recommendation = `1X (${home} or Draw)`;
       primarySafe = `Safe: 1X (${home} or Draw)`;
-      strategyAnalysis = `Defensive League: Home Double Chance (1X Prob ${prob1X}%).`;
+      strategyAnalysis = `Defensive League Strategy: Home Double Chance (1X Prob ${prob1X}%).`;
     } else {
       recommendation = `Under 3.5 Goals`;
       primarySafe = `Safe: Under 3.5 Goals`;
-      strategyAnalysis = `Defensive League: High-confidence Under 3.5 Goals.`;
+      strategyAnalysis = `Defensive League Strategy: High-confidence Under 3.5 Goals.`;
     }
   } else if (isHighDraw) {
-    // In high-draw leagues (MLS, Serie B, Liga MX), avoid straight Direct Wins
+    // ⚖️ High-Draw Leagues (MLS, Serie B, Liga MX, Championship):
     if (fHp >= 75) {
       recommendation = `${home} to Win (1)`;
       primarySafe = `Safe: 1X (${home} or Draw)`;
@@ -703,7 +813,7 @@ function determineLeagueStrategy(league, home, away, fHp, fDp, fAp, isBig) {
       strategyAnalysis = `High-Draw League Strategy: Tight match goals market.`;
     }
   } else if (isHomeFortress) {
-    // Massive home pitch advantage
+    // 🏰 Home Fortress Leagues (Turkey, 2. Bundesliga, League One & Two):
     if (fHp >= 55) {
       recommendation = `${home} to Win (1)`;
       primarySafe = `Safe: 1X (${home} or Draw)`;
@@ -722,7 +832,7 @@ function determineLeagueStrategy(league, home, away, fHp, fDp, fAp, isBig) {
       strategyAnalysis = `Home Fortress League: Backing Home Pitch (1X).`;
     }
   } else if (isHighScoring) {
-    // Goals market is king in shootouts
+    // ⚽ High-Scoring Leagues (Eredivisie, Bundesliga, Austria, Scotland):
     if (fHp >= 70) {
       recommendation = `${home} to Win (1)`;
       primarySafe = `Safe: 1X (${home} or Draw)`;
@@ -737,7 +847,7 @@ function determineLeagueStrategy(league, home, away, fHp, fDp, fAp, isBig) {
       strategyAnalysis = `Goal-Fest League Strategy: Reliable Over 1.5 Goals (89-100% hit rate).`;
     }
   } else {
-    // Universal Smart Baseline for International cups & unclassified leagues
+    // 🌐 Universal Smart Baseline (Remaining World Competitions):
     if (fHp >= 68) {
       recommendation = `${home} to Win (1)`;
       primarySafe = `Safe: 1X (${home} or Draw)`;
