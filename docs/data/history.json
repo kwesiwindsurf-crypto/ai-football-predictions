@@ -1,5 +1,2156 @@
 [
   {
+    "id": "Zenit-St-Petersburg-Akhmat-Grozny",
+    "espnEventId": "401879832",
+    "homeTeam": "Zenit St Petersburg",
+    "awayTeam": "Akhmat Grozny",
+    "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/2533.png",
+    "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/2991.png",
+    "league": "Russia - Premier League",
+    "date": "2026-10-18T11:00Z",
+    "status": "finished",
+    "statusShort": "FT",
+    "homeScore": 3,
+    "awayScore": 2,
+    "homeOdds": null,
+    "drawOdds": null,
+    "awayOdds": null,
+    "oddsRating": -21,
+    "homeRank": null,
+    "awayRank": null,
+    "homeForm": "DWWLW",
+    "awayForm": "DLWDD",
+    "homePoints": 21,
+    "awayPoints": 11,
+    "homeLineup": {
+      "avgRating": 0,
+      "startingXI": [
+        {
+          "number": "?",
+          "name": "Denis Adamov",
+          "position": "G",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Nuraly Alip",
+          "position": "CD-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Nino",
+          "position": "CD-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Douglas Santos",
+          "position": "LB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Gustavo Mantuan",
+          "position": "RB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Maksim Glushenkov",
+          "position": "AM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Artem Karpukas",
+          "position": "LM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Wilmar Barrios",
+          "position": "RM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Aleksandr Sobolev",
+          "position": "F",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Pedro Henrique",
+          "position": "AM-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Luiz Henrique",
+          "position": "AM-R",
+          "rating": 0,
+          "stats": ""
+        }
+      ],
+      "bench": [
+        {
+          "number": "?",
+          "name": "Vadim Shilov",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Daniil Kondakov",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Vyacheslav Karavaev",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Amir Musaev",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Felipe",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Sergey Volkov",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Maksim Zaytsev",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Bogdan Moskvichev",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jhonatan",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Román Vega",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Kevin Andrade",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Aleksandr Erokhin",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        }
+      ]
+    },
+    "awayLineup": {
+      "avgRating": 0,
+      "startingXI": [
+        {
+          "number": "?",
+          "name": "Vadim Uljanov",
+          "position": "G",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Klisman Cake",
+          "position": "CD-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Kalidou Sidibe",
+          "position": "CD-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Miroslav Bogosavac",
+          "position": "LB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Arsen Adamov",
+          "position": "RB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Egas Cacintura",
+          "position": "AM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Ismael Silva Lime",
+          "position": "LM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Turpal-Ali Ibishev",
+          "position": "RM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "George Melkadze",
+          "position": "F",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Kirill Shchetinin",
+          "position": "AM-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Lechii Sadulaev",
+          "position": "AM-R",
+          "rating": 0,
+          "stats": ""
+        }
+      ],
+      "bench": [
+        {
+          "number": "?",
+          "name": "Erald Maksuti",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Aleksey Kasadzhikov",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Maksim Sidorov",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Rasul Mitsaev",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Kirill Kistenev",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Abakar Gadzhiev",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Manuel Keliano",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Mohamed Konaté",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Maksim Samorodov",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        }
+      ]
+    },
+    "h2hSummary": null,
+    "matchUrl": "https://www.espn.com/soccer/match/_/gameId/401879832/akhmat-grozny-zenit-st-petersburg",
+    "prediction": {
+      "homeWinProbability": 52,
+      "drawProbability": 17,
+      "awayWinProbability": 31,
+      "recommendation": "Over 1.5 Goals",
+      "analysis": "Not Big Teams & Tight: Goals Market (Over 1.5).\nHomeForm: 60%, AwayForm: 33%, BigGame: false",
+      "stakingOptions": [
+        "Safe: Over 1.5 Goals",
+        "Value: Zenit St Petersburg Draw No Bet (1.7)",
+        "Risky: Zenit St Petersburg to WIN by 2+ Goals (2.85)",
+        "BTTS: Both Teams To Score - Yes (1.78)",
+        "Alternative: Over 2.5 Total Goals (1.70)"
+      ]
+    }
+  },
+  {
+    "id": "Udinese-Lecce",
+    "espnEventId": "401874771",
+    "homeTeam": "Udinese",
+    "awayTeam": "Lecce",
+    "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/118.png",
+    "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/113.png",
+    "league": "Italy - Serie A",
+    "date": "2026-10-18T10:30Z",
+    "status": "finished",
+    "statusShort": "FT",
+    "homeScore": 0,
+    "awayScore": 3,
+    "homeOdds": 1.83,
+    "drawOdds": 3.35,
+    "awayOdds": 3.95,
+    "oddsRating": -35,
+    "homeRank": null,
+    "awayRank": null,
+    "homeForm": "DLLLL",
+    "awayForm": "DLLWL",
+    "homePoints": 4,
+    "awayPoints": 9,
+    "homeLineup": {
+      "avgRating": 0,
+      "startingXI": [
+        {
+          "number": "?",
+          "name": "Maduka Okoye",
+          "position": "G",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "David Alaba",
+          "position": "CD",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Enzo Ebosse",
+          "position": "CD-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Oumar Solet",
+          "position": "CD-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Oier Zarraga",
+          "position": "CM-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jesper Karlström",
+          "position": "CM-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Hassane Kamara",
+          "position": "LM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Mërgim Vojvoda",
+          "position": "RM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Keinan Davis",
+          "position": "F",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Giorgi Chakvetadze",
+          "position": "CF-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jurgen Ekkelenkamp",
+          "position": "CF-R",
+          "rating": 0,
+          "stats": ""
+        }
+      ],
+      "bench": [
+        {
+          "number": "?",
+          "name": "Giulio Vinciati",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Juan David Arizala",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "James Abankwah",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Daniele Padelli",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Matteo Palma",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Lazar Jovanovic",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Bartosz Mrozek",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Alessandro Zanoli",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Sandi Lovric",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jakub Piotrowski",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Christian Kabasele",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Unai Gómez",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Lennon Miller",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Nicolò Bertola",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        }
+      ]
+    },
+    "awayLineup": {
+      "avgRating": 0,
+      "startingXI": [
+        {
+          "number": "?",
+          "name": "Wladimiro Falcone",
+          "position": "G",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Tiago Gabriel",
+          "position": "CD-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Kialonda Gaspar",
+          "position": "CD-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Antonino Gallo",
+          "position": "LB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Danilo Veiga",
+          "position": "RB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Oumar Ngom",
+          "position": "CM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Youssef Maleh",
+          "position": "LM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Lassana Coulibaly",
+          "position": "RM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Willem Geubbels",
+          "position": "F",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Amar Ahmed",
+          "position": "LF",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Konan N’Dri",
+          "position": "RF",
+          "rating": 0,
+          "stats": ""
+        }
+      ],
+      "bench": [
+        {
+          "number": "?",
+          "name": "Corrie Ndaba",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Santiago Pierotti",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Elijah Scott",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Joel Monteiro",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Francisco Esteban Sánchez",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Gaby Jean",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Nikola Stulic",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Omri Gandelman",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Olaf Gorter",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Mohamed Kaba",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Alexandru Borbei",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Marco Bleve",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Ali Dembélé",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Sadik Fofana",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jamil Siebert",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        }
+      ]
+    },
+    "h2hSummary": null,
+    "matchUrl": "https://www.espn.com/soccer/match/_/gameId/401874771/lecce-udinese",
+    "prediction": {
+      "homeWinProbability": 59,
+      "drawProbability": 18,
+      "awayWinProbability": 24,
+      "recommendation": "Udinese to Win (1)",
+      "analysis": "Moderate Favorite (Prob 55-59%): Direct Win.\nHomeForm: 20%, AwayForm: 7%, BigGame: false",
+      "stakingOptions": [
+        "Safe: 1X (Udinese or Draw)",
+        "Value: Udinese Draw No Bet (1.5)",
+        "Risky: Udinese to WIN by 2+ Goals (2.85)",
+        "BTTS: Both Teams To Score - Yes (1.78)",
+        "Alternative: Over 2.5 Total Goals (1.70)"
+      ]
+    }
+  },
+  {
+    "id": "Kasimpasa-Samsunspor",
+    "espnEventId": "401888276",
+    "homeTeam": "Kasimpasa",
+    "awayTeam": "Samsunspor",
+    "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/6870.png",
+    "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/11429.png",
+    "league": "Turkey - Süper Lig",
+    "date": "2026-10-18T10:30Z",
+    "status": "finished",
+    "statusShort": "FT",
+    "homeScore": 4,
+    "awayScore": 1,
+    "homeOdds": null,
+    "drawOdds": null,
+    "awayOdds": null,
+    "oddsRating": -48,
+    "homeRank": null,
+    "awayRank": null,
+    "homeForm": "DLDWD",
+    "awayForm": "DLLLL",
+    "homePoints": 13,
+    "awayPoints": 4,
+    "homeLineup": {
+      "avgRating": 0,
+      "startingXI": [
+        {
+          "number": "?",
+          "name": "Andreas Gianniotis",
+          "position": "G",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Matei Ilie",
+          "position": "CD-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Adem Arous",
+          "position": "CD-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Ayberk Karapo",
+          "position": "LB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Cláudio Winck",
+          "position": "RB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Elson Mendes Da Silva",
+          "position": "AM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Kerem Demirbay",
+          "position": "LM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Andri Fannar Baldursson",
+          "position": "RM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Adrian Benedyczak",
+          "position": "F",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Ali Yavuz Kol",
+          "position": "AM-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jesurun Rak-Sakyi",
+          "position": "AM-R",
+          "rating": 0,
+          "stats": ""
+        }
+      ],
+      "bench": [
+        {
+          "number": "?",
+          "name": "Kevin Mouanga",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Ahmet Taha Dagbasi",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Thiemoko Diarra",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Marcus Rafferty",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Ali Yanar",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Atakan Mujde",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Guven Yalcin",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Omer Bayram",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Haris Hajradinovic",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Emi̇Rhan Boz",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        }
+      ]
+    },
+    "awayLineup": {
+      "avgRating": 0,
+      "startingXI": [
+        {
+          "number": "?",
+          "name": "Okan Kocuk",
+          "position": "G",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Gabriele Guarino",
+          "position": "CD-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Yunus Emre Çift",
+          "position": "CD-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Elliot Watt",
+          "position": "DM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Logi Tomasson",
+          "position": "LB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Josafat Mendes",
+          "position": "RB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Oskar Øhlenschlaeger",
+          "position": "CM-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Yalcin Kayan",
+          "position": "CM-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Emre Kilinc",
+          "position": "LM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Tanguy Coulibaly",
+          "position": "RM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Mohamed Bayo",
+          "position": "F",
+          "rating": 0,
+          "stats": ""
+        }
+      ],
+      "bench": [
+        {
+          "number": "?",
+          "name": "Haluk Tan",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Enes Albak",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Bilal Biyazit",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Strahinja Erakovic",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Samed Onur",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Igor Drapinski",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Saikuba Jarju",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Afonso Sousa",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Elayis Tavsan",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Antoine Sekongo",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        }
+      ]
+    },
+    "h2hSummary": null,
+    "matchUrl": "https://www.espn.com/soccer/match/_/gameId/401888276/samsunspor-kasimpasa",
+    "prediction": {
+      "homeWinProbability": 66,
+      "drawProbability": 17,
+      "awayWinProbability": 18,
+      "recommendation": "Kasimpasa to Win (1)",
+      "analysis": "Clear Favorite (Prob >= 60%): Direct Win.\nHomeForm: 47%, AwayForm: 0%, BigGame: false",
+      "stakingOptions": [
+        "Safe: 1X (Kasimpasa or Draw)",
+        "Value: Kasimpasa Draw No Bet (1.7)",
+        "Risky: Kasimpasa to WIN by 2+ Goals (2.85)",
+        "BTTS: Both Teams To Score - Yes (1.78)",
+        "Alternative: Over 2.5 Total Goals (1.70)"
+      ]
+    }
+  },
+  {
+    "id": "PEC-Zwolle-Go-Ahead-Eagles",
+    "espnEventId": "401875578",
+    "homeTeam": "PEC Zwolle",
+    "awayTeam": "Go Ahead Eagles",
+    "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/2565.png",
+    "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/3706.png",
+    "league": "Netherlands - Eredivisie",
+    "date": "2026-10-18T10:15Z",
+    "status": "finished",
+    "statusShort": "FT",
+    "homeScore": 4,
+    "awayScore": 1,
+    "homeOdds": 3.3,
+    "drawOdds": 3.55,
+    "awayOdds": 2,
+    "oddsRating": 46,
+    "homeRank": null,
+    "awayRank": null,
+    "homeForm": "DLLLD",
+    "awayForm": "DDDDD",
+    "homePoints": 7,
+    "awayPoints": 11,
+    "homeLineup": {
+      "avgRating": 0,
+      "startingXI": [
+        {
+          "number": "?",
+          "name": "Jasper Schendelaar",
+          "position": "G",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Nick Viergever",
+          "position": "CD-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Simon Graves",
+          "position": "CD-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Sherel Floranus",
+          "position": "LB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Olivier Aertssen",
+          "position": "RB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Thijs Oosting",
+          "position": "AM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Tobias Sommer",
+          "position": "LM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Ryan Thomas",
+          "position": "RM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Sydney van Hooijdonk",
+          "position": "F",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Dylan Mbayo",
+          "position": "AM-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Gilles Van Der Wal",
+          "position": "AM-R",
+          "rating": 0,
+          "stats": ""
+        }
+      ],
+      "bench": [
+        {
+          "number": "?",
+          "name": "Tijs Velthuis",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Damian Van Der Haar",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jadiel Pereira Da Gama",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Nick Fichtinger",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Elias Sörensen",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jan Bürger",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Gabriel Reiziger",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Koen Kostons",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Tom De Graaff",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Duke Verduin",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Odysseus Velanas",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Ibrahim Cissoko",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        }
+      ]
+    },
+    "awayLineup": {
+      "avgRating": 0,
+      "startingXI": [
+        {
+          "number": "?",
+          "name": "Kjetil Haug",
+          "position": "G",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Joris Kramer",
+          "position": "CD-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Giovanni van Zwam",
+          "position": "CD-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Dean James",
+          "position": "LB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Alfons Sampsted",
+          "position": "RB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Sören Tengstedt",
+          "position": "AM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Evert Linthorst",
+          "position": "LM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Melle Meulensteen",
+          "position": "RM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Stefan Ingi Sigurdarson",
+          "position": "F",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Mathis Suray",
+          "position": "AM-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Victor Edvardsen",
+          "position": "AM-R",
+          "rating": 0,
+          "stats": ""
+        }
+      ],
+      "bench": [
+        {
+          "number": "?",
+          "name": "Gerrit Nauber",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Thomas Hulleman",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Julius Dirksen",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Robbin Weijenberg",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Nando Verdoni",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Thibo Baeten",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Oskar Siira Sivertsen",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Erik Flataker",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Tomas Galvez",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Richonell Margaret",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Tino Jukić",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Yassir Rahmouni",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        }
+      ]
+    },
+    "h2hSummary": null,
+    "matchUrl": "https://www.espn.com/soccer/match/_/gameId/401875578/go-ahead-eagles-pec-zwolle",
+    "prediction": {
+      "homeWinProbability": 18,
+      "drawProbability": 17,
+      "awayWinProbability": 64,
+      "recommendation": "Go Ahead Eagles to Win (2)",
+      "analysis": "Clear Favorite (Prob >= 60%): Direct Win.\nHomeForm: 0%, AwayForm: 20%, BigGame: false",
+      "stakingOptions": [
+        "Safe: X2 (Go Ahead Eagles or Draw)",
+        "Value: Go Ahead Eagles Draw No Bet (1.64)",
+        "Risky: Go Ahead Eagles to WIN by 2+ Goals (2.85)",
+        "BTTS: Both Teams To Score - Yes (1.78)",
+        "Alternative: Over 2.5 Total Goals (1.70)"
+      ]
+    }
+  },
+  {
+    "id": "Alavés-Sevilla",
+    "espnEventId": "401882492",
+    "homeTeam": "Alavés",
+    "awayTeam": "Sevilla",
+    "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/21378.png",
+    "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/21424.png",
+    "league": "Spanish Liga F",
+    "date": "2026-10-18T10:00Z",
+    "status": "finished",
+    "statusShort": "FT",
+    "homeScore": 1,
+    "awayScore": 1,
+    "homeOdds": null,
+    "drawOdds": null,
+    "awayOdds": null,
+    "oddsRating": 28,
+    "homeRank": null,
+    "awayRank": null,
+    "homeForm": "DLLLW",
+    "awayForm": "DDLWL",
+    "homePoints": 7,
+    "awayPoints": 8,
+    "homeLineup": {
+      "avgRating": 0,
+      "startingXI": [
+        {
+          "number": "?",
+          "name": "Sofía Fuente",
+          "position": "G",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Pichi",
+          "position": "CD-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Inés Juan",
+          "position": "CD-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Juliette Vidal",
+          "position": "LB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Laia Parera",
+          "position": "RB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Kim Shin-Ji",
+          "position": "CM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Nayadet López",
+          "position": "LM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Carmen Sobrón",
+          "position": "RM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Andrea Gómez",
+          "position": "F",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Ainhoa Guallar",
+          "position": "LF",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Kumba Zainab Brima",
+          "position": "RF",
+          "rating": 0,
+          "stats": ""
+        }
+      ],
+      "bench": [
+        {
+          "number": "?",
+          "name": "Sarah Brasero",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Merche Izal",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Almudena Rivero",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Reyes Moreno",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Hanane Aït El Haj",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Yorladiz Díaz",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Celia Ochoa",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Laura Navajas",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Amaya Garcia",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Somea Polozen",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Elene Viles",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        }
+      ]
+    },
+    "awayLineup": {
+      "avgRating": 0,
+      "startingXI": [
+        {
+          "number": "?",
+          "name": "Esther Sullastres",
+          "position": "G",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Iris Arnaiz",
+          "position": "CD-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Alice Marques",
+          "position": "CD-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Raquel Morcillo",
+          "position": "LB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Alba López",
+          "position": "RB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Rosa Márquez",
+          "position": "AM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Sandra Castelló",
+          "position": "LM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Alicia Redondo",
+          "position": "RM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Andrea Alvarez",
+          "position": "F",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Esther Martín-Pozuelo",
+          "position": "AM-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Claudia Blanco",
+          "position": "AM-R",
+          "rating": 0,
+          "stats": ""
+        }
+      ],
+      "bench": [
+        {
+          "number": "?",
+          "name": "Clara Ferrer Gallego",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Xenia Barrios",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jassina Blom",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Gemma Gili Giner",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Isabel Álvarez",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Mabel Sierra",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "María Echezarreta",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        }
+      ]
+    },
+    "h2hSummary": null,
+    "matchUrl": "https://www.espn.com/soccer/match/_/gameId/401882492/sevilla-alaves",
+    "prediction": {
+      "homeWinProbability": 28,
+      "drawProbability": 17,
+      "awayWinProbability": 56,
+      "recommendation": "Sevilla to Win (2)",
+      "analysis": "Moderate Favorite (Prob 55-59%): Direct Win.\nHomeForm: 0%, AwayForm: 7%, BigGame: false",
+      "stakingOptions": [
+        "Safe: X2 (Sevilla or Draw)",
+        "Value: Sevilla Draw No Bet (1.7)",
+        "Risky: Sevilla to WIN by 2+ Goals (2.85)",
+        "BTTS: Both Teams To Score - Yes (1.78)",
+        "Alternative: Over 2.5 Total Goals (1.70)"
+      ]
+    }
+  },
+  {
+    "id": "Real-Sociedad-Barcelona",
+    "espnEventId": "401882485",
+    "homeTeam": "Real Sociedad",
+    "awayTeam": "Barcelona",
+    "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/21428.png",
+    "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/20091.png",
+    "league": "Spanish Liga F",
+    "date": "2026-10-18T10:00Z",
+    "status": "finished",
+    "statusShort": "FT",
+    "homeScore": 2,
+    "awayScore": 1,
+    "homeOdds": null,
+    "drawOdds": null,
+    "awayOdds": null,
+    "oddsRating": 3,
+    "homeRank": null,
+    "awayRank": null,
+    "homeForm": "DWWLD",
+    "awayForm": "DWWWW",
+    "homePoints": 8,
+    "awayPoints": 18,
+    "homeLineup": {
+      "avgRating": 0,
+      "startingXI": [
+        {
+          "number": "?",
+          "name": "Alazne Estensoro",
+          "position": "G",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Nahia Aparicio",
+          "position": "CD",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Ainhoa Moraza",
+          "position": "CD-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Claudia Florentino",
+          "position": "CD-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Cecilia Marcos",
+          "position": "LB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Camino",
+          "position": "RB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Ainoa Campo",
+          "position": "CM-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Esther Laborde",
+          "position": "CM-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Klára Cahynová",
+          "position": "LM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Ainhoa Marín",
+          "position": "RM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Nerea Eizagirre",
+          "position": "F",
+          "rating": 0,
+          "stats": ""
+        }
+      ],
+      "bench": [
+        {
+          "number": "?",
+          "name": "Arola Aparicio",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Ane Isasisasmendi",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Maren Lezeta",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Sonya Keefe",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Julia Arrula",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "María Molina",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Ava Seelenfreund",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Intza Eguiguren",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        }
+      ]
+    },
+    "awayLineup": {
+      "avgRating": 0,
+      "startingXI": [
+        {
+          "number": "?",
+          "name": "Cata Coll",
+          "position": "G",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Renee Van Asten",
+          "position": "CD-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Irene Paredes",
+          "position": "CD-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Esmee Brugts",
+          "position": "LB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Martina Fernández",
+          "position": "RB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Clara Serrajordi",
+          "position": "CM-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Patri Guijarro",
+          "position": "CM-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Aitana Bonmatí",
+          "position": "LM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Carla Martínez",
+          "position": "RM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Ewa Pajor",
+          "position": "CF-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Rosalía Dominguez",
+          "position": "CF-R",
+          "rating": 0,
+          "stats": ""
+        }
+      ],
+      "bench": [
+        {
+          "number": "?",
+          "name": "Caroline Graham Hansen",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Marta Torrejón",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Kika Nazareth",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Noa Jiménez",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Aïcha Cámara",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Sydney Schertenleib",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Kerolin",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Mayssa Baha",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Gemma Font",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        }
+      ]
+    },
+    "h2hSummary": null,
+    "matchUrl": "https://www.espn.com/soccer/match/_/gameId/401882485/barcelona-real-sociedad",
+    "prediction": {
+      "homeWinProbability": 40,
+      "drawProbability": 17,
+      "awayWinProbability": 43,
+      "recommendation": "Over 1.5 Goals",
+      "analysis": "Not Big Teams & Tight: Goals Market (Over 1.5).\nHomeForm: 47%, AwayForm: 100%, BigGame: false",
+      "stakingOptions": [
+        "Safe: Over 1.5 Goals",
+        "Value: Barcelona Draw No Bet (1.7)",
+        "Risky: Barcelona to WIN by 2+ Goals (2.85)",
+        "BTTS: Both Teams To Score - Yes (1.78)",
+        "Alternative: Under 2.5 Goals (1.80)"
+      ]
+    }
+  },
+  {
     "id": "Cruz-Azul-FC-Juárez",
     "espnEventId": "401876939",
     "homeTeam": "Cruz Azul",
@@ -20636,7 +22787,7 @@
         },
         {
           "number": "?",
-          "name": "Sekou Sylla",
+          "name": "Sékou Sylla",
           "position": "LB",
           "rating": 0,
           "stats": ""
@@ -29883,7 +32034,7 @@
         },
         {
           "number": "?",
-          "name": "Joe Felix",
+          "name": "Joel Felix",
           "position": "RM",
           "rating": 0,
           "stats": ""
