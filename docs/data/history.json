@@ -1719,6 +1719,1106 @@
     }
   },
   {
+    "id": "AFC-Bournemouth-Sunderland",
+    "espnEventId": "401879263",
+    "homeTeam": "AFC Bournemouth",
+    "awayTeam": "Sunderland",
+    "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/349.png",
+    "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/366.png",
+    "league": "England - Premier League",
+    "date": "2026-10-18T13:00Z",
+    "status": "finished",
+    "statusShort": "FT",
+    "homeScore": 2,
+    "awayScore": 0,
+    "homeOdds": 2,
+    "drawOdds": 3.55,
+    "awayOdds": 3.55,
+    "oddsRating": -20,
+    "homeRank": null,
+    "awayRank": null,
+    "homeForm": "DWLLW",
+    "awayForm": "LWLLW",
+    "homePoints": 6,
+    "awayPoints": 4,
+    "homeLineup": {
+      "avgRating": 0,
+      "startingXI": [
+        {
+          "number": "?",
+          "name": "Djordje Petrovic",
+          "position": "G",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "António Silva",
+          "position": "CD-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "James Hill",
+          "position": "CD-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Tyler Adams",
+          "position": "DM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Adrien Truffert",
+          "position": "LB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Adam Smith",
+          "position": "RB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Lewis Cook",
+          "position": "CM-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Ryan Christie",
+          "position": "CM-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Marcus Tavernier",
+          "position": "LM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Rayan",
+          "position": "RM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Evanilson",
+          "position": "F",
+          "rating": 0,
+          "stats": ""
+        }
+      ],
+      "bench": [
+        {
+          "number": "?",
+          "name": "Ben Gannon-Doak",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Justin Kluivert",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Juanlu Sanchez",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Michele Di Gregorio",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "David Brooks",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Julio Soler",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Amine Adli",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Bafodé Diakité",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Álvaro Rodríguez",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        }
+      ]
+    },
+    "awayLineup": {
+      "avgRating": 0,
+      "startingXI": [
+        {
+          "number": "?",
+          "name": "Robin Roefs",
+          "position": "G",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Omar Alderete",
+          "position": "CD-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Kevin Danso",
+          "position": "CD-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Reinildo Mandava",
+          "position": "LB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Nordi Mukiele",
+          "position": "RB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Chris Rigg",
+          "position": "AM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Noah Sadiki",
+          "position": "LM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Granit Xhaka",
+          "position": "RM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Tymur Tutierov",
+          "position": "F",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Enzo Le Fée",
+          "position": "AM-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Trai Hume",
+          "position": "AM-R",
+          "rating": 0,
+          "stats": ""
+        }
+      ],
+      "bench": [
+        {
+          "number": "?",
+          "name": "Juan Angulo",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Nilson Angulo",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Melker Ellborg",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Dayann Methalie",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jules Ahoka",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Luke O'Nien",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Chemsdine Talbi",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Habib Diarra",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Malick Fofana",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        }
+      ]
+    },
+    "h2hSummary": null,
+    "matchUrl": "https://www.espn.com/soccer/match/_/gameId/401879263/sunderland-afc-bournemouth",
+    "prediction": {
+      "homeWinProbability": 50,
+      "drawProbability": 20,
+      "awayWinProbability": 30,
+      "recommendation": "Over 1.5 Goals",
+      "analysis": "Not Big Teams & Tight: Goals Market (Over 1.5).\nHomeForm: 47%, AwayForm: 33%, BigGame: false",
+      "stakingOptions": [
+        "Safe: Over 1.5 Goals",
+        "Value: AFC Bournemouth Draw No Bet (1.64)",
+        "Risky: AFC Bournemouth to WIN by 2+ Goals (2.85)",
+        "BTTS: Both Teams To Score - Yes (1.78)",
+        "Alternative: Over 2.5 Total Goals (1.70)"
+      ]
+    }
+  },
+  {
+    "id": "Fiorentina-Como",
+    "espnEventId": "401874774",
+    "homeTeam": "Fiorentina",
+    "awayTeam": "Como",
+    "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/109.png",
+    "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/2572.png",
+    "league": "Italy - Serie A",
+    "date": "2026-10-18T13:00Z",
+    "status": "finished",
+    "statusShort": "FT",
+    "homeScore": 1,
+    "awayScore": 3,
+    "homeOdds": 3.35,
+    "drawOdds": 3.55,
+    "awayOdds": 1.95,
+    "oddsRating": 13,
+    "homeRank": null,
+    "awayRank": null,
+    "homeForm": "DLDWW",
+    "awayForm": "DLDLW",
+    "homePoints": 4,
+    "awayPoints": 14,
+    "homeLineup": {
+      "avgRating": 0,
+      "startingXI": [
+        {
+          "number": "?",
+          "name": "David de Gea",
+          "position": "G",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Marin Pongracic",
+          "position": "CD-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Radu Dragusin",
+          "position": "CD-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Viery",
+          "position": "LB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Álex Jiménez",
+          "position": "RB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Pedro Gonçalves",
+          "position": "AM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Nicolò Fagioli",
+          "position": "LM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Cher Ndour",
+          "position": "RM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Mateo Pellegrino",
+          "position": "F",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Alieu Njie",
+          "position": "AM-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Franco Mastantuono",
+          "position": "AM-R",
+          "rating": 0,
+          "stats": ""
+        }
+      ],
+      "bench": [
+        {
+          "number": "?",
+          "name": "Dodô",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Wilfried Gnonto",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Oliver Christensen",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "João Mário",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Christ Inao Oulaï",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Beto",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Arnis Ademi",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Brando Mazzeo",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Antonio Pirrò",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Marco Brescianini",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Luca Lezzerini",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Víctor Valdepeñas",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        }
+      ]
+    },
+    "awayLineup": {
+      "avgRating": 0,
+      "startingXI": [
+        {
+          "number": "?",
+          "name": "Jean Butez",
+          "position": "G",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Marc-Oliver Kempf",
+          "position": "CD-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Trevoh Chalobah",
+          "position": "CD-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Álex Valle",
+          "position": "LB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Ivan Smolcic",
+          "position": "RB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Nico Paz",
+          "position": "AM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Lucas Da Cunha",
+          "position": "LM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Luis Milla",
+          "position": "RM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Anastasios Douvikas",
+          "position": "F",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Maxence Caqueret",
+          "position": "AM-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Mattia Liberali",
+          "position": "AM-R",
+          "rating": 0,
+          "stats": ""
+        }
+      ],
+      "bench": [
+        {
+          "number": "?",
+          "name": "Martin Baturina",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jacobo Ramón",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jayden Addai",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Adrian Lahdo",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Samuele Ricci",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Máximo Perrone",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Robert Sánchez",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Edoardo Goldaniga",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Mauro Vigorito",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Willy Kambwala",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Kaiki",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jesús Rodriguez",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Alberto Dossena",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Yan Couto",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        }
+      ]
+    },
+    "h2hSummary": null,
+    "matchUrl": "https://www.espn.com/soccer/match/_/gameId/401874774/como-fiorentina",
+    "prediction": {
+      "homeWinProbability": 33,
+      "drawProbability": 21,
+      "awayWinProbability": 46,
+      "recommendation": "Over 1.5 Goals",
+      "analysis": "Not Big Teams & Tight: Goals Market (Over 1.5).\nHomeForm: 47%, AwayForm: 60%, BigGame: false",
+      "stakingOptions": [
+        "Safe: Over 1.5 Goals",
+        "Value: Como Draw No Bet (1.6)",
+        "Risky: Como to WIN by 2+ Goals (2.85)",
+        "BTTS: Both Teams To Score - Yes (1.78)",
+        "Alternative: Over 2.5 Total Goals (1.70)"
+      ]
+    }
+  },
+  {
+    "id": "Kalamata-OFI-Crete",
+    "espnEventId": "401896817",
+    "homeTeam": "Kalamata",
+    "awayTeam": "OFI Crete",
+    "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/132429.png",
+    "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/1010.png",
+    "league": "Greece - Super League",
+    "date": "2026-10-18T13:00Z",
+    "status": "finished",
+    "statusShort": "FT",
+    "homeScore": 4,
+    "awayScore": 3,
+    "homeOdds": null,
+    "drawOdds": null,
+    "awayOdds": null,
+    "oddsRating": 21,
+    "homeRank": null,
+    "awayRank": null,
+    "homeForm": "DWLWD",
+    "awayForm": "DLLDW",
+    "homePoints": 10,
+    "awayPoints": 10,
+    "homeLineup": {
+      "avgRating": 0,
+      "startingXI": [
+        {
+          "number": "?",
+          "name": "Nikola Vasilj",
+          "position": "G",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Rodrigues",
+          "position": "CD-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Stefanos Strougis",
+          "position": "CD-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Julio Alonso",
+          "position": "LB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Petros Kaloutsikidis",
+          "position": "RB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Erik Hamza",
+          "position": "AM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Djibril Diarra",
+          "position": "LM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Gonzalo Piñeiro",
+          "position": "RM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Dawid Kurminowski",
+          "position": "F",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Ahmad Mendes Moreira",
+          "position": "AM-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Kenneth Vargas",
+          "position": "AM-R",
+          "rating": 0,
+          "stats": ""
+        }
+      ],
+      "bench": [
+        {
+          "number": "?",
+          "name": "Josete Miranda",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Junior Bakayoko",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Joannis Gelios",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Juan Cataldi",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Arnór Sigurdsson",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Axel Guessand",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Panagiotis Ginis",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Ilias Chatzitheodoridis",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Argyrios Liatsikouras",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jovanny Bolívar",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Uros Ignjatovic",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Julián Bonetto",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        }
+      ]
+    },
+    "awayLineup": {
+      "avgRating": 0,
+      "startingXI": [
+        {
+          "number": "?",
+          "name": "Nikos Christogeorgos",
+          "position": "G",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Dimitris Nikolaou",
+          "position": "CD",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Kresimir Krizmanic",
+          "position": "CD-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Konstantinos Kostoulas",
+          "position": "CD-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Giorgos Kanellopoulos",
+          "position": "CM-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Zisis Karachalios",
+          "position": "CM-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Nicolaos Athanasiou",
+          "position": "LM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Borja González",
+          "position": "RM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Kenan Kodro",
+          "position": "F",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Anastasios Chatzigiovanis",
+          "position": "CF-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Thiago Thomas Nuss",
+          "position": "CF-R",
+          "rating": 0,
+          "stats": ""
+        }
+      ],
+      "bench": [
+        {
+          "number": "?",
+          "name": "Pavlos Kainourgiakis",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Klidman Lilo",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Konstantinos Lagoudakis",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Lorenzo Dickmann",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Thanasis Sitmalidis",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Achilleas Poungouras",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Giannis Apostolakis",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Andreas Bouchalakis",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Giannis Theodosoulakis",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Thanasis Androutsos",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Panagiotis Katsikas",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Thiago Romano",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        }
+      ]
+    },
+    "h2hSummary": null,
+    "matchUrl": "https://www.espn.com/soccer/match/_/gameId/401896817/ofi-crete-kalamata",
+    "prediction": {
+      "homeWinProbability": 31,
+      "drawProbability": 17,
+      "awayWinProbability": 52,
+      "recommendation": "Over 1.5 Goals",
+      "analysis": "Not Big Teams & Tight: Goals Market (Over 1.5).\nHomeForm: 7%, AwayForm: 73%, BigGame: false",
+      "stakingOptions": [
+        "Safe: Over 1.5 Goals",
+        "Value: OFI Crete Draw No Bet (1.7)",
+        "Risky: OFI Crete to WIN by 2+ Goals (2.85)",
+        "BTTS: Both Teams To Score - Yes (1.78)",
+        "Alternative: Over 2.5 Total Goals (1.70)"
+      ]
+    }
+  },
+  {
     "id": "SC-Cambuur-AZ-Alkmaar",
     "espnEventId": "401875576",
     "homeTeam": "SC Cambuur",
