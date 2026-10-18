@@ -2,9 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
   <title>AI Scorecast — Elite Football Predictions &amp; Live Match Analytics</title>
-  <meta name="description" content="State-of-the-art AI football predictions, probability modeling, live scores, accuracy tracker, and betting analytics across 62+ global competitions.">
+  <meta name="description" content="State-of-the-art AI football predictions, probability modeling, live scores, accuracy tracker, and betting analytics across 62+ global competitions. Mobile-optimized with haptic feedback.">
+  <meta name="theme-color" content="#030712">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -30,12 +33,15 @@
       --text-muted: #94a3b8;
       --text-dim: #64748b;
       --surface: rgba(30, 41, 59, 0.6);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --safe-top: env(safe-area-inset-top, 0px);
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
+      -webkit-tap-highlight-color: transparent;
     }
 
     body {
@@ -88,12 +94,23 @@
       100% { transform: translate(-35px, 45px) scale(1.12); }
     }
 
+    /* Tactile Touch / Haptic Feedback Simulation */
+    .touch-haptic {
+      transition: transform 0.12s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.12s ease;
+      user-select: none;
+    }
+    .touch-haptic:active {
+      transform: scale(0.95) !important;
+      filter: brightness(1.15);
+    }
+
     /* Live Marquee Ticker */
     .ticker-wrap {
       width: 100%;
-      background: rgba(15, 23, 42, 0.85);
+      background: rgba(15, 23, 42, 0.88);
       border-bottom: 1px solid rgba(56, 189, 248, 0.2);
       backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       overflow: hidden;
       position: sticky;
       top: 0;
@@ -149,31 +166,31 @@
       flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
-      gap: 1.5rem;
-      margin-top: 1rem;
+      gap: 1.2rem;
+      margin-top: 0.8rem;
       margin-bottom: 2rem;
-      padding-bottom: 1.5rem;
+      padding-bottom: 1.4rem;
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
 
     .brand {
       display: flex;
       align-items: center;
-      gap: 1.2rem;
+      gap: 1.1rem;
     }
 
     .brand-icon-wrap {
       position: relative;
     }
     .brand-icon {
-      width: 54px;
-      height: 54px;
-      border-radius: 18px;
+      width: 52px;
+      height: 52px;
+      border-radius: 17px;
       background: linear-gradient(135deg, #0284c7 0%, #6366f1 50%, #8b5cf6 100%);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.8rem;
+      font-size: 1.75rem;
       box-shadow: 0 10px 30px var(--primary-glow);
       border: 1px solid rgba(255, 255, 255, 0.25);
       position: relative;
@@ -209,11 +226,11 @@
       text-transform: uppercase;
       letter-spacing: 0.1em;
       color: var(--primary);
-      margin-bottom: 3px;
+      margin-bottom: 2px;
     }
 
     .brand-title {
-      font-size: 2.1rem;
+      font-size: 2rem;
       font-weight: 900;
       letter-spacing: -0.03em;
       line-height: 1.1;
@@ -223,7 +240,7 @@
     }
 
     .brand-subtitle {
-      font-size: 0.86rem;
+      font-size: 0.85rem;
       color: var(--text-muted);
       margin-top: 3px;
     }
@@ -231,7 +248,7 @@
     .header-actions {
       display: flex;
       align-items: center;
-      gap: 0.85rem;
+      gap: 0.75rem;
       flex-wrap: wrap;
     }
 
@@ -256,9 +273,9 @@
       background: rgba(16, 185, 129, 0.12);
       border: 1px solid rgba(16, 185, 129, 0.35);
       color: var(--win);
-      padding: 7px 14px;
+      padding: 7px 13px;
       border-radius: 9999px;
-      font-size: 0.76rem;
+      font-size: 0.75rem;
       font-weight: 700;
       letter-spacing: 0.06em;
       text-transform: uppercase;
@@ -279,6 +296,31 @@
       100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
     }
 
+    /* Haptic Feedback Toggle Button */
+    .btn-haptic-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      background: rgba(30, 41, 59, 0.7);
+      color: #cbd5e1;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: all 0.2s ease;
+    }
+    .btn-haptic-toggle.active {
+      border-color: var(--primary);
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--primary);
+      box-shadow: 0 0 14px var(--primary-glow);
+    }
+
     .btn {
       display: inline-flex;
       align-items: center;
@@ -295,6 +337,8 @@
       background: rgba(30, 41, 59, 0.7);
       color: var(--text);
       backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      min-height: 42px;
     }
     .btn:hover {
       transform: translateY(-2px);
@@ -337,6 +381,7 @@
       overflow: hidden;
       box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.12);
       backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
     }
 
     /* Tactical Football Grid Backdrop */
@@ -412,7 +457,7 @@
 
     .hero-features {
       display: flex;
-      gap: 1.4rem;
+      gap: 1.2rem;
       margin-top: 1.3rem;
       flex-wrap: wrap;
     }
@@ -445,6 +490,7 @@
       padding: 1.6rem;
       margin-bottom: 2.2rem;
       backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
       align-items: center;
     }
@@ -514,7 +560,8 @@
       font-weight: 600;
       margin-top: 4px;
       display: inline-flex;
-      align-items: gap;
+      align-items: center;
+      gap: 4px;
     }
 
     .stat-tile {
@@ -769,12 +816,16 @@
       background: rgba(255, 255, 255, 0.06);
       border: 1px solid rgba(255, 255, 255, 0.1);
       color: #cbd5e1;
-      padding: 4px 10px;
+      padding: 6px 12px;
       border-radius: 8px;
-      font-size: 0.75rem;
+      font-size: 0.78rem;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s ease;
+      min-height: 38px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
     }
     .btn-copy-pick:hover {
       background: rgba(56, 189, 248, 0.2);
@@ -794,6 +845,7 @@
       border: 1px solid var(--card-border);
       border-radius: 20px;
       backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     }
 
@@ -807,11 +859,12 @@
       background: rgba(30, 41, 59, 0.6);
       border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 12px;
-      padding: 11px 14px 11px 44px;
+      padding: 12px 14px 12px 44px;
       color: #fff;
       font-family: inherit;
-      font-size: 0.9rem;
+      font-size: 16px; /* Prevents auto-zoom on mobile */
       transition: all 0.25s ease;
+      min-height: 44px;
     }
     .search-input:focus {
       outline: none;
@@ -838,7 +891,7 @@
       border: 1px solid rgba(255, 255, 255, 0.06);
     }
     .filter-btn {
-      padding: 8px 16px;
+      padding: 9px 16px;
       border-radius: 9px;
       border: none;
       background: transparent;
@@ -848,6 +901,10 @@
       font-family: inherit;
       cursor: pointer;
       transition: all 0.2s ease;
+      min-height: 40px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
     .filter-btn:hover {
       color: #fff;
@@ -862,26 +919,33 @@
       background: rgba(30, 41, 59, 0.6);
       border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 12px;
-      padding: 10px 14px;
+      padding: 11px 14px;
       color: #fff;
       font-family: inherit;
-      font-size: 0.86rem;
+      font-size: 16px; /* Prevents iOS zoom */
       cursor: pointer;
       min-width: 175px;
       transition: all 0.25s ease;
+      min-height: 44px;
     }
     .select-dropdown:focus {
       outline: none;
       border-color: var(--primary);
     }
 
-    /* Quick Filter Chips */
+    /* Quick Filter Chips (Thumb-Friendly Horizontal Scroll) */
     .quick-tags-row {
       display: flex;
-      flex-wrap: wrap;
       gap: 8px;
       margin-bottom: 2rem;
       align-items: center;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      padding-bottom: 6px;
+    }
+    .quick-tags-row::-webkit-scrollbar {
+      display: none;
     }
     .quick-tag-label {
       font-size: 0.78rem;
@@ -890,23 +954,29 @@
       text-transform: uppercase;
       letter-spacing: 0.05em;
       margin-right: 4px;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
     .quick-tag {
       font-size: 0.78rem;
       font-weight: 600;
-      padding: 6px 14px;
+      padding: 7px 15px;
       border-radius: 9999px;
-      background: rgba(30, 41, 59, 0.5);
+      background: rgba(30, 41, 59, 0.55);
       border: 1px solid rgba(255, 255, 255, 0.08);
       color: #cbd5e1;
       cursor: pointer;
       transition: all 0.2s ease;
+      white-space: nowrap;
+      flex-shrink: 0;
+      min-height: 38px;
+      display: inline-flex;
+      align-items: center;
     }
     .quick-tag:hover {
       background: rgba(56, 189, 248, 0.15);
       border-color: var(--primary);
       color: #fff;
-      transform: translateY(-1px);
     }
     .quick-tag.active {
       background: rgba(56, 189, 248, 0.25);
@@ -965,6 +1035,7 @@
       gap: 1.2rem;
       transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       box-shadow: 0 12px 32px rgba(0, 0, 0, 0.38);
       position: relative;
     }
@@ -1203,7 +1274,7 @@
     .staking-chip {
       font-size: 0.73rem;
       font-weight: 600;
-      padding: 3px 9px;
+      padding: 4px 9px;
       border-radius: 6px;
       background: rgba(255, 255, 255, 0.06);
       border: 1px solid rgba(255, 255, 255, 0.08);
@@ -1233,11 +1304,12 @@
       color: var(--primary);
       text-decoration: none;
       font-weight: 600;
-      padding: 5px 12px;
+      padding: 6px 12px;
       background: rgba(56, 189, 248, 0.09);
       border: 1px solid rgba(56, 189, 248, 0.2);
       border-radius: 8px;
       transition: all 0.2s ease;
+      min-height: 38px;
     }
     .match-site-link:hover {
       background: rgba(56, 189, 248, 0.22);
@@ -1248,8 +1320,8 @@
     /* Toast Notification */
     .toast {
       position: fixed;
-      bottom: 2rem;
-      right: 2rem;
+      bottom: calc(5rem + var(--safe-bottom));
+      right: 1.5rem;
       background: rgba(15, 23, 42, 0.95);
       border: 1px solid rgba(56, 189, 248, 0.4);
       color: #fff;
@@ -1258,6 +1330,7 @@
       font-size: 0.88rem;
       font-weight: 600;
       backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px var(--primary-glow);
       display: flex;
       align-items: center;
@@ -1274,16 +1347,16 @@
       pointer-events: auto;
     }
 
-    /* Floating Back to Top */
+    /* Floating Back to Top Button */
     .btn-back-top {
       position: fixed;
-      bottom: 2rem;
-      left: 2rem;
+      bottom: calc(5.5rem + var(--safe-bottom));
+      left: 1.5rem;
       width: 44px;
       height: 44px;
       border-radius: 50%;
-      background: rgba(15, 23, 42, 0.85);
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(15, 23, 42, 0.88);
+      border: 1px solid rgba(255, 255, 255, 0.15);
       color: var(--primary);
       display: flex;
       align-items: center;
@@ -1291,6 +1364,7 @@
       font-size: 1.2rem;
       cursor: pointer;
       backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
       box-shadow: 0 6px 20px rgba(0,0,0,0.4);
       opacity: 0;
       transform: scale(0.8);
@@ -1305,6 +1379,11 @@
       background: var(--primary);
       color: #030712;
       box-shadow: 0 0 20px var(--primary-glow);
+    }
+
+    /* Mobile Bottom Navigation Dock */
+    .mobile-nav-bar {
+      display: none;
     }
 
     /* Empty state & Loading */
@@ -1333,8 +1412,8 @@
     /* Footer */
     footer {
       text-align: center;
-      margin-top: 5rem;
-      padding-top: 2.8rem;
+      margin-top: 4rem;
+      padding-top: 2.5rem;
       border-top: 1px solid rgba(255, 255, 255, 0.08);
       color: var(--text-dim);
       font-size: 0.86rem;
@@ -1349,7 +1428,7 @@
       text-decoration: underline;
     }
 
-    /* Responsive */
+    /* Responsive Breakdown */
     @media (max-width: 1080px) {
       .tracker-card {
         grid-template-columns: 1fr 1fr;
@@ -1362,17 +1441,147 @@
       }
     }
 
-    @media (max-width: 640px) {
-      .container { padding: 1rem 1rem 3rem; }
-      .brand-title { font-size: 1.55rem; }
-      .tracker-card { grid-template-columns: 1fr; }
-      .radial-stat-box { grid-column: span 1; }
-      .matches-grid { grid-template-columns: 1fr; }
-      .controls { flex-direction: column; align-items: stretch; }
-      .filter-group { flex-wrap: wrap; }
-      .select-dropdown { width: 100%; }
-      .hero-banner { padding: 1.4rem; }
-      .quick-tags-row { display: none; }
+    /* Mobile Optimization: Screens <= 768px */
+    @media (max-width: 768px) {
+      body {
+        padding-bottom: calc(75px + var(--safe-bottom)) !important;
+      }
+      .container {
+        padding: 0.9rem 0.9rem 2rem;
+      }
+      .brand-title {
+        font-size: 1.6rem;
+      }
+      .brand-icon {
+        width: 46px;
+        height: 46px;
+        font-size: 1.5rem;
+      }
+      .header-actions {
+        width: 100%;
+        justify-content: space-between;
+      }
+      .clock-badge {
+        flex: 1;
+        justify-content: center;
+      }
+      .hero-banner {
+        padding: 1.4rem 1.2rem;
+        border-radius: 20px;
+      }
+      .hero-heading {
+        font-size: 1.45rem;
+      }
+      .hero-features {
+        gap: 0.6rem;
+      }
+      .hero-feat-item {
+        font-size: 0.78rem;
+        padding: 5px 10px;
+      }
+
+      /* Compact 2-Column Performance HUD on Mobile */
+      .tracker-card {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 0.75rem !important;
+        padding: 1.1rem !important;
+        border-radius: 20px !important;
+      }
+      .radial-stat-box {
+        grid-column: span 2 !important;
+        padding-right: 0 !important;
+        border-right: none !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+        padding-bottom: 1rem !important;
+        justify-content: center;
+      }
+      .stat-tile {
+        padding: 0.9rem !important;
+        border-radius: 14px !important;
+      }
+      .stat-tile-val {
+        font-size: 1.55rem !important;
+      }
+
+      /* Mobile Controls */
+      .controls {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 1rem;
+        gap: 0.8rem;
+      }
+      .filter-group {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        width: 100%;
+        justify-content: flex-start;
+      }
+      .filter-group::-webkit-scrollbar {
+        display: none;
+      }
+      .select-dropdown {
+        width: 100%;
+      }
+
+      /* Featured Grid on Mobile */
+      .featured-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1.1rem;
+      }
+
+      /* Matches Grid on Mobile */
+      .matches-grid {
+        grid-template-columns: 1fr;
+        gap: 1.1rem;
+      }
+      .match-card {
+        padding: 1.2rem;
+        border-radius: 18px;
+      }
+
+      /* Native App Style Bottom Navigation Dock */
+      .mobile-nav-bar {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: calc(62px + var(--safe-bottom));
+        padding-bottom: var(--safe-bottom);
+        background: rgba(10, 16, 30, 0.94);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border-top: 1px solid rgba(255, 255, 255, 0.12);
+        z-index: 999;
+        align-items: center;
+        justify-content: space-around;
+        box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.6);
+      }
+      .nav-tab-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        font-size: 0.68rem;
+        font-weight: 700;
+        color: var(--text-muted);
+        text-decoration: none;
+        flex: 1;
+        height: 100%;
+        cursor: pointer;
+        transition: all 0.15s ease;
+      }
+      .nav-tab-item:active {
+        transform: scale(0.92);
+      }
+      .nav-tab-item.active {
+        color: var(--primary);
+      }
+      .nav-tab-icon {
+        font-size: 1.2rem;
+      }
     }
   </style>
 </head>
@@ -1434,14 +1643,19 @@
           <span class="pulse-dot"></span>
           <span>LIVE CLOUD SYNC</span>
         </div>
-        <button class="btn" id="btn-refresh" onclick="loadData(true)">
+        <!-- Haptic Engine Toggle Button -->
+        <button class="btn-haptic-toggle touch-haptic active" id="btn-haptic" onclick="toggleHaptics()" title="Toggle Haptic Feedback">
+          <span id="haptic-icon">📳</span>
+          <span id="haptic-text">Haptics: ON</span>
+        </button>
+        <button class="btn touch-haptic" id="btn-refresh" onclick="loadData(true); triggerHaptic('medium');">
           <span>🔄 Refresh</span>
         </button>
-        <a href="https://github.com/kwesiwindsurf-crypto/ai-football-predictions" target="_blank" rel="noopener noreferrer" class="btn btn-github">
+        <a href="https://github.com/kwesiwindsurf-crypto/ai-football-predictions" target="_blank" rel="noopener noreferrer" class="btn btn-github touch-haptic" onclick="triggerHaptic('light')">
           <span>⭐ GitHub</span>
         </a>
-        <a href="https://t.me/ai_scorecast_football" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
-          <span>📢 Telegram Channel</span>
+        <a href="https://t.me/ai_scorecast_football" target="_blank" rel="noopener noreferrer" class="btn btn-primary touch-haptic" onclick="triggerHaptic('medium')">
+          <span>📢 Telegram</span>
         </a>
       </div>
     </header>
@@ -1465,7 +1679,7 @@
       </div>
     </section>
 
-    <!-- Performance HUD Scorecard (Clickable Stat Tiles) -->
+    <!-- Performance HUD Scorecard (Clickable Stat Tiles with Haptics) -->
     <section class="tracker-card" id="tracker" aria-label="Performance Scorecard">
       <div class="radial-stat-box">
         <div class="radial-ring-wrap">
@@ -1482,7 +1696,7 @@
         </div>
       </div>
 
-      <div class="stat-tile" onclick="filterByResult('WON')" title="Filter to Won Matches">
+      <div class="stat-tile touch-haptic" onclick="filterByResult('WON'); triggerHaptic('medium');" title="Filter to Won Matches">
         <div class="stat-tile-top">
           <span class="stat-tile-label">Wins</span>
           <span class="stat-tile-icon">🏆</span>
@@ -1491,7 +1705,7 @@
         <span class="stat-tile-sub">Direct &amp; Safe Hits</span>
       </div>
 
-      <div class="stat-tile" onclick="filterByResult('DRAW_SHIELD')" title="Filter to Shielded Draws">
+      <div class="stat-tile touch-haptic" onclick="filterByResult('DRAW_SHIELD'); triggerHaptic('medium');" title="Filter to Shielded Draws">
         <div class="stat-tile-top">
           <span class="stat-tile-label">Draws Shielded</span>
           <span class="stat-tile-icon">🛡️</span>
@@ -1500,7 +1714,7 @@
         <span class="stat-tile-sub">Protected by 1X / X2</span>
       </div>
 
-      <div class="stat-tile" onclick="filterByResult('LOST')" title="Filter to Losses">
+      <div class="stat-tile touch-haptic" onclick="filterByResult('LOST'); triggerHaptic('medium');" title="Filter to Losses">
         <div class="stat-tile-top">
           <span class="stat-tile-label">Losses</span>
           <span class="stat-tile-icon">❌</span>
@@ -1509,7 +1723,7 @@
         <span class="stat-tile-sub">Uncovered Upsets</span>
       </div>
 
-      <div class="stat-tile" onclick="filterByResult('PENDING')" title="Filter to Live / In-Play">
+      <div class="stat-tile touch-haptic" onclick="filterByResult('PENDING'); triggerHaptic('medium');" title="Filter to Live / In-Play">
         <div class="stat-tile-top">
           <span class="stat-tile-label">Live / In-Play</span>
           <span class="stat-tile-icon">⏳</span>
@@ -1518,7 +1732,7 @@
         <span class="stat-tile-sub">Active &amp; Upcoming</span>
       </div>
 
-      <div class="stat-tile" onclick="filterByResult('ALL')" title="Reset to All Matches">
+      <div class="stat-tile touch-haptic" onclick="filterByResult('ALL'); triggerHaptic('medium');" title="Reset to All Matches">
         <div class="stat-tile-top">
           <span class="stat-tile-label">Total Matches</span>
           <span class="stat-tile-icon">📈</span>
@@ -1540,36 +1754,36 @@
       <div class="featured-grid" id="featured-grid"></div>
     </section>
 
-    <!-- Quick Category Chips -->
-    <div class="quick-tags-row">
-      <span class="quick-tag-label">Quick Filters:</span>
-      <button class="quick-tag active" data-qtag="all" onclick="setQuickTag('all', this)">All Games</button>
-      <button class="quick-tag" data-qtag="bankers" onclick="setQuickTag('bankers', this)">⭐ Top Confidence (&ge; 70%)</button>
-      <button class="quick-tag" data-qtag="double_chance" onclick="setQuickTag('double_chance', this)">🛡️ Double Chance (1X / X2)</button>
-      <button class="quick-tag" data-qtag="goals" onclick="setQuickTag('goals', this)">⚽ Over/Under Goals</button>
-      <button class="quick-tag" data-qtag="ucl" onclick="setQuickTag('ucl', this)">🏆 European Cups</button>
-      <button class="quick-tag" data-qtag="won_only" onclick="setQuickTag('won_only', this)">✅ Verified Hits</button>
+    <!-- Quick Category Chips (Smooth Horizontal Swipe with Haptics) -->
+    <div class="quick-tags-row" id="quick-tags">
+      <span class="quick-tag-label">Quick:</span>
+      <button class="quick-tag touch-haptic active" data-qtag="all" onclick="setQuickTag('all', this); triggerHaptic('light');">All Games</button>
+      <button class="quick-tag touch-haptic" data-qtag="bankers" onclick="setQuickTag('bankers', this); triggerHaptic('light');">⭐ Top Confidence (&ge; 70%)</button>
+      <button class="quick-tag touch-haptic" data-qtag="double_chance" onclick="setQuickTag('double_chance', this); triggerHaptic('light');">🛡️ Double Chance (1X / X2)</button>
+      <button class="quick-tag touch-haptic" data-qtag="goals" onclick="setQuickTag('goals', this); triggerHaptic('light');">⚽ Over/Under Goals</button>
+      <button class="quick-tag touch-haptic" data-qtag="ucl" onclick="setQuickTag('ucl', this); triggerHaptic('light');">🏆 European Cups</button>
+      <button class="quick-tag touch-haptic" data-qtag="won_only" onclick="setQuickTag('won_only', this); triggerHaptic('light');">✅ Verified Hits</button>
     </div>
 
     <!-- Toolbar: Search, Date Filters, League & Status -->
     <div class="controls">
       <div class="search-box">
         <span class="search-icon">🔍</span>
-        <input type="text" id="search-input" class="search-input" placeholder="Search team, league, or recommendation..." oninput="handleSearch()">
+        <input type="text" id="search-input" class="search-input" placeholder="Search team, league, or recommendation..." oninput="handleSearch()" onfocus="triggerHaptic('select')">
       </div>
 
       <div class="filter-group">
-        <button class="filter-btn active" data-date="all" onclick="setDateFilter('all', this)">All Days</button>
-        <button class="filter-btn" data-date="yesterday" onclick="setDateFilter('yesterday', this)">Yesterday</button>
-        <button class="filter-btn" data-date="today" onclick="setDateFilter('today', this)">Today</button>
-        <button class="filter-btn" data-date="tomorrow" onclick="setDateFilter('tomorrow', this)">Tomorrow</button>
+        <button class="filter-btn touch-haptic active" data-date="all" onclick="setDateFilter('all', this); triggerHaptic('light');">All Days</button>
+        <button class="filter-btn touch-haptic" data-date="yesterday" onclick="setDateFilter('yesterday', this); triggerHaptic('light');">Yesterday</button>
+        <button class="filter-btn touch-haptic" data-date="today" onclick="setDateFilter('today', this); triggerHaptic('light');">Today</button>
+        <button class="filter-btn touch-haptic" data-date="tomorrow" onclick="setDateFilter('tomorrow', this); triggerHaptic('light');">Tomorrow</button>
       </div>
 
-      <select id="league-select" class="select-dropdown" onchange="handleLeagueFilter()">
+      <select id="league-select" class="select-dropdown touch-haptic" onchange="handleLeagueFilter(); triggerHaptic('light');">
         <option value="all">All Leagues</option>
       </select>
 
-      <select id="status-select" class="select-dropdown" onchange="handleStatusFilter()">
+      <select id="status-select" class="select-dropdown touch-haptic" onchange="handleStatusFilter(); triggerHaptic('light');">
         <option value="all">All Statuses</option>
         <option value="live">🟢 Live In-Play</option>
         <option value="finished">🏁 Finished (FT)</option>
@@ -1591,12 +1805,36 @@
       <p><strong>AI Scorecast</strong> &bull; Advanced Football Prediction &amp; Analytics Engine</p>
       <p style="margin-top: 4px;">Powered by Cloudflare Workers KV, ESPN Match Feeds &amp; League-Tailored Strategy Systems &bull; Auto-syncs every 20 minutes</p>
       <p style="margin-top: 10px;">
-        <a href="https://t.me/ai_scorecast_football" target="_blank" rel="noopener noreferrer">📢 Official Telegram (@ai_scorecast_football)</a> &bull;
-        <a href="https://github.com/kwesiwindsurf-crypto/ai-football-predictions" target="_blank" rel="noopener noreferrer">⭐ GitHub Repository</a> &bull;
-        <a href="javascript:void(0)" onclick="loadData(true)">🔄 Force Sync</a>
+        <a href="https://t.me/ai_scorecast_football" target="_blank" rel="noopener noreferrer" onclick="triggerHaptic('medium')">📢 Official Telegram (@ai_scorecast_football)</a> &bull;
+        <a href="https://github.com/kwesiwindsurf-crypto/ai-football-predictions" target="_blank" rel="noopener noreferrer" onclick="triggerHaptic('light')">⭐ GitHub Repository</a> &bull;
+        <a href="javascript:void(0)" onclick="loadData(true); triggerHaptic('medium');">🔄 Force Sync</a>
       </p>
     </footer>
   </div>
+
+  <!-- Mobile Bottom Navigation Dock (App-Like Thumb Experience) -->
+  <nav class="mobile-nav-bar" id="mobile-dock" aria-label="Mobile Navigation">
+    <div class="nav-tab-item active" id="tab-matches" onclick="scrollToSection('content-area'); triggerHaptic('light');">
+      <span class="nav-tab-icon">⚽</span>
+      <span>Matches</span>
+    </div>
+    <div class="nav-tab-item" id="tab-bankers" onclick="scrollToBankers(); triggerHaptic('light');">
+      <span class="nav-tab-icon">⭐</span>
+      <span>Bankers</span>
+    </div>
+    <div class="nav-tab-item" id="tab-live" onclick="quickFilterLive(); triggerHaptic('light');">
+      <span class="nav-tab-icon">🔴</span>
+      <span>Live</span>
+    </div>
+    <div class="nav-tab-item" id="tab-stats" onclick="scrollToSection('tracker'); triggerHaptic('light');">
+      <span class="nav-tab-icon">📊</span>
+      <span>Accuracy</span>
+    </div>
+    <a href="https://t.me/ai_scorecast_football" target="_blank" rel="noopener noreferrer" class="nav-tab-item" onclick="triggerHaptic('medium');">
+      <span class="nav-tab-icon">📢</span>
+      <span>Telegram</span>
+    </a>
+  </nav>
 
   <!-- Floating Toast Notification -->
   <div class="toast" id="toast">
@@ -1605,7 +1843,7 @@
   </div>
 
   <!-- Floating Back to Top Button -->
-  <button class="btn-back-top" id="btn-back-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" title="Back to top">
+  <button class="btn-back-top touch-haptic" id="btn-back-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); triggerHaptic('light');" title="Back to top">
     ↑
   </button>
 
@@ -1618,6 +1856,53 @@
     let currentQuickTag = 'all';
     let currentResultFilter = 'ALL';
     let searchQuery = '';
+
+    // ==========================================
+    // 📳 HAPTICS ENGINE (Vibration API + Touch Feedback)
+    // ==========================================
+    let hapticEnabled = localStorage.getItem('ai_scorecast_haptics') !== 'false';
+
+    function triggerHaptic(type = 'light') {
+      if (!hapticEnabled) return;
+      if ('vibrate' in navigator) {
+        try {
+          if (type === 'light') navigator.vibrate(12);
+          else if (type === 'medium') navigator.vibrate(28);
+          else if (type === 'heavy') navigator.vibrate(45);
+          else if (type === 'success') navigator.vibrate([15, 35, 25]);
+          else if (type === 'select') navigator.vibrate(8);
+          else if (type === 'error') navigator.vibrate([35, 50, 35]);
+        } catch (_) {}
+      }
+    }
+
+    function updateHapticUI() {
+      const btn = document.getElementById('btn-haptic');
+      const icon = document.getElementById('haptic-icon');
+      const text = document.getElementById('haptic-text');
+      if (!btn) return;
+      if (hapticEnabled) {
+        btn.classList.add('active');
+        if (icon) icon.innerText = '📳';
+        if (text) text.innerText = 'Haptics: ON';
+      } else {
+        btn.classList.remove('active');
+        if (icon) icon.innerText = '📴';
+        if (text) text.innerText = 'Haptics: OFF';
+      }
+    }
+
+    function toggleHaptics() {
+      hapticEnabled = !hapticEnabled;
+      localStorage.setItem('ai_scorecast_haptics', hapticEnabled ? 'true' : 'false');
+      updateHapticUI();
+      if (hapticEnabled) {
+        triggerHaptic('success');
+        showToast('Haptic Feedback Enabled 📳');
+      } else {
+        showToast('Haptic Feedback Disabled 📴');
+      }
+    }
 
     // Live UTC Clock
     function updateClock() {
@@ -1652,6 +1937,33 @@
         else btn.classList.remove('show');
       }
     });
+
+    // Mobile Dock Navigation Helpers
+    function scrollToSection(id) {
+      const el = document.getElementById(id);
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function scrollToBankers() {
+      const el = document.getElementById('featured-showcase');
+      if (el && el.style.display !== 'none') {
+        el.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        // Fallback: Filter to bankers
+        const bTag = document.querySelector('[data-qtag="bankers"]');
+        if (bTag) setQuickTag('bankers', bTag);
+      }
+    }
+
+    function quickFilterLive() {
+      const statusSelect = document.getElementById('status-select');
+      if (statusSelect) {
+        statusSelect.value = 'live';
+        handleStatusFilter();
+        scrollToSection('content-area');
+        showToast('Filtered to Live Matches 🔴');
+      }
+    }
 
     // Evaluate prediction against scores
     function evaluatePrediction(rec, hScore, aScore, hTeam, aTeam) {
@@ -1746,7 +2058,10 @@
         updateScorecard();
         renderFeaturedBankers();
         renderMatches();
-        if (force) showToast('Data synchronized successfully!');
+        if (force) {
+          triggerHaptic('success');
+          showToast('Data synchronized successfully!');
+        }
       } catch (e) {
         console.error('Fetch error:', e);
         document.getElementById('content-area').innerHTML = `
@@ -1755,6 +2070,7 @@
             <p style="font-size: 0.9rem; margin-top: 8px;">Please check your internet connection and click Refresh above.</p>
           </div>
         `;
+        triggerHaptic('error');
         showToast('Connection failed. Retrying in background...', '⚠️');
       }
     }
@@ -1806,7 +2122,6 @@
 
     function filterByResult(res) {
       currentResultFilter = res;
-      // Highlight selected stat tile
       document.querySelectorAll('.stat-tile').forEach(t => t.classList.remove('active-filter'));
       renderMatches();
       if (res !== 'ALL') showToast(`Filtered to: ${res}`);
@@ -1857,7 +2172,7 @@
         const primarySafe = m.prediction?.stakingOptions?.[0] || 'High Confidence';
 
         const card = document.createElement('div');
-        card.className = 'banker-card';
+        card.className = 'banker-card touch-haptic';
         card.innerHTML = `
           <div class="banker-top">
             <span class="banker-league">🏆 ${m.league || 'Featured'}</span>
@@ -1890,8 +2205,8 @@
           <div class="banker-footer">
             <span class="banker-time">⏳ ${dateStr} &bull; ${timeStr}</span>
             <div class="banker-actions">
-              <button class="btn-copy-pick" onclick="copyPickText('${m.homeTeam}', '${m.awayTeam}', '${rec}', '${maxProb}%', '${primarySafe}')">📋 Copy</button>
-              <a href="${m.matchUrl || '#'}" target="_blank" rel="noopener noreferrer" class="match-site-link">Preview ↗</a>
+              <button class="btn-copy-pick touch-haptic" onclick="copyPickText('${m.homeTeam}', '${m.awayTeam}', '${rec}', '${maxProb}%', '${primarySafe}'); triggerHaptic('success');">📋 Copy</button>
+              <a href="${m.matchUrl || '#'}" target="_blank" rel="noopener noreferrer" class="match-site-link touch-haptic" onclick="triggerHaptic('light')">Preview ↗</a>
             </div>
           </div>
         `;
@@ -2034,7 +2349,7 @@
 
         matches.forEach(m => {
           const card = document.createElement('div');
-          card.className = 'match-card';
+          card.className = 'match-card touch-haptic';
 
           const dateObj = new Date(m.date);
           const timeStr = !isNaN(dateObj) ? dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
@@ -2066,7 +2381,7 @@
           // Match Site Link
           const siteUrl = m.matchUrl || (m.espnEventId ? `https://www.espn.com/soccer/match/_/gameId/${m.espnEventId}` : null);
           const siteLinkHtml = siteUrl
-            ? `<a href="${siteUrl}" target="_blank" rel="noopener noreferrer" class="match-site-link">Match Overview ↗</a>`
+            ? `<a href="${siteUrl}" target="_blank" rel="noopener noreferrer" class="match-site-link touch-haptic" onclick="triggerHaptic('light')">Match Overview ↗</a>`
             : `<span style="color: var(--text-dim);">No web link</span>`;
 
           const scoreText = (isLive || isFT) ? `${m.homeScore ?? 0} : ${m.awayScore ?? 0}` : 'vs';
@@ -2161,7 +2476,8 @@
       });
     }
 
-    // Auto-load on page start
+    // Initialize UI and data
+    updateHapticUI();
     loadData();
   </script>
 </body>
