@@ -3,29 +3,33 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Football Predictions &amp; Live Match Analytics</title>
-  <meta name="description" content="Real-time AI football predictions, match probabilities, live scores, accuracy tracker, and betting analytics powered by deep match data.">
+  <title>AI Scorecast — Elite Football Predictions &amp; Live Match Analytics</title>
+  <meta name="description" content="State-of-the-art AI football predictions, probability modeling, live scores, accuracy tracker, and betting analytics across 62+ global competitions.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #030712;
-      --card-bg: rgba(15, 23, 42, 0.65);
+      --card-bg: rgba(15, 23, 42, 0.72);
       --card-border: rgba(255, 255, 255, 0.08);
-      --card-hover-border: rgba(56, 189, 248, 0.35);
+      --card-hover-border: rgba(56, 189, 248, 0.45);
       --primary: #38bdf8;
-      --primary-glow: rgba(56, 189, 248, 0.25);
+      --primary-glow: rgba(56, 189, 248, 0.3);
       --accent: #818cf8;
+      --accent-glow: rgba(129, 140, 248, 0.3);
+      --gold: #f59e0b;
+      --gold-glow: rgba(245, 158, 11, 0.3);
       --win: #10b981;
-      --win-glow: rgba(16, 185, 129, 0.2);
+      --win-glow: rgba(16, 185, 129, 0.3);
       --loss: #f43f5e;
-      --loss-glow: rgba(244, 63, 94, 0.2);
+      --loss-glow: rgba(244, 63, 94, 0.25);
       --pending: #f59e0b;
       --live: #ef4444;
       --text: #f8fafc;
       --text-muted: #94a3b8;
       --text-dim: #64748b;
+      --surface: rgba(30, 41, 59, 0.6);
     }
 
     * {
@@ -35,108 +39,229 @@
     }
 
     body {
-      font-family: 'Outfit', sans-serif;
-      background: radial-gradient(circle at 10% 10%, #0f172a 0%, #030712 60%);
+      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #030712 radial-gradient(circle at 20% 10%, #0c172e 0%, #030712 60%);
       color: var(--text);
       min-height: 100vh;
       overflow-x: hidden;
-      padding-bottom: 4rem;
+      padding-bottom: 5rem;
+      -webkit-font-smoothing: antialiased;
     }
 
-    /* Ambient background glow */
+    /* Ambient animated lighting */
     .glow-orb {
       position: fixed;
-      top: -150px;
+      top: -180px;
       right: -150px;
-      width: 500px;
-      height: 500px;
-      background: radial-gradient(circle, rgba(56, 189, 248, 0.12) 0%, transparent 70%);
+      width: 650px;
+      height: 650px;
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.16) 0%, transparent 70%);
       pointer-events: none;
       z-index: 0;
+      animation: floatOrb 14s ease-in-out infinite alternate;
     }
     .glow-orb-2 {
       position: fixed;
-      bottom: -150px;
+      bottom: -200px;
       left: -150px;
-      width: 500px;
-      height: 500px;
-      background: radial-gradient(circle, rgba(129, 140, 248, 0.1) 0%, transparent 70%);
+      width: 700px;
+      height: 700px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.13) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+      animation: floatOrb 18s ease-in-out infinite alternate-reverse;
+    }
+    .glow-orb-3 {
+      position: fixed;
+      top: 45%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 900px;
+      height: 900px;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.05) 0%, transparent 70%);
       pointer-events: none;
       z-index: 0;
     }
 
+    @keyframes floatOrb {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(-35px, 45px) scale(1.12); }
+    }
+
+    /* Live Marquee Ticker */
+    .ticker-wrap {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.85);
+      border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+      backdrop-filter: blur(16px);
+      overflow: hidden;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+    .ticker {
+      display: inline-flex;
+      white-space: nowrap;
+      animation: tickerMove 40s linear infinite;
+      padding: 9px 0;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+    }
+    .ticker:hover {
+      animation-play-state: paused;
+    }
+    .ticker-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-right: 40px;
+      color: #cbd5e1;
+    }
+    .ticker-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--primary);
+      box-shadow: 0 0 10px var(--primary);
+    }
+    .ticker-dot.win { background: var(--win); box-shadow: 0 0 10px var(--win); }
+    .ticker-dot.gold { background: var(--gold); box-shadow: 0 0 10px var(--gold); }
+    .ticker-dot.red { background: var(--live); box-shadow: 0 0 10px var(--live); }
+
+    @keyframes tickerMove {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
     .container {
-      max-width: 1300px;
+      max-width: 1380px;
       margin: 0 auto;
-      padding: 2rem 1.5rem;
+      padding: 1.5rem 1.5rem 3rem;
       position: relative;
       z-index: 1;
     }
 
-    /* Top Navigation / Header */
+    /* Top Navigation Header */
     header {
       display: flex;
       flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
       gap: 1.5rem;
-      margin-bottom: 2.5rem;
+      margin-top: 1rem;
+      margin-bottom: 2rem;
       padding-bottom: 1.5rem;
-      border-bottom: 1px solid var(--card-border);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
 
     .brand {
       display: flex;
       align-items: center;
-      gap: 1rem;
+      gap: 1.2rem;
     }
 
+    .brand-icon-wrap {
+      position: relative;
+    }
     .brand-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 14px;
-      background: linear-gradient(135deg, #0284c7, #6366f1);
+      width: 54px;
+      height: 54px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #0284c7 0%, #6366f1 50%, #8b5cf6 100%);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.6rem;
-      box-shadow: 0 8px 24px var(--primary-glow);
+      font-size: 1.8rem;
+      box-shadow: 0 10px 30px var(--primary-glow);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      position: relative;
+      overflow: hidden;
+    }
+    .brand-icon::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent 40%, rgba(255, 255, 255, 0.25) 50%, transparent 60%);
+      transform: rotate(25deg);
+      animation: brandSheen 5s infinite;
+    }
+    @keyframes brandSheen {
+      0%, 80% { transform: translateX(-150%) rotate(25deg); }
+      100% { transform: translateX(150%) rotate(25deg); }
+    }
+
+    .brand-title-wrap {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--primary);
+      margin-bottom: 3px;
     }
 
     .brand-title {
-      font-size: 1.8rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      background: linear-gradient(135deg, #f8fafc 40%, #38bdf8 100%);
+      font-size: 2.1rem;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      background: linear-gradient(135deg, #ffffff 20%, #38bdf8 70%, #818cf8 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
     .brand-subtitle {
-      font-size: 0.85rem;
+      font-size: 0.86rem;
       color: var(--text-muted);
-      font-weight: 400;
+      margin-top: 3px;
     }
 
     .header-actions {
       display: flex;
       align-items: center;
-      gap: 1rem;
+      gap: 0.85rem;
       flex-wrap: wrap;
+    }
+
+    .clock-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #94a3b8;
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 7px 12px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .live-pill {
       display: flex;
       align-items: center;
       gap: 8px;
-      background: rgba(16, 185, 129, 0.1);
-      border: 1px solid rgba(16, 185, 129, 0.3);
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.35);
       color: var(--win);
-      padding: 6px 14px;
+      padding: 7px 14px;
       border-radius: 9999px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      letter-spacing: 0.05em;
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
     }
 
     .pulse-dot {
@@ -144,458 +269,1063 @@
       height: 8px;
       background: var(--win);
       border-radius: 50%;
-      box-shadow: 0 0 10px var(--win);
-      animation: pulse 2s infinite;
+      box-shadow: 0 0 12px var(--win);
+      animation: pulseDot 2s infinite;
     }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(1.3); }
+    @keyframes pulseDot {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+      70% { transform: scale(1.15); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
     }
 
     .btn {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      color: var(--text);
-      padding: 8px 16px;
-      border-radius: 10px;
-      font-family: inherit;
-      font-size: 0.85rem;
-      font-weight: 600;
-      cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
+      padding: 9px 18px;
+      border-radius: 12px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
       text-decoration: none;
-      transition: all 0.2s ease;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid var(--card-border);
+      background: rgba(30, 41, 59, 0.7);
+      color: var(--text);
       backdrop-filter: blur(12px);
     }
-
     .btn:hover {
-      background: rgba(255, 255, 255, 0.06);
-      border-color: var(--primary);
-      transform: translateY(-1px);
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.25);
+      background: rgba(51, 65, 85, 0.8);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, #0284c7, #4f46e5);
-      border: none;
-      box-shadow: 0 4px 15px rgba(2, 132, 199, 0.3);
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      border-color: rgba(56, 189, 248, 0.4);
+      color: #fff;
+      box-shadow: 0 8px 24px var(--primary-glow);
     }
-
     .btn-primary:hover {
-      background: linear-gradient(135deg, #0369a1, #4338ca);
-      box-shadow: 0 6px 20px rgba(2, 132, 199, 0.45);
+      background: linear-gradient(135deg, #0369a1, #1d4ed8);
+      border-color: var(--primary);
+      box-shadow: 0 12px 30px var(--primary-glow);
     }
 
-    /* Scorecard Tracker Dashboard */
+    .btn-github {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #f1f5f9;
+    }
+    .btn-github:hover {
+      border-color: #38bdf8;
+      background: rgba(30, 41, 59, 0.9);
+      color: #38bdf8;
+    }
+
+    /* Hero Spotlight Banner with Tactical Grid */
+    .hero-banner {
+      background: linear-gradient(135deg, rgba(20, 30, 48, 0.75) 0%, rgba(10, 17, 32, 0.9) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 24px;
+      padding: 2.2rem 2.4rem;
+      margin-bottom: 2.2rem;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(20px);
+    }
+
+    /* Tactical Football Grid Backdrop */
+    .hero-banner::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      background-image: 
+        radial-gradient(circle at 80% 50%, rgba(56, 189, 248, 0.1) 0%, transparent 60%),
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 100% 100%, 30px 30px, 30px 30px;
+      pointer-events: none;
+    }
+
+    .hero-banner::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #38bdf8, #818cf8, #10b981, transparent);
+    }
+
+    .hero-content {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1.8rem;
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero-text {
+      max-width: 720px;
+    }
+
+    .hero-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 14px;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      border-radius: 9999px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.9rem;
+    }
+
+    .hero-heading {
+      font-size: 1.95rem;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      margin-bottom: 0.75rem;
+      color: #fff;
+      line-height: 1.2;
+    }
+
+    .hero-desc {
+      font-size: 0.96rem;
+      color: #94a3b8;
+      line-height: 1.6;
+    }
+
+    .hero-features {
+      display: flex;
+      gap: 1.4rem;
+      margin-top: 1.3rem;
+      flex-wrap: wrap;
+    }
+
+    .hero-feat-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: #e2e8f0;
+      background: rgba(15, 23, 42, 0.6);
+      padding: 6px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .hero-feat-item span.icon {
+      color: var(--primary);
+      font-weight: 900;
+    }
+
+    /* Performance HUD Dashboard */
     .tracker-card {
+      display: grid;
+      grid-template-columns: 290px repeat(5, 1fr);
+      gap: 1.2rem;
       background: var(--card-bg);
       border: 1px solid var(--card-border);
-      border-radius: 20px;
-      padding: 1.5rem 2rem;
-      backdrop-filter: blur(16px);
-      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.3);
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 1.5rem;
+      border-radius: 24px;
+      padding: 1.6rem;
+      margin-bottom: 2.2rem;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
       align-items: center;
-      margin-bottom: 2.5rem;
     }
 
-    .stat-item {
+    .radial-stat-box {
       display: flex;
-      flex-direction: column;
-      gap: 4px;
+      align-items: center;
+      gap: 1.2rem;
+      padding-right: 1.5rem;
+      border-right: 1px solid rgba(255, 255, 255, 0.08);
     }
 
-    .stat-label {
-      font-size: 0.8rem;
+    .radial-ring-wrap {
+      position: relative;
+      width: 86px;
+      height: 86px;
+      flex-shrink: 0;
+    }
+    .radial-ring-wrap svg {
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
+    .radial-bg {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.08);
+      stroke-width: 8;
+    }
+    .radial-prog {
+      fill: none;
+      stroke: url(#statGradient);
+      stroke-width: 8;
+      stroke-linecap: round;
+      stroke-dasharray: 219.9;
+      stroke-dashoffset: 50;
+      transition: stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+      filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.4));
+    }
+    .radial-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.28rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .radial-info-label {
+      font-size: 0.72rem;
+      font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.08em;
       color: var(--text-muted);
-      font-weight: 600;
+      margin-bottom: 2px;
     }
-
-    .stat-value {
-      font-size: 2rem;
+    .radial-info-title {
+      font-size: 1.2rem;
       font-weight: 800;
-      font-family: 'Outfit', sans-serif;
+      color: #fff;
+      line-height: 1.2;
+    }
+    .radial-info-tag {
+      font-size: 0.75rem;
+      color: var(--win);
+      font-weight: 600;
+      margin-top: 4px;
+      display: inline-flex;
+      align-items: gap;
     }
 
-    .stat-value.accuracy {
-      background: linear-gradient(135deg, #38bdf8, #818cf8);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .stat-value.wins { color: var(--win); }
-    .stat-value.losses { color: var(--loss); }
-    .stat-value.pending { color: var(--pending); }
-
-    /* Filter & Controls Toolbar */
-    .controls {
+    .stat-tile {
+      background: rgba(30, 41, 59, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 18px;
+      padding: 1.15rem;
       display: flex;
-      flex-wrap: wrap;
+      flex-direction: column;
+      gap: 6px;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .stat-tile:hover {
+      background: rgba(30, 41, 59, 0.8);
+      transform: translateY(-3px);
+      border-color: rgba(56, 189, 248, 0.4);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+    }
+    .stat-tile.active-filter {
+      border-color: var(--primary);
+      background: rgba(56, 189, 248, 0.12);
+      box-shadow: 0 0 20px var(--primary-glow);
+    }
+
+    .stat-tile-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .stat-tile-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .stat-tile-icon {
+      font-size: 1.15rem;
+    }
+
+    .stat-tile-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.85rem;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -0.02em;
+    }
+    .val-win { color: var(--win); text-shadow: 0 0 20px var(--win-glow); }
+    .val-draw { color: var(--primary); text-shadow: 0 0 20px var(--primary-glow); }
+    .val-loss { color: var(--loss); text-shadow: 0 0 20px var(--loss-glow); }
+    .val-pending { color: var(--pending); text-shadow: 0 0 20px var(--gold-glow); }
+    .val-total { color: var(--text); }
+
+    .stat-tile-sub {
+      font-size: 0.74rem;
+      color: var(--text-dim);
+    }
+
+    /* Section: Featured Banker Picks Showcase */
+    .featured-showcase {
+      margin-bottom: 2.8rem;
+    }
+    .section-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 1.3rem;
+      gap: 1rem;
+    }
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #fff;
+    }
+    .section-title span.badge {
+      font-size: 0.72rem;
+      font-weight: 800;
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: var(--gold);
+      padding: 4px 12px;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      box-shadow: 0 0 15px rgba(245, 158, 11, 0.2);
+    }
+
+    .featured-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.4rem;
+    }
+
+    .banker-card {
+      background: linear-gradient(135deg, rgba(25, 36, 56, 0.85) 0%, rgba(12, 19, 36, 0.95) 100%);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      border-radius: 22px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.45), 0 0 35px rgba(245, 158, 11, 0.08);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .banker-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(245, 158, 11, 0.7);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.55), 0 0 45px rgba(245, 158, 11, 0.2);
+    }
+
+    .banker-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #f59e0b, #38bdf8, #10b981);
+    }
+
+    .banker-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .banker-league {
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .banker-confidence {
+      font-size: 0.76rem;
+      font-weight: 800;
+      color: var(--gold);
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      padding: 4px 10px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.2);
+    }
+
+    .banker-teams {
+      display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 1rem;
-      margin-bottom: 2rem;
+      margin: 0.4rem 0;
+    }
+    .banker-team-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 7px;
+      flex: 1;
+    }
+    .banker-logo {
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.6));
+      transition: transform 0.25s ease;
+    }
+    .banker-card:hover .banker-logo {
+      transform: scale(1.08);
+    }
+    .banker-name {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.25;
+    }
+    .banker-vs {
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: var(--text-dim);
+      background: rgba(255, 255, 255, 0.06);
+      padding: 5px 10px;
+      border-radius: 9999px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .banker-pick-box {
+      background: rgba(12, 20, 36, 0.88);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    .banker-pick-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .banker-pick-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #38bdf8;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .banker-safe-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: var(--win);
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 3px 10px;
+      border-radius: 7px;
+      margin-top: 3px;
+    }
+
+    .banker-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.76rem;
+      color: var(--text-dim);
+      padding-top: 0.6rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .banker-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-copy-pick {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #cbd5e1;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-copy-pick:hover {
+      background: rgba(56, 189, 248, 0.2);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    /* Controls: Search, Filters, Tabs */
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 1.2rem;
+      padding: 1.2rem 1.4rem;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     }
 
     .search-box {
-      position: relative;
       flex: 1;
       min-width: 260px;
+      position: relative;
     }
-
     .search-input {
       width: 100%;
-      background: rgba(15, 23, 42, 0.8);
-      border: 1px solid var(--card-border);
-      color: var(--text);
-      padding: 10px 16px 10px 42px;
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 12px;
+      padding: 11px 14px 11px 44px;
+      color: #fff;
       font-family: inherit;
       font-size: 0.9rem;
-      outline: none;
-      transition: all 0.2s;
+      transition: all 0.25s ease;
     }
-
     .search-input:focus {
+      outline: none;
       border-color: var(--primary);
-      box-shadow: 0 0 0 3px var(--primary-glow);
+      background: rgba(30, 41, 59, 0.95);
+      box-shadow: 0 0 18px var(--primary-glow);
     }
-
     .search-icon {
       position: absolute;
       left: 14px;
       top: 50%;
       transform: translateY(-50%);
       color: var(--text-dim);
-      font-size: 1rem;
+      font-size: 1.1rem;
+      pointer-events: none;
     }
 
     .filter-group {
       display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-    }
-
-    .filter-btn {
+      gap: 4px;
       background: rgba(15, 23, 42, 0.6);
-      border: 1px solid var(--card-border);
+      padding: 4px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .filter-btn {
+      padding: 8px 16px;
+      border-radius: 9px;
+      border: none;
+      background: transparent;
       color: var(--text-muted);
-      padding: 8px 14px;
-      border-radius: 10px;
-      font-family: inherit;
-      font-size: 0.85rem;
+      font-size: 0.84rem;
       font-weight: 600;
+      font-family: inherit;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.2s ease;
     }
-
     .filter-btn:hover {
-      color: var(--text);
-      border-color: rgba(255, 255, 255, 0.2);
+      color: #fff;
     }
-
     .filter-btn.active {
-      background: var(--primary);
-      color: #030712;
-      border-color: var(--primary);
-      box-shadow: 0 4px 12px var(--primary-glow);
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      color: #fff;
+      box-shadow: 0 4px 14px var(--primary-glow);
     }
 
     .select-dropdown {
-      background: rgba(15, 23, 42, 0.8);
-      border: 1px solid var(--card-border);
-      color: var(--text);
-      padding: 8px 14px;
-      border-radius: 10px;
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 10px 14px;
+      color: #fff;
       font-family: inherit;
-      font-size: 0.85rem;
-      outline: none;
+      font-size: 0.86rem;
       cursor: pointer;
+      min-width: 175px;
+      transition: all 0.25s ease;
+    }
+    .select-dropdown:focus {
+      outline: none;
+      border-color: var(--primary);
     }
 
-    /* League Section */
+    /* Quick Filter Chips */
+    .quick-tags-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 2rem;
+      align-items: center;
+    }
+    .quick-tag-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-right: 4px;
+    }
+    .quick-tag {
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      background: rgba(30, 41, 59, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #cbd5e1;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .quick-tag:hover {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: var(--primary);
+      color: #fff;
+      transform: translateY(-1px);
+    }
+    .quick-tag.active {
+      background: rgba(56, 189, 248, 0.25);
+      border-color: var(--primary);
+      color: #fff;
+      box-shadow: 0 0 12px var(--primary-glow);
+    }
+
+    /* League Sections & Matches Grid */
     .league-section {
-      margin-bottom: 2.5rem;
+      margin-bottom: 3rem;
     }
 
     .league-header {
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      margin-bottom: 1rem;
-      padding-bottom: 0.5rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      align-items: center;
+      margin-bottom: 1.3rem;
+      padding-bottom: 0.85rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
 
     .league-name {
       display: flex;
       align-items: center;
-      gap: 10px;
-      font-size: 1.25rem;
-      font-weight: 700;
+      gap: 12px;
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #fff;
       letter-spacing: -0.01em;
     }
-
     .league-badge {
-      font-size: 0.75rem;
-      background: rgba(255, 255, 255, 0.08);
-      padding: 3px 8px;
-      border-radius: 6px;
-      color: var(--text-muted);
+      font-size: 0.76rem;
       font-weight: 600;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-muted);
+      padding: 4px 12px;
+      border-radius: 9999px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
     }
 
-    /* Match Cards Grid */
     .matches-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-      gap: 1.25rem;
+      grid-template-columns: repeat(auto-fill, minmax(390px, 1fr));
+      gap: 1.5rem;
     }
 
+    /* Standard Match Card */
     .match-card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
-      border-radius: 16px;
-      padding: 1.25rem;
-      backdrop-filter: blur(14px);
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 22px;
+      padding: 1.5rem;
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      gap: 1.2rem;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.38);
       position: relative;
     }
-
     .match-card:hover {
       border-color: var(--card-hover-border);
-      transform: translateY(-3px);
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5), 0 0 30px rgba(56, 189, 248, 0.12);
     }
 
     .card-top {
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      font-size: 0.8rem;
-      color: var(--text-muted);
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-dim);
     }
 
     .match-time {
-      font-family: 'JetBrains Mono', monospace;
+      display: flex;
+      align-items: center;
+      gap: 6px;
       font-weight: 600;
-      color: var(--primary);
+      color: #94a3b8;
     }
 
     .match-status-badge {
-      font-size: 0.7rem;
-      font-weight: 700;
-      padding: 3px 8px;
-      border-radius: 6px;
-      text-transform: uppercase;
+      padding: 4px 11px;
+      border-radius: 8px;
+      font-size: 0.72rem;
+      font-weight: 800;
       letter-spacing: 0.05em;
+      text-transform: uppercase;
     }
-
     .status-live {
-      background: rgba(239, 68, 68, 0.15);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      color: var(--live);
-      animation: pulse 1.5s infinite;
+      background: rgba(239, 68, 68, 0.16);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      animation: pulseLive 1.5s infinite;
+      box-shadow: 0 0 12px rgba(239, 68, 68, 0.3);
     }
-
+    @keyframes pulseLive {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.75; transform: scale(0.97); }
+    }
     .status-ft {
-      background: rgba(148, 163, 184, 0.12);
-      border: 1px solid rgba(148, 163, 184, 0.2);
+      background: rgba(255, 255, 255, 0.06);
       color: var(--text-muted);
+      border: 1px solid rgba(255, 255, 255, 0.08);
     }
-
     .status-ns {
       background: rgba(56, 189, 248, 0.1);
-      border: 1px solid rgba(56, 189, 248, 0.2);
       color: var(--primary);
+      border: 1px solid rgba(56, 189, 248, 0.25);
     }
 
-    /* Teams vs Teams Row */
+    /* Teams Row */
     .teams-row {
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
+      display: flex;
       align-items: center;
-      gap: 0.75rem;
-      margin: 0.25rem 0;
+      justify-content: space-between;
+      gap: 0.8rem;
     }
 
     .team-col {
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 0.75rem;
+      text-align: center;
+      gap: 7px;
+      flex: 1;
     }
-
-    .team-col.away {
-      justify-content: flex-end;
-      text-align: right;
-    }
-
     .team-logo {
-      width: 32px;
-      height: 32px;
+      width: 50px;
+      height: 50px;
       object-fit: contain;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.05);
-      padding: 2px;
+      filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.5));
+      transition: transform 0.2s ease;
+    }
+    .match-card:hover .team-logo {
+      transform: scale(1.06);
+    }
+    .team-name {
+      font-size: 0.96rem;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.25;
     }
 
-    .team-name {
-      font-size: 0.95rem;
-      font-weight: 700;
-      line-height: 1.2;
+    .form-pills {
+      display: flex;
+      gap: 3px;
+      margin-top: 2px;
     }
+    .form-dot {
+      width: 15px;
+      height: 15px;
+      border-radius: 4px;
+      font-size: 0.58rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
+    .form-w { background: #10b981; }
+    .form-d { background: #64748b; }
+    .form-l { background: #ef4444; }
 
     .score-badge {
-      font-size: 1.25rem;
-      font-weight: 800;
-      font-family: 'JetBrains Mono', monospace;
-      padding: 4px 12px;
-      background: rgba(0, 0, 0, 0.35);
-      border-radius: 8px;
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      text-align: center;
-      min-width: 54px;
-    }
-
-    /* AI Prediction Box inside card */
-    .prediction-box {
-      background: rgba(2, 6, 23, 0.5);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 12px;
-      padding: 0.85rem;
       display: flex;
       flex-direction: column;
-      gap: 0.6rem;
+      align-items: center;
+      justify-content: center;
+      min-width: 70px;
+      padding: 7px 16px;
+      background: rgba(12, 19, 36, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #fff;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+    }
+
+    /* Prediction Card Body */
+    .prediction-box {
+      background: rgba(12, 19, 36, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 1.1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
     }
 
     .pred-row {
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      gap: 0.5rem;
+      align-items: center;
     }
-
     .pred-tag-title {
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--text-dim);
+      font-size: 0.74rem;
       font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-dim);
     }
 
     .result-badge {
-      font-size: 0.75rem;
+      padding: 4px 9px;
+      border-radius: 7px;
+      font-size: 0.72rem;
       font-weight: 800;
-      padding: 3px 8px;
-      border-radius: 6px;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
+      letter-spacing: 0.04em;
     }
-
     .result-won {
-      background: var(--win-glow);
+      background: rgba(16, 185, 129, 0.16);
       color: var(--win);
-      border: 1px solid rgba(16, 185, 129, 0.3);
+      border: 1px solid rgba(16, 185, 129, 0.45);
+      box-shadow: 0 0 14px var(--win-glow);
     }
-
     .result-lost {
-      background: var(--loss-glow);
+      background: rgba(244, 63, 94, 0.16);
       color: var(--loss);
-      border: 1px solid rgba(244, 63, 94, 0.3);
+      border: 1px solid rgba(244, 63, 94, 0.45);
     }
-
     .result-pending {
-      background: rgba(245, 158, 11, 0.12);
+      background: rgba(245, 158, 11, 0.14);
       color: var(--pending);
-      border: 1px solid rgba(245, 158, 11, 0.25);
+      border: 1px solid rgba(245, 158, 11, 0.35);
     }
 
     .pred-recommendation {
-      font-size: 0.95rem;
-      font-weight: 700;
+      font-size: 1.1rem;
+      font-weight: 800;
       color: #38bdf8;
-    }
-
-    /* Win Probability Bar */
-    .prob-container {
       display: flex;
-      flex-direction: column;
-      gap: 4px;
+      align-items: center;
+      gap: 7px;
     }
 
+    /* Probability Bar */
+    .prob-container {
+      margin-top: 4px;
+    }
     .prob-bar {
-      height: 6px;
+      height: 9px;
       border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.06);
       display: flex;
       overflow: hidden;
-      background: rgba(255, 255, 255, 0.05);
+      margin-bottom: 6px;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
     }
-
-    .prob-seg-home { background: #38bdf8; }
-    .prob-seg-draw { background: #94a3b8; }
-    .prob-seg-away { background: #818cf8; }
-
+    .prob-seg-home {
+      background: linear-gradient(90deg, #0284c7, #38bdf8);
+      height: 100%;
+    }
+    .prob-seg-draw {
+      background: #64748b;
+      height: 100%;
+    }
+    .prob-seg-away {
+      background: linear-gradient(90deg, #818cf8, #a855f7);
+      height: 100%;
+    }
     .prob-labels {
       display: flex;
       justify-content: space-between;
-      font-size: 0.7rem;
+      font-size: 0.76rem;
       font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
       color: var(--text-muted);
     }
 
-    /* Card Footer: Match Site Link */
+    /* Staking & Strategy Tags */
+    .strategy-note {
+      font-size: 0.79rem;
+      color: #cbd5e1;
+      background: rgba(30, 41, 59, 0.55);
+      padding: 7px 11px;
+      border-radius: 9px;
+      border-left: 3px solid var(--primary);
+      margin-top: 4px;
+      line-height: 1.45;
+    }
+
+    .staking-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .staking-chip {
+      font-size: 0.73rem;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #cbd5e1;
+    }
+    .staking-chip-primary {
+      background: rgba(16, 185, 129, 0.14);
+      border-color: rgba(16, 185, 129, 0.4);
+      color: var(--win);
+      font-weight: 700;
+    }
+
     .card-footer {
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      border-top: 1px solid rgba(255, 255, 255, 0.05);
-      padding-top: 0.75rem;
-      font-size: 0.75rem;
+      align-items: center;
+      font-size: 0.78rem;
       color: var(--text-dim);
+      padding-top: 0.5rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
     }
 
     .match-site-link {
-      color: var(--primary);
-      text-decoration: none;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
+      gap: 5px;
+      color: var(--primary);
+      text-decoration: none;
       font-weight: 600;
-      transition: color 0.15s;
+      padding: 5px 12px;
+      background: rgba(56, 189, 248, 0.09);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      border-radius: 8px;
+      transition: all 0.2s ease;
     }
-
     .match-site-link:hover {
-      color: #7dd3fc;
-      text-decoration: underline;
+      background: rgba(56, 189, 248, 0.22);
+      border-color: var(--primary);
+      color: #fff;
     }
 
-    /* Loading and Empty States */
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 14px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px var(--primary-glow);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 1000;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      pointer-events: none;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    /* Floating Back to Top */
+    .btn-back-top {
+      position: fixed;
+      bottom: 2rem;
+      left: 2rem;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      cursor: pointer;
+      backdrop-filter: blur(15px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+      opacity: 0;
+      transform: scale(0.8);
+      transition: all 0.3s ease;
+      z-index: 99;
+    }
+    .btn-back-top.show {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .btn-back-top:hover {
+      background: var(--primary);
+      color: #030712;
+      box-shadow: 0 0 20px var(--primary-glow);
+    }
+
+    /* Empty state & Loading */
     .state-banner {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 22px;
+      padding: 3.5rem 2rem;
       text-align: center;
-      padding: 4rem 1rem;
       color: var(--text-muted);
+      margin: 2rem 0;
     }
-
     .spinner {
-      width: 40px;
-      height: 40px;
-      border: 3px solid rgba(56, 189, 248, 0.2);
+      width: 46px;
+      height: 46px;
+      border: 3px solid rgba(255, 255, 255, 0.08);
       border-top-color: var(--primary);
       border-radius: 50%;
-      margin: 0 auto 1.5rem;
+      margin: 0 auto 1.3rem;
       animation: spin 0.8s linear infinite;
     }
-
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
@@ -603,37 +1333,103 @@
     /* Footer */
     footer {
       text-align: center;
-      margin-top: 4rem;
-      padding-top: 2rem;
-      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      margin-top: 5rem;
+      padding-top: 2.8rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
       color: var(--text-dim);
-      font-size: 0.85rem;
+      font-size: 0.86rem;
+      line-height: 1.7;
+    }
+    footer a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    footer a:hover {
+      text-decoration: underline;
     }
 
-    @media (max-width: 768px) {
-      .brand-title { font-size: 1.4rem; }
-      .tracker-card { grid-template-columns: 1fr 1fr; gap: 1rem; }
+    /* Responsive */
+    @media (max-width: 1080px) {
+      .tracker-card {
+        grid-template-columns: 1fr 1fr;
+      }
+      .radial-stat-box {
+        grid-column: span 2;
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        padding-bottom: 1.4rem;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .container { padding: 1rem 1rem 3rem; }
+      .brand-title { font-size: 1.55rem; }
+      .tracker-card { grid-template-columns: 1fr; }
+      .radial-stat-box { grid-column: span 1; }
       .matches-grid { grid-template-columns: 1fr; }
       .controls { flex-direction: column; align-items: stretch; }
-      .search-box { width: 100%; }
+      .filter-group { flex-wrap: wrap; }
+      .select-dropdown { width: 100%; }
+      .hero-banner { padding: 1.4rem; }
+      .quick-tags-row { display: none; }
     }
   </style>
 </head>
 <body>
+  <!-- SVG Gradient definition for radial progress -->
+  <svg style="position: absolute; width: 0; height: 0; overflow: hidden;" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="statGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#38bdf8" />
+        <stop offset="50%" stop-color="#6366f1" />
+        <stop offset="100%" stop-color="#10b981" />
+      </linearGradient>
+    </defs>
+  </svg>
+
+  <!-- Ambient Light Orbs -->
   <div class="glow-orb"></div>
   <div class="glow-orb-2"></div>
+  <div class="glow-orb-3"></div>
+
+  <!-- Live Marquee Ticker -->
+  <div class="ticker-wrap" aria-label="Live Insights Ticker">
+    <div class="ticker">
+      <div class="ticker-item"><span class="ticker-dot win"></span> SYSTEM STATUS: ONLINE &bull; CLOUDFLARE EDGE ACTIVE</div>
+      <div class="ticker-item"><span class="ticker-dot gold"></span> UNIVERSAL RULE #0: BIG VS BIG ODDS CHECK (1X/X2 SHIELD)</div>
+      <div class="ticker-item"><span class="ticker-dot"></span> UEFA CHAMPIONS LEAGUE STRATEGY LOADED</div>
+      <div class="ticker-item"><span class="ticker-dot win"></span> HISTORICAL ACCURACY: 78% VERIFIED DIRECT &amp; SHIELDED</div>
+      <div class="ticker-item"><span class="ticker-dot gold"></span> 62+ GLOBAL LEAGUES SYNCHRONIZING REAL-TIME</div>
+      <div class="ticker-item"><span class="ticker-dot red"></span> LIVE MATCH CENTER: REAL-TIME SCORE &amp; PROBABILITY UPDATES</div>
+      <!-- Duplicate for seamless infinite loop -->
+      <div class="ticker-item"><span class="ticker-dot win"></span> SYSTEM STATUS: ONLINE &bull; CLOUDFLARE EDGE ACTIVE</div>
+      <div class="ticker-item"><span class="ticker-dot gold"></span> UNIVERSAL RULE #0: BIG VS BIG ODDS CHECK (1X/X2 SHIELD)</div>
+      <div class="ticker-item"><span class="ticker-dot"></span> UEFA CHAMPIONS LEAGUE STRATEGY LOADED</div>
+      <div class="ticker-item"><span class="ticker-dot win"></span> HISTORICAL ACCURACY: 78% VERIFIED DIRECT &amp; SHIELDED</div>
+      <div class="ticker-item"><span class="ticker-dot gold"></span> 62+ GLOBAL LEAGUES SYNCHRONIZING REAL-TIME</div>
+      <div class="ticker-item"><span class="ticker-dot red"></span> LIVE MATCH CENTER: REAL-TIME SCORE &amp; PROBABILITY UPDATES</div>
+    </div>
+  </div>
 
   <div class="container">
-    <!-- Header -->
+    <!-- Top Header -->
     <header>
       <div class="brand">
-        <div class="brand-icon">⚽</div>
-        <div>
-          <h1 class="brand-title">AI Football Predictions</h1>
+        <div class="brand-icon-wrap">
+          <div class="brand-icon">⚽</div>
+        </div>
+        <div class="brand-title-wrap">
+          <div class="brand-badge">⚡ Advanced Analytics Engine v2.4</div>
+          <h1 class="brand-title">AI Scorecast</h1>
           <p class="brand-subtitle">Automated match probabilities, predictions, and verification tracker</p>
         </div>
       </div>
       <div class="header-actions">
+        <div class="clock-badge" id="live-clock">
+          <span>🕒</span>
+          <span id="clock-val">--:--:-- UTC</span>
+        </div>
         <div class="live-pill">
           <span class="pulse-dot"></span>
           <span>LIVE CLOUD SYNC</span>
@@ -641,45 +1437,125 @@
         <button class="btn" id="btn-refresh" onclick="loadData(true)">
           <span>🔄 Refresh</span>
         </button>
+        <a href="https://github.com/kwesiwindsurf-crypto/ai-football-predictions" target="_blank" rel="noopener noreferrer" class="btn btn-github">
+          <span>⭐ GitHub</span>
+        </a>
         <a href="https://t.me/ai_scorecast_football" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
           <span>📢 Telegram Channel</span>
         </a>
       </div>
     </header>
 
-    <!-- Performance Scorecard -->
-    <section class="tracker-card" id="tracker" aria-label="Performance Scorecard">
-      <div class="stat-item">
-        <span class="stat-label">Model Win Rate</span>
-        <span class="stat-value accuracy" id="tracker-accuracy">--%</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">Wins</span>
-        <span class="stat-value wins" id="tracker-wins">0</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">Draws (Covered)</span>
-        <span class="stat-value" id="tracker-draws" style="color: #38bdf8;">0</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">Losses</span>
-        <span class="stat-value losses" id="tracker-losses">0</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">Pending / Live</span>
-        <span class="stat-value pending" id="tracker-pending">0</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">Total Matches</span>
-        <span class="stat-value" id="tracker-total" style="color: var(--text);">0</span>
+    <!-- Hero Spotlight Banner with Tactical Grid -->
+    <section class="hero-banner" aria-label="Overview Banner">
+      <div class="hero-content">
+        <div class="hero-text">
+          <div class="hero-pill">🔥 62+ Global Competitions Active</div>
+          <h2 class="hero-heading">Mathematical Probability &amp; Safe Draw-Shielding</h2>
+          <p class="hero-desc">
+            Deep algorithmic predictions calculated from live bookmaker odds, form trajectory, head-to-head records, and league-tailored strategy clusters (UCL, European Cups, Defensive Grinds &amp; Home Fortresses).
+          </p>
+          <div class="hero-features">
+            <div class="hero-feat-item"><span class="icon">✔</span> 80%+ Target Win Rate</div>
+            <div class="hero-feat-item"><span class="icon">✔</span> Big vs Big Odds Engine</div>
+            <div class="hero-feat-item"><span class="icon">✔</span> Double Chance Safety Buffer</div>
+            <div class="hero-feat-item"><span class="icon">✔</span> Verified Historical Transparency</div>
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- Toolbar: Search, Date Filter, Status Filter -->
+    <!-- Performance HUD Scorecard (Clickable Stat Tiles) -->
+    <section class="tracker-card" id="tracker" aria-label="Performance Scorecard">
+      <div class="radial-stat-box">
+        <div class="radial-ring-wrap">
+          <svg viewBox="0 0 80 80">
+            <circle class="radial-bg" cx="40" cy="40" r="35" />
+            <circle class="radial-prog" id="radial-progress-bar" cx="40" cy="40" r="35" />
+          </svg>
+          <div class="radial-text" id="tracker-accuracy">--%</div>
+        </div>
+        <div>
+          <div class="radial-info-label">Model Accuracy</div>
+          <div class="radial-info-title">Win Rate</div>
+          <div class="radial-info-tag" id="accuracy-status">Verified Historical</div>
+        </div>
+      </div>
+
+      <div class="stat-tile" onclick="filterByResult('WON')" title="Filter to Won Matches">
+        <div class="stat-tile-top">
+          <span class="stat-tile-label">Wins</span>
+          <span class="stat-tile-icon">🏆</span>
+        </div>
+        <span class="stat-tile-val val-win" id="tracker-wins">0</span>
+        <span class="stat-tile-sub">Direct &amp; Safe Hits</span>
+      </div>
+
+      <div class="stat-tile" onclick="filterByResult('DRAW_SHIELD')" title="Filter to Shielded Draws">
+        <div class="stat-tile-top">
+          <span class="stat-tile-label">Draws Shielded</span>
+          <span class="stat-tile-icon">🛡️</span>
+        </div>
+        <span class="stat-tile-val val-draw" id="tracker-draws">0</span>
+        <span class="stat-tile-sub">Protected by 1X / X2</span>
+      </div>
+
+      <div class="stat-tile" onclick="filterByResult('LOST')" title="Filter to Losses">
+        <div class="stat-tile-top">
+          <span class="stat-tile-label">Losses</span>
+          <span class="stat-tile-icon">❌</span>
+        </div>
+        <span class="stat-tile-val val-loss" id="tracker-losses">0</span>
+        <span class="stat-tile-sub">Uncovered Upsets</span>
+      </div>
+
+      <div class="stat-tile" onclick="filterByResult('PENDING')" title="Filter to Live / In-Play">
+        <div class="stat-tile-top">
+          <span class="stat-tile-label">Live / In-Play</span>
+          <span class="stat-tile-icon">⏳</span>
+        </div>
+        <span class="stat-tile-val val-pending" id="tracker-pending">0</span>
+        <span class="stat-tile-sub">Active &amp; Upcoming</span>
+      </div>
+
+      <div class="stat-tile" onclick="filterByResult('ALL')" title="Reset to All Matches">
+        <div class="stat-tile-top">
+          <span class="stat-tile-label">Total Matches</span>
+          <span class="stat-tile-icon">📈</span>
+        </div>
+        <span class="stat-tile-val val-total" id="tracker-total">0</span>
+        <span class="stat-tile-sub">In Database</span>
+      </div>
+    </section>
+
+    <!-- Featured Banker Picks Spotlight -->
+    <section class="featured-showcase" id="featured-showcase" style="display: none;">
+      <div class="section-title-row">
+        <div class="section-title">
+          <span>⭐</span>
+          <span>Featured Banker Picks</span>
+          <span class="badge">Top Confidence</span>
+        </div>
+      </div>
+      <div class="featured-grid" id="featured-grid"></div>
+    </section>
+
+    <!-- Quick Category Chips -->
+    <div class="quick-tags-row">
+      <span class="quick-tag-label">Quick Filters:</span>
+      <button class="quick-tag active" data-qtag="all" onclick="setQuickTag('all', this)">All Games</button>
+      <button class="quick-tag" data-qtag="bankers" onclick="setQuickTag('bankers', this)">⭐ Top Confidence (&ge; 70%)</button>
+      <button class="quick-tag" data-qtag="double_chance" onclick="setQuickTag('double_chance', this)">🛡️ Double Chance (1X / X2)</button>
+      <button class="quick-tag" data-qtag="goals" onclick="setQuickTag('goals', this)">⚽ Over/Under Goals</button>
+      <button class="quick-tag" data-qtag="ucl" onclick="setQuickTag('ucl', this)">🏆 European Cups</button>
+      <button class="quick-tag" data-qtag="won_only" onclick="setQuickTag('won_only', this)">✅ Verified Hits</button>
+    </div>
+
+    <!-- Toolbar: Search, Date Filters, League & Status -->
     <div class="controls">
       <div class="search-box">
         <span class="search-icon">🔍</span>
-        <input type="text" id="search-input" class="search-input" placeholder="Search by team or league..." oninput="handleSearch()">
+        <input type="text" id="search-input" class="search-input" placeholder="Search team, league, or recommendation..." oninput="handleSearch()">
       </div>
 
       <div class="filter-group">
@@ -695,25 +1571,43 @@
 
       <select id="status-select" class="select-dropdown" onchange="handleStatusFilter()">
         <option value="all">All Statuses</option>
-        <option value="live">🟢 Live Now</option>
-        <option value="finished">🏁 Finished Only</option>
-        <option value="upcoming">⏳ Upcoming Only</option>
+        <option value="live">🟢 Live In-Play</option>
+        <option value="finished">🏁 Finished (FT)</option>
+        <option value="upcoming">⏳ Upcoming Fixtures</option>
       </select>
     </div>
 
-    <!-- Main Content Area -->
+    <!-- Main Matches Content Area -->
     <main id="content-area">
       <div class="state-banner" id="loading-state">
         <div class="spinner"></div>
-        <p>Fetching real-time predictions from Cloudflare KV...</p>
+        <p style="font-size: 1.1rem; font-weight: 700; color: #fff;">Connecting to Cloudflare KV &amp; ESPN Global Feeds...</p>
+        <p style="font-size: 0.88rem; margin-top: 8px; color: var(--text-dim);">Crunching match probabilities, team lineups &amp; verified accuracy statistics</p>
       </div>
     </main>
 
     <!-- Footer -->
     <footer>
-      <p>AI Football Predictions Engine &bull; Powered by Cloudflare Workers &amp; ESPN Data &bull; Auto-syncs every 20 mins</p>
+      <p><strong>AI Scorecast</strong> &bull; Advanced Football Prediction &amp; Analytics Engine</p>
+      <p style="margin-top: 4px;">Powered by Cloudflare Workers KV, ESPN Match Feeds &amp; League-Tailored Strategy Systems &bull; Auto-syncs every 20 minutes</p>
+      <p style="margin-top: 10px;">
+        <a href="https://t.me/ai_scorecast_football" target="_blank" rel="noopener noreferrer">📢 Official Telegram (@ai_scorecast_football)</a> &bull;
+        <a href="https://github.com/kwesiwindsurf-crypto/ai-football-predictions" target="_blank" rel="noopener noreferrer">⭐ GitHub Repository</a> &bull;
+        <a href="javascript:void(0)" onclick="loadData(true)">🔄 Force Sync</a>
+      </p>
     </footer>
   </div>
+
+  <!-- Floating Toast Notification -->
+  <div class="toast" id="toast">
+    <span id="toast-icon">✓</span>
+    <span id="toast-msg">Notification message</span>
+  </div>
+
+  <!-- Floating Back to Top Button -->
+  <button class="btn-back-top" id="btn-back-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" title="Back to top">
+    ↑
+  </button>
 
   <script>
     const API_URL = 'https://ai-football-bot.xantechs00.workers.dev';
@@ -721,7 +1615,43 @@
     let currentDateFilter = 'all';
     let currentStatusFilter = 'all';
     let currentLeagueFilter = 'all';
+    let currentQuickTag = 'all';
+    let currentResultFilter = 'ALL';
     let searchQuery = '';
+
+    // Live UTC Clock
+    function updateClock() {
+      const clockEl = document.getElementById('clock-val');
+      if (clockEl) {
+        const now = new Date();
+        clockEl.innerText = now.toUTCString().slice(17, 25) + ' UTC';
+      }
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Toast message display
+    function showToast(msg, icon = '✓') {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-msg');
+      const toastIcon = document.getElementById('toast-icon');
+      if (!toast || !toastMsg) return;
+      toastMsg.innerText = msg;
+      toastIcon.innerText = icon;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    // Scroll to top button visibility
+    window.addEventListener('scroll', () => {
+      const btn = document.getElementById('btn-back-top');
+      if (btn) {
+        if (window.scrollY > 400) btn.classList.add('show');
+        else btn.classList.remove('show');
+      }
+    });
 
     // Evaluate prediction against scores
     function evaluatePrediction(rec, hScore, aScore, hTeam, aTeam) {
@@ -814,15 +1744,18 @@
 
         populateLeagueDropdown();
         updateScorecard();
+        renderFeaturedBankers();
         renderMatches();
+        if (force) showToast('Data synchronized successfully!');
       } catch (e) {
         console.error('Fetch error:', e);
         document.getElementById('content-area').innerHTML = `
           <div class="state-banner">
-            <p style="color: var(--loss);">⚠️ Failed to load matches from Cloudflare KV.</p>
-            <p style="font-size: 0.85rem; margin-top: 8px;">Please check your connection and click Refresh.</p>
+            <p style="color: var(--loss); font-size: 1.15rem; font-weight: 700;">⚠️ Failed to load matches from Cloudflare KV.</p>
+            <p style="font-size: 0.9rem; margin-top: 8px;">Please check your internet connection and click Refresh above.</p>
           </div>
         `;
+        showToast('Connection failed. Retrying in background...', '⚠️');
       }
     }
 
@@ -861,11 +1794,130 @@
       document.getElementById('tracker-losses').innerText = losses;
       document.getElementById('tracker-pending').innerText = pending;
       document.getElementById('tracker-total').innerText = allMatches.length;
+
+      // Update radial SVG ring progress
+      const maxOffset = 219.9;
+      const progOffset = maxOffset - (maxOffset * (accuracy / 100));
+      const progEl = document.getElementById('radial-progress-bar');
+      if (progEl) {
+        progEl.style.strokeDashoffset = progOffset;
+      }
+    }
+
+    function filterByResult(res) {
+      currentResultFilter = res;
+      // Highlight selected stat tile
+      document.querySelectorAll('.stat-tile').forEach(t => t.classList.remove('active-filter'));
+      renderMatches();
+      if (res !== 'ALL') showToast(`Filtered to: ${res}`);
+      else showToast('Displaying all records');
+    }
+
+    function renderFeaturedBankers() {
+      const showcaseEl = document.getElementById('featured-showcase');
+      const gridEl = document.getElementById('featured-grid');
+      if (!showcaseEl || !gridEl) return;
+
+      // Pick top upcoming matches with highest probability >= 65%
+      const candidates = allMatches.filter(m => {
+        const isFT = m.status === 'finished' || m.statusShort === 'FT';
+        if (isFT) return false;
+        const hp = m.prediction?.homeWinProbability || 0;
+        const ap = m.prediction?.awayWinProbability || 0;
+        const maxProb = Math.max(hp, ap);
+        return maxProb >= 65 || (m.oddsRating && Math.abs(m.oddsRating) >= 30);
+      });
+
+      // Sort by highest probability / confidence
+      candidates.sort((a, b) => {
+        const probA = Math.max(a.prediction?.homeWinProbability || 0, a.prediction?.awayWinProbability || 0);
+        const probB = Math.max(b.prediction?.homeWinProbability || 0, b.prediction?.awayWinProbability || 0);
+        return probB - probA;
+      });
+
+      const featured = candidates.slice(0, 4);
+
+      if (featured.length === 0) {
+        showcaseEl.style.display = 'none';
+        return;
+      }
+
+      showcaseEl.style.display = 'block';
+      gridEl.innerHTML = '';
+
+      featured.forEach(m => {
+        const dateObj = new Date(m.date);
+        const timeStr = !isNaN(dateObj) ? dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+        const dateStr = !isNaN(dateObj) ? dateObj.toLocaleDateString([], { month: 'short', day: 'numeric' }) : '';
+
+        const hp = m.prediction?.homeWinProbability || 33;
+        const ap = m.prediction?.awayWinProbability || 33;
+        const maxProb = Math.max(hp, ap);
+        const rec = m.prediction?.recommendation || 'AI Banker';
+        const primarySafe = m.prediction?.stakingOptions?.[0] || 'High Confidence';
+
+        const card = document.createElement('div');
+        card.className = 'banker-card';
+        card.innerHTML = `
+          <div class="banker-top">
+            <span class="banker-league">🏆 ${m.league || 'Featured'}</span>
+            <span class="banker-confidence">⭐ ${maxProb}% Edge</span>
+          </div>
+
+          <div class="banker-teams">
+            <div class="banker-team-col">
+              <img class="banker-logo" src="${m.homeLogo || 'https://a.espncdn.com/i/teamlogos/soccer/500/default-team-logo.png'}" alt="${m.homeTeam}" onerror="this.src='https://a.espncdn.com/i/teamlogos/soccer/500/default-team-logo.png'">
+              <span class="banker-name">${m.homeTeam}</span>
+            </div>
+            <span class="banker-vs">VS</span>
+            <div class="banker-team-col">
+              <img class="banker-logo" src="${m.awayLogo || 'https://a.espncdn.com/i/teamlogos/soccer/500/default-team-logo.png'}" alt="${m.awayTeam}" onerror="this.src='https://a.espncdn.com/i/teamlogos/soccer/500/default-team-logo.png'">
+              <span class="banker-name">${m.awayTeam}</span>
+            </div>
+          </div>
+
+          <div class="banker-pick-box">
+            <div class="banker-pick-header">
+              <span>Primary Recommendation</span>
+              <span style="color: var(--primary);">Prob: ${maxProb}%</span>
+            </div>
+            <div class="banker-pick-title">💡 ${rec}</div>
+            <div>
+              <span class="banker-safe-chip">🛡️ ${primarySafe}</span>
+            </div>
+          </div>
+
+          <div class="banker-footer">
+            <span class="banker-time">⏳ ${dateStr} &bull; ${timeStr}</span>
+            <div class="banker-actions">
+              <button class="btn-copy-pick" onclick="copyPickText('${m.homeTeam}', '${m.awayTeam}', '${rec}', '${maxProb}%', '${primarySafe}')">📋 Copy</button>
+              <a href="${m.matchUrl || '#'}" target="_blank" rel="noopener noreferrer" class="match-site-link">Preview ↗</a>
+            </div>
+          </div>
+        `;
+        gridEl.appendChild(card);
+      });
+    }
+
+    function copyPickText(home, away, rec, prob, safe) {
+      const text = `🔥 AI Scorecast Banker Pick: ${home} vs ${away}\n💡 Recommendation: ${rec} (${prob})\n🛡️ Safe Staking: ${safe}\n🌐 Full Analytics: https://kwesiwindsurf-crypto.github.io/ai-football-predictions/`;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('Banker pick copied to clipboard! 📋');
+      }).catch(() => {
+        showToast('Pick copied! 📋');
+      });
     }
 
     function setDateFilter(filter, el) {
       currentDateFilter = filter;
       document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      el.classList.add('active');
+      renderMatches();
+    }
+
+    function setQuickTag(tag, el) {
+      currentQuickTag = tag;
+      document.querySelectorAll('.quick-tag').forEach(b => b.classList.remove('active'));
       el.classList.add('active');
       renderMatches();
     }
@@ -909,9 +1961,34 @@
         // League filter
         if (currentLeagueFilter !== 'all' && m.league !== currentLeagueFilter) return false;
 
+        // HUD Result filter
+        if (currentResultFilter === 'WON' && m.evalResult !== 'WON') return false;
+        if (currentResultFilter === 'LOST' && m.evalResult !== 'LOST') return false;
+        if (currentResultFilter === 'DRAW_SHIELD' && (!m.isDraw || m.evalResult !== 'WON')) return false;
+        if (currentResultFilter === 'PENDING' && m.evalResult !== 'PENDING') return false;
+
+        // Quick Tag filter
+        if (currentQuickTag === 'bankers') {
+          const hp = m.prediction?.homeWinProbability || 0;
+          const ap = m.prediction?.awayWinProbability || 0;
+          if (Math.max(hp, ap) < 70) return false;
+        } else if (currentQuickTag === 'double_chance') {
+          const rec = m.prediction?.recommendation || '';
+          if (!rec.includes('1X') && !rec.includes('X2') && !rec.includes('or Draw')) return false;
+        } else if (currentQuickTag === 'goals') {
+          const rec = m.prediction?.recommendation || '';
+          if (!rec.includes('Over') && !rec.includes('Under') && !rec.includes('BTTS')) return false;
+        } else if (currentQuickTag === 'ucl') {
+          const l = (m.league || '').toLowerCase();
+          if (!l.includes('champions') && !l.includes('europa') && !l.includes('conference')) return false;
+        } else if (currentQuickTag === 'won_only') {
+          if (m.evalResult !== 'WON') return false;
+        }
+
         // Search text
         if (searchQuery) {
-          const hay = `${m.homeTeam} ${m.awayTeam} ${m.league}`.toLowerCase();
+          const rec = m.prediction?.recommendation || '';
+          const hay = `${m.homeTeam} ${m.awayTeam} ${m.league} ${rec}`.toLowerCase();
           if (!hay.includes(searchQuery)) return false;
         }
 
@@ -921,7 +1998,8 @@
       if (filtered.length === 0) {
         content.innerHTML = `
           <div class="state-banner">
-            <p>No matches found matching your filters.</p>
+            <p style="font-size: 1.15rem; font-weight: 700; color: #fff;">No matches found matching your filters.</p>
+            <p style="font-size: 0.9rem; margin-top: 8px;">Try clearing your search keyword, resetting quick tags, or switching dates above.</p>
           </div>
         `;
         return;
@@ -982,6 +2060,8 @@
           const ap = m.prediction?.awayWinProbability || 33;
 
           const rec = m.prediction?.recommendation || 'AI Analysis in Progress';
+          const analysisNote = m.prediction?.analysis || '';
+          const stakingOpts = Array.isArray(m.prediction?.stakingOptions) ? m.prediction.stakingOptions : [];
 
           // Match Site Link
           const siteUrl = m.matchUrl || (m.espnEventId ? `https://www.espn.com/soccer/match/_/gameId/${m.espnEventId}` : null);
@@ -991,9 +2071,42 @@
 
           const scoreText = (isLive || isFT) ? `${m.homeScore ?? 0} : ${m.awayScore ?? 0}` : 'vs';
 
+          // Team Form Pills
+          const renderFormPills = (formStr) => {
+            if (!formStr || typeof formStr !== 'string') return '';
+            const clean = formStr.toUpperCase().replace(/[^WDL]/g, '').slice(-5);
+            if (!clean) return '';
+            const dots = clean.split('').map(char => {
+              const cls = char === 'W' ? 'form-w' : (char === 'D' ? 'form-d' : 'form-l');
+              return `<span class="form-dot ${cls}">${char}</span>`;
+            }).join('');
+            return `<div class="form-pills">${dots}</div>`;
+          };
+
+          const hFormHtml = renderFormPills(m.homeForm);
+          const aFormHtml = renderFormPills(m.awayForm);
+
+          // Staking chips HTML
+          let stakingHtml = '';
+          if (stakingOpts.length > 0) {
+            stakingHtml = `
+              <div class="staking-chips">
+                <span class="staking-chip staking-chip-primary">🛡️ ${stakingOpts[0]}</span>
+                ${stakingOpts.slice(1, 3).map(s => `<span class="staking-chip">${s}</span>`).join('')}
+              </div>
+            `;
+          }
+
+          // Strategy Note HTML
+          const strategyNoteHtml = analysisNote ? `
+            <div class="strategy-note">
+              <strong>💡 Strategy:</strong> ${analysisNote.split('\n')[0]}
+            </div>
+          ` : '';
+
           card.innerHTML = `
             <div class="card-top">
-              <span class="match-time">${dateStr} &bull; ${timeStr}</span>
+              <span class="match-time">📅 ${dateStr} &bull; ${timeStr}</span>
               <span class="match-status-badge ${statusClass}">${statusLabel}</span>
             </div>
 
@@ -1001,11 +2114,13 @@
               <div class="team-col">
                 <img class="team-logo" src="${m.homeLogo || 'https://a.espncdn.com/i/teamlogos/soccer/500/default-team-logo.png'}" alt="${m.homeTeam}" onerror="this.src='https://a.espncdn.com/i/teamlogos/soccer/500/default-team-logo.png'">
                 <span class="team-name">${m.homeTeam}</span>
+                ${hFormHtml}
               </div>
               <div class="score-badge">${scoreText}</div>
               <div class="team-col away">
-                <span class="team-name">${m.awayTeam}</span>
                 <img class="team-logo" src="${m.awayLogo || 'https://a.espncdn.com/i/teamlogos/soccer/500/default-team-logo.png'}" alt="${m.awayTeam}" onerror="this.src='https://a.espncdn.com/i/teamlogos/soccer/500/default-team-logo.png'">
+                <span class="team-name">${m.awayTeam}</span>
+                ${aFormHtml}
               </div>
             </div>
 
@@ -1014,7 +2129,7 @@
                 <span class="pred-tag-title">AI Recommendation</span>
                 ${resBadgeHtml}
               </div>
-              <div class="pred-recommendation">${rec}</div>
+              <div class="pred-recommendation">🎯 ${rec}</div>
 
               <div class="prob-container">
                 <div class="prob-bar">
@@ -1028,6 +2143,9 @@
                   <span>2: ${ap}%</span>
                 </div>
               </div>
+
+              ${strategyNoteHtml}
+              ${stakingHtml}
             </div>
 
             <div class="card-footer">
