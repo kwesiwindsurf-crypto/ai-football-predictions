@@ -4,6 +4,9 @@ export default {
   async fetch(request, env) {
     const headers = {
       'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, HEAD',
+      'Access-Control-Allow-Headers': '*',
+      'Access-Control-Max-Age': '86400',
       'Content-Type': 'application/json',
       'Cache-Control': 'public, max-age=300', // 5-min browser cache
     };
