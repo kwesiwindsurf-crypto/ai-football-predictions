@@ -7,7 +7,7 @@ Automated real-time AI football predictions, match probabilities, live scores, a
 ## 🌐 Live Web Dashboard
 
 You can access the live prediction dashboard directly in your browser:
-👉 **`https://kwesiwindsurf-crypto.github.io/ai-football-predictions/`**
+👉 https://kwesiwindsurf-crypto.github.io/ai-football-predictions
 
 ### 📊 Features on the Web Dashboard:
 * 🎯 **Dynamic Win Rate & Scorecard**: Real-time accuracy percentage, wins, losses, and draw-covered bets calculated automatically as matches finish.
