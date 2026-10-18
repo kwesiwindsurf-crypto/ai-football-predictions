@@ -1296,6 +1296,7 @@ async function postDailyDigestToTelegram(matches) {
   }
 
   currentMsg += `────────────────────\n` +
+                `🌐 [View Full Match Details & Live Dashboard](https://kwesiwindsurf-crypto.github.io/ai-football-predictions/)\n` +
                 `📲 _Get live scores, player stats & full analysis in the app!_`;
   messagesToSend.push(currentMsg);
 
@@ -1397,6 +1398,7 @@ async function checkAndPostMatchResults(activePicks, matches, todayResults = [])
                 `🏆 ${match.league || pick.league || ''}\n\n` +
                 `💡 *Our Pick:* ${pick.recommendation}\n` +
                 `${statusLine}\n\n` +
+                `🌐 [View Full Match Details & Scorecard](https://kwesiwindsurf-crypto.github.io/ai-football-predictions/)\n` +
                 `📲 _Check the app for live results & upcoming predictions!_`;
 
     const success = await sendTelegramMessage(msg);
@@ -1460,6 +1462,7 @@ async function postDailyDashboardToTelegram(todayResults) {
   }
 
   msg += `────────────────────\n` +
+         `🌐 [View Verified Scorecard & Full Details](https://kwesiwindsurf-crypto.github.io/ai-football-predictions/)\n` +
          `📲 _Check tomorrow's fixtures & early predictions in the app!_`;
 
   const success = await sendTelegramMessage(msg);
