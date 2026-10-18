@@ -619,11 +619,18 @@ function makePrediction(home, away, hOdds, dOdds, aOdds, league, homeFormStr, aw
 // ─── League-Tailored Strategy Engine ──────────────────────────────────────────
 // ─── League & Tournament Strategy Engine ──────────────────────────────────────
 // Tailors predictions across 62+ world competitions including UCL, Europa, World Cups & Domestic Leagues
-function determineLeagueStrategy(league, home, away, fHp, fDp, fAp, isBig) {
+function determineLeagueStrategy(league, home, away, fHp, fDp, fAp, isBig, hOdds, aOdds) {
   const lStr = (league || '').toLowerCase();
   const prob1X = fHp + fDp;
   const probX2 = fAp + fDp;
   const maxProb = Math.max(fHp, fDp, fAp);
+
+  // Odds evaluation for Big vs Big / Blockbuster matches (never blindly assume home advantage)
+  const hasOdds = hOdds > 0 && aOdds > 0;
+  const isHomeOddsFav = hasOdds ? hOdds < aOdds : fHp > fAp;
+  const isAwayOddsFav = hasOdds ? aOdds < hOdds : fAp > fHp;
+  const oddsGap = hasOdds ? Math.abs(hOdds - aOdds) : 0;
+  const isOddsClose = hasOdds ? oddsGap <= 0.40 : Math.abs(fHp - fAp) <= 8;
 
   // 1. UEFA Champions League (The Pinnacle of European Football)
   const isUCL = lStr.includes('champions league') || lStr.includes('uefa.champions');
@@ -679,12 +686,39 @@ function determineLeagueStrategy(league, home, away, fHp, fDp, fAp, isBig) {
   let primarySafe = '';
   let strategyAnalysis = '';
 
+  // ── 0. BLOCKBUSTER CLASHES (Big vs Big across any league or tournament) ──
+  // Instead of blindly assuming 1X (Home pitch advantage), we evaluate bookmaker odds:
+  // 1. If odds / probabilities favor Away giant -> X2 (Double Chance)
+  // 2. If odds are close / dead heat -> Over 1.5 Goals (or Under 3.5 in defensive leagues)
+  // 3. If odds confirm Home giant -> 1X (Double Chance)
+  if (isBig) {
+    if (isOddsClose) {
+      if (isDefensive || isSouthAmericanCups) {
+        recommendation = `Under 3.5 Goals`;
+        primarySafe = `Safe: Under 3.5 Goals`;
+        strategyAnalysis = `Blockbuster Derby (${league}): Heavyweight clash with close odds. Defensive buffer (Under 3.5).`;
+      } else {
+        recommendation = `Over 1.5 Goals`;
+        primarySafe = `Safe: Over 1.5 Goals`;
+        strategyAnalysis = `Blockbuster Clash (${league}): Evenly matched titans, goals market is the winning pick (Over 1.5).`;
+      }
+    } else if (isAwayOddsFav && (aOdds < hOdds - 0.20 || fAp > fHp + 5)) {
+      recommendation = `X2 (${away} or Draw)`;
+      primarySafe = `Safe: X2 (${away} or Draw)`;
+      strategyAnalysis = `Blockbuster Clash (${league}): Market odds favor away giant ${away} (X2 Double Chance - No blind home bias).`;
+    } else {
+      recommendation = `1X (${home} or Draw)`;
+      primarySafe = `Safe: 1X (${home} or Draw)`;
+      strategyAnalysis = `Blockbuster Clash (${league}): Market odds favor home giant ${home} (1X Double Chance).`;
+    }
+    return { recommendation, primarySafe, strategyAnalysis };
+  }
+
   // ── SPECIALIZED LOGIC PER COMPETITION ARCHETYPE ──
 
   if (isUCL) {
     // 👑 UEFA Champions League Strategy:
     // Heavy favorites (Man City, Real Madrid vs pot 3/4) win cleanly.
-    // Big vs Big matches are fast-paced goal battles (Over 1.5 hits in 89%).
     if (fHp >= 68) {
       recommendation = `${home} to Win (1)`;
       primarySafe = `Safe: 1X (${home} or Draw)`;
@@ -693,10 +727,10 @@ function determineLeagueStrategy(league, home, away, fHp, fDp, fAp, isBig) {
       recommendation = `${away} to Win (2)`;
       primarySafe = `Safe: X2 (${away} or Draw)`;
       strategyAnalysis = `UEFA Champions League: Dominant Away Giant (${fAp}% Win).`;
-    } else if (isBig || prob1X >= 70) {
+    } else if (prob1X >= 70) {
       recommendation = `1X (${home} or Draw)`;
       primarySafe = `Safe: 1X (${home} or Draw)`;
-      strategyAnalysis = `UCL Blockbuster: Home Pitch Protection (1X Covered).`;
+      strategyAnalysis = `UEFA Champions League: Compound 1X Advantage (${prob1X}%).`;
     } else {
       recommendation = `Over 1.5 Goals`;
       primarySafe = `Safe: Over 1.5 Goals`;
@@ -864,7 +898,7 @@ function determineLeagueStrategy(league, home, away, fHp, fDp, fAp, isBig) {
       recommendation = `X2 (${away} or Draw)`;
       primarySafe = `Safe: X2 (${away} or Draw)`;
       strategyAnalysis = `Compound X2 Edge (Win+Draw Prob ${probX2}%): Covered.`;
-    } else if (isBig || maxProb >= 42) {
+    } else if (maxProb >= 42) {
       recommendation = `Over 1.5 Goals`;
       primarySafe = `Safe: Over 1.5 Goals`;
       strategyAnalysis = `Competitive Match: Goals Market (Over 1.5).`;
@@ -880,7 +914,7 @@ function determineLeagueStrategy(league, home, away, fHp, fDp, fAp, isBig) {
 
   // Decision logic via League-Tailored Strategy Engine
   const { recommendation, primarySafe, strategyAnalysis } = determineLeagueStrategy(
-    league, home, away, fHp, fDp, fAp, isBig
+    league, home, away, fHp, fDp, fAp, isBig, hOdds, aOdds
   );
   
   const dnbOdds = favOdds ? Math.max(1.30, parseFloat((favOdds * 0.82).toFixed(2))) : 1.70;
