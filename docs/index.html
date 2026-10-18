@@ -2205,8 +2205,7 @@
           <div class="banker-footer">
             <span class="banker-time">⏳ ${dateStr} &bull; ${timeStr}</span>
             <div class="banker-actions">
-              <button class="btn-copy-pick touch-haptic" onclick="copyPickText('${m.homeTeam}', '${m.awayTeam}', '${rec}', '${maxProb}%', '${primarySafe}'); triggerHaptic('success');">📋 Copy</button>
-              <a href="${m.matchUrl || '#'}" target="_blank" rel="noopener noreferrer" class="match-site-link touch-haptic" onclick="triggerHaptic('light')">Preview ↗</a>
+              <button class="btn-copy-pick touch-haptic" onclick="copyPickText('${m.homeTeam}', '${m.awayTeam}', '${rec}', '${maxProb}%', '${primarySafe}'); triggerHaptic('success');">📋 Copy Pick</button>
             </div>
           </div>
         `;
@@ -2378,12 +2377,6 @@
           const analysisNote = m.prediction?.analysis || '';
           const stakingOpts = Array.isArray(m.prediction?.stakingOptions) ? m.prediction.stakingOptions : [];
 
-          // Match Site Link
-          const siteUrl = m.matchUrl || (m.espnEventId ? `https://www.espn.com/soccer/match/_/gameId/${m.espnEventId}` : null);
-          const siteLinkHtml = siteUrl
-            ? `<a href="${siteUrl}" target="_blank" rel="noopener noreferrer" class="match-site-link touch-haptic" onclick="triggerHaptic('light')">Match Overview ↗</a>`
-            : `<span style="color: var(--text-dim);">No web link</span>`;
-
           const scoreText = (isLive || isFT) ? `${m.homeScore ?? 0} : ${m.awayScore ?? 0}` : 'vs';
 
           // Team Form Pills
@@ -2465,7 +2458,7 @@
 
             <div class="card-footer">
               <span>Odds Rating: ${m.oddsRating !== null && m.oddsRating !== undefined ? (m.oddsRating > 0 ? '+' + m.oddsRating : m.oddsRating) : 'N/A'}</span>
-              ${siteLinkHtml}
+              <span style="font-size: 0.74rem; color: var(--text-dim); font-weight: 600;">⚡ AI Scorecast Model</span>
             </div>
           `;
 

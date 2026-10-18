@@ -13,7 +13,7 @@ You can access the live prediction dashboard directly in your browser:
 * 🎯 **Dynamic Win Rate & Scorecard**: Real-time accuracy percentage, wins, losses, and draw-covered bets calculated automatically as matches finish.
 * 🏆 **Global Competitions**: UEFA Champions League, UEFA Europa League, UEFA Conference League, English Premier League, Spanish La Liga, Italian Serie A, German Bundesliga, French Ligue 1, and global tournaments.
 * 🤖 **AI Match Probability Distribution**: 1X2 win probabilities (`Home %`, `Draw %`, `Away %`) and tailored betting recommendations (e.g. *Over 1.5 Goals*, *Draw No Bet*, *Direct Win*).
-* ↗️ **Direct Match Site Links**: Tap **"Match Overview ↗"** on any card to view official match statistics, head-to-head records, and lineups on ESPN.
+* ⚡ **AI Staking Insights & Form Trends**: Instant odds rating, safe staking options, and recent form indicators (W/D/L) for every fixture.
 * 🔍 **Live Search & Filter**: Search by team name or filter by date (*Today*, *Yesterday*, *Tomorrow*) and match status (*Live*, *Final*, *Upcoming*).
 
 ---
