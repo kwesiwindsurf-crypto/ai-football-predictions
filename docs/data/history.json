@@ -334,6 +334,48 @@
     }
   },
   {
+    "id": "Escorpiones-Belén-Puntarenas-FC",
+    "espnEventId": "401876838",
+    "homeTeam": "Escorpiones Belén",
+    "awayTeam": "Puntarenas FC",
+    "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/132447.png",
+    "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/7237.png",
+    "league": "Costa Rican Primera Division",
+    "date": "2026-10-20T02:00Z",
+    "status": "finished",
+    "statusShort": "FT",
+    "homeScore": 1,
+    "awayScore": 2,
+    "homeOdds": 2.55,
+    "drawOdds": 3.3,
+    "awayOdds": 2.45,
+    "oddsRating": 24,
+    "homeRank": null,
+    "awayRank": null,
+    "homeForm": "DWWLL",
+    "awayForm": "DLDWD",
+    "homePoints": 10,
+    "awayPoints": 15,
+    "homeLineup": null,
+    "awayLineup": null,
+    "h2hSummary": null,
+    "matchUrl": "https://www.espn.com/soccer/match/_/gameId/401876838/puntarenas-fc-escorpiones-belen",
+    "prediction": {
+      "homeWinProbability": 29,
+      "drawProbability": 18,
+      "awayWinProbability": 53,
+      "recommendation": "Over 1.5 Goals",
+      "analysis": "Not Big Teams & Tight: Goals Market (Over 1.5).\nHomeForm: 7%, AwayForm: 33%, BigGame: false",
+      "stakingOptions": [
+        "Safe: Over 1.5 Goals",
+        "Value: Puntarenas FC Draw No Bet (2.01)",
+        "Risky: Puntarenas FC to WIN by 2+ Goals (2.85)",
+        "BTTS: Both Teams To Score - Yes (1.78)",
+        "Alternative: Over 2.5 Total Goals (1.70)"
+      ]
+    }
+  },
+  {
     "id": "León-Atlante",
     "espnEventId": "401924369",
     "homeTeam": "León",
