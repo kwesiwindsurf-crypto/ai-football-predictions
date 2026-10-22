@@ -1,5 +1,1119 @@
 [
   {
+    "id": "Pachuca-Cruz-Azul",
+    "espnEventId": "401876930",
+    "homeTeam": "Pachuca",
+    "awayTeam": "Cruz Azul",
+    "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/234.png",
+    "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/218.png",
+    "league": "Mexico - Liga MX",
+    "date": "2026-10-22T03:10Z",
+    "status": "finished",
+    "statusShort": "FT",
+    "homeScore": 1,
+    "awayScore": 2,
+    "homeOdds": null,
+    "drawOdds": null,
+    "awayOdds": null,
+    "oddsRating": -25,
+    "homeRank": null,
+    "awayRank": null,
+    "homeForm": "DLDLD",
+    "awayForm": "DWDDL",
+    "homePoints": 13,
+    "awayPoints": 23,
+    "homeLineup": {
+      "avgRating": 0,
+      "startingXI": [
+        {
+          "number": "?",
+          "name": "Carlos Moreno",
+          "position": "G",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Pedro Budib",
+          "position": "CD-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Eduardo Bauermann",
+          "position": "CD-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Francisco Venegas",
+          "position": "LB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jorge Berlanga",
+          "position": "RB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Rodolfo Pizarro",
+          "position": "AM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Alan Bautista",
+          "position": "LM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Christian Rivera",
+          "position": "RM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Salomón Rondón",
+          "position": "F",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Oussama Idrissi",
+          "position": "AM-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Javier Vallejo",
+          "position": "AM-R",
+          "rating": 0,
+          "stats": ""
+        }
+      ],
+      "bench": [
+        {
+          "number": "?",
+          "name": "Ulises Natanael Martínez Reynoso",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jose Eulogio Téllez",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Kenedy",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Ángel López Bustamante",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Sergio Rodríguez",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Mauricio Isais",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Adrián Alcaraz",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Sebastian Santos",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Cristóbal Hernández",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Gael Álvarez",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        }
+      ]
+    },
+    "awayLineup": {
+      "avgRating": 0,
+      "startingXI": [
+        {
+          "number": "?",
+          "name": "Andrés Gudiño",
+          "position": "G",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Alán Montes",
+          "position": "CD",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Gonzalo Piovi",
+          "position": "CD-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Amaury García",
+          "position": "CD-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Ángel Márquez",
+          "position": "CM-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Érik Lira",
+          "position": "CM-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Omar Campos",
+          "position": "LM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Alan Mozo",
+          "position": "RM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Gabriel Fernandez",
+          "position": "F",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Carlos Rodríguez",
+          "position": "CF-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Agustín Palavecino",
+          "position": "CF-R",
+          "rating": 0,
+          "stats": ""
+        }
+      ],
+      "bench": [
+        {
+          "number": "?",
+          "name": "Rogelio González",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jesús Orozco",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Kevin Mier",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Nicolás Ibáñez",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Rodolfo Rotondi",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Ariel Castro",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Juan José Calero",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Andres Montaño",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Luka Romero",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Osinachi Ebere",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        }
+      ]
+    },
+    "h2hSummary": null,
+    "matchUrl": "https://www.espn.com/soccer/match/_/gameId/401876930/cruz-azul-pachuca",
+    "prediction": {
+      "homeWinProbability": 54,
+      "drawProbability": 17,
+      "awayWinProbability": 29,
+      "recommendation": "Over 1.5 Goals",
+      "analysis": "Not Big Teams & Tight: Goals Market (Over 1.5).\nHomeForm: 47%, AwayForm: 20%, BigGame: false",
+      "stakingOptions": [
+        "Safe: Over 1.5 Goals",
+        "Value: Pachuca Draw No Bet (1.7)",
+        "Risky: Pachuca to WIN by 2+ Goals (2.85)",
+        "BTTS: Both Teams To Score - Yes (1.78)",
+        "Alternative: Over 2.5 Total Goals (1.70)"
+      ]
+    }
+  },
+  {
+    "id": "Santos-Pumas-UNAM",
+    "espnEventId": "401876929",
+    "homeTeam": "Santos",
+    "awayTeam": "Pumas UNAM",
+    "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/225.png",
+    "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/233.png",
+    "league": "Mexico - Liga MX",
+    "date": "2026-10-22T03:10Z",
+    "status": "finished",
+    "statusShort": "FT",
+    "homeScore": 2,
+    "awayScore": 0,
+    "homeOdds": null,
+    "drawOdds": null,
+    "awayOdds": null,
+    "oddsRating": -29,
+    "homeRank": null,
+    "awayRank": null,
+    "homeForm": "DWWWW",
+    "awayForm": "DWDLD",
+    "homePoints": 19,
+    "awayPoints": 16,
+    "homeLineup": {
+      "avgRating": 0,
+      "startingXI": [
+        {
+          "number": "?",
+          "name": "Carlos Acevedo",
+          "position": "G",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Felipe Sanchez",
+          "position": "CD",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Efraín Orona",
+          "position": "CD-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Franco Pardo",
+          "position": "CD-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Facundo Cáseres",
+          "position": "CM-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Francisco Villalba",
+          "position": "CM-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Diego González",
+          "position": "LM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Mauricio Cuevas",
+          "position": "RM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Tahiel Jiménez",
+          "position": "F",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Ezequiel Bullaude",
+          "position": "CF-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Eduardo Aguirre",
+          "position": "CF-R",
+          "rating": 0,
+          "stats": ""
+        }
+      ],
+      "bench": [
+        {
+          "number": "?",
+          "name": "Jonathan Pérez",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Kevin Palacios",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Luis Gómez",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Esteban Lozano",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Hector Holguin Perez",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Emmanuel Echeverría",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Salvador Mariscal",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "José Abella",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Javier Güemez",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Aldo López",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        }
+      ]
+    },
+    "awayLineup": {
+      "avgRating": 0,
+      "startingXI": [
+        {
+          "number": "?",
+          "name": "Keylor Navas",
+          "position": "G",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Nathan Silva",
+          "position": "CD",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Rubén Duarte",
+          "position": "CD-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Rodrigo López",
+          "position": "CD-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Pablo Bennevendo",
+          "position": "LB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Uriel Antuna",
+          "position": "RB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Pedro Vite",
+          "position": "CM-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Adalberto Carrasquilla",
+          "position": "CM-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "César Huerta",
+          "position": "LM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Juninho",
+          "position": "RM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Robert Morales",
+          "position": "F",
+          "rating": 0,
+          "stats": ""
+        }
+      ],
+      "bench": [
+        {
+          "number": "?",
+          "name": "Álvaro Angulo",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Pablo Lara",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Luciano Herrera",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Israel Luna",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Antonio Leone",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Angel Azuaje",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jesús Rivas",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Santiago López",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Alan Medina",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Victor Arteaga",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        }
+      ]
+    },
+    "h2hSummary": null,
+    "matchUrl": "https://www.espn.com/soccer/match/_/gameId/401876929/pumas-unam-santos",
+    "prediction": {
+      "homeWinProbability": 56,
+      "drawProbability": 17,
+      "awayWinProbability": 27,
+      "recommendation": "Santos to Win (1)",
+      "analysis": "Moderate Favorite (Prob 55-59%): Direct Win.\nHomeForm: 60%, AwayForm: 20%, BigGame: false",
+      "stakingOptions": [
+        "Safe: 1X (Santos or Draw)",
+        "Value: Santos Draw No Bet (1.7)",
+        "Risky: Santos to WIN by 2+ Goals (2.85)",
+        "BTTS: Both Teams To Score - Yes (1.78)",
+        "Alternative: Over 2.5 Total Goals (1.70)"
+      ]
+    }
+  },
+  {
+    "id": "Cartaginés-Club-Deportivo-Olimpia",
+    "espnEventId": "401922486",
+    "homeTeam": "Cartaginés",
+    "awayTeam": "Club Deportivo Olimpia",
+    "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/7239.png",
+    "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/884.png",
+    "league": "Concacaf Central American Cup",
+    "date": "2026-10-22T02:30Z",
+    "status": "finished",
+    "statusShort": "FT",
+    "homeScore": 1,
+    "awayScore": 0,
+    "homeOdds": null,
+    "drawOdds": null,
+    "awayOdds": null,
+    "oddsRating": 1,
+    "homeRank": null,
+    "awayRank": null,
+    "homeForm": "DWWLL",
+    "awayForm": "DWWWW",
+    "homePoints": 0,
+    "awayPoints": 0,
+    "homeLineup": {
+      "avgRating": 0,
+      "startingXI": [
+        {
+          "number": "?",
+          "name": "Kevin Briceño",
+          "position": "G",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Luis Olivas",
+          "position": "CD-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Diego Mesén",
+          "position": "CD-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "José Quirós",
+          "position": "LB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Carlos Barahona",
+          "position": "RB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Gian Mauro Morera Alvarado",
+          "position": "CM-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Luis Flores",
+          "position": "CM-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Claudio Alvarado",
+          "position": "LM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Manuel Morán",
+          "position": "RM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Alonso Hernández",
+          "position": "CF-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "José De Jesús González",
+          "position": "CF-R",
+          "rating": 0,
+          "stats": ""
+        }
+      ],
+      "bench": [
+        {
+          "number": "?",
+          "name": "Leonardo Alfaro",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Mauricio Villalobos",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Bernald Alfaro",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Christopher Moya",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Douglas López",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Johan Enrique Cortés Alfaro",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Diego Gonzalez",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Juan Gaete",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Randal Cordero",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "José Mora",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Darién Hidalgo",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Geancarlo Castro",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        }
+      ]
+    },
+    "awayLineup": {
+      "avgRating": 0,
+      "startingXI": [
+        {
+          "number": "?",
+          "name": "Edrick Menjivar",
+          "position": "G",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Clinton Bennett",
+          "position": "CD-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Juan Hernández",
+          "position": "CD-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Cristian Nahun Canales Zuniga",
+          "position": "LB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Felix Garcia",
+          "position": "RB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jorge Álvarez",
+          "position": "CM-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jack Jean-Baptiste",
+          "position": "CM-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Imanol Enriquez",
+          "position": "LM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Edwin Rodríguez",
+          "position": "RM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jorge Benguche",
+          "position": "CF-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Yustin Arboleda",
+          "position": "CF-R",
+          "rating": 0,
+          "stats": ""
+        }
+      ],
+      "bench": [
+        {
+          "number": "?",
+          "name": "David Flores",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Kilmar Peña",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Anthony Ortiz",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Rodbin Mejía",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Didier Paguada",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Kevin Güiti",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Raul García",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "O Rodriguez",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Axel Jamir Maldonado",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Brayan Cortés",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Nicolás Dibble",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Edwin Lobo",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        }
+      ]
+    },
+    "h2hSummary": null,
+    "matchUrl": "https://www.espn.com/soccer/match/_/gameId/401922486/club-deportivo-olimpia-cartagines",
+    "prediction": {
+      "homeWinProbability": 41,
+      "drawProbability": 17,
+      "awayWinProbability": 42,
+      "recommendation": "Over 1.5 Goals",
+      "analysis": "Domestic Cup Strategy: Open Knockout Action (Over 1.5).\nHomeForm: 33%, AwayForm: 60%, BigGame: false",
+      "stakingOptions": [
+        "Safe: Over 1.5 Goals",
+        "Value: Club Deportivo Olimpia Draw No Bet (1.7)",
+        "Risky: Club Deportivo Olimpia to WIN by 2+ Goals (2.85)",
+        "BTTS: Both Teams To Score - Yes (1.78)",
+        "Alternative: Under 2.5 Goals (1.80)"
+      ]
+    }
+  },
+  {
+    "id": "CD-FAS-Isidro-Metapán",
+    "espnEventId": "401899709",
+    "homeTeam": "CD FAS",
+    "awayTeam": "Isidro Metapán",
+    "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/7229.png",
+    "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/7224.png",
+    "league": "Salvadoran Primera Division",
+    "date": "2026-10-22T01:30Z",
+    "status": "finished",
+    "statusShort": "FT",
+    "homeScore": 0,
+    "awayScore": 0,
+    "homeOdds": 2.05,
+    "drawOdds": 2.95,
+    "awayOdds": 3.6,
+    "oddsRating": -21,
+    "homeRank": null,
+    "awayRank": null,
+    "homeForm": "DLWWD",
+    "awayForm": "DWLWW",
+    "homePoints": 31,
+    "awayPoints": 30,
+    "homeLineup": null,
+    "awayLineup": null,
+    "h2hSummary": null,
+    "matchUrl": "https://www.espn.com/soccer/match/_/gameId/401899709/isidro-metapan-cd-fas",
+    "prediction": {
+      "homeWinProbability": 50,
+      "drawProbability": 21,
+      "awayWinProbability": 29,
+      "recommendation": "1X (CD FAS or Draw)",
+      "analysis": "Compound 1X Edge (Win+Draw Prob 71%): Covered.\nHomeForm: 73%, AwayForm: 47%, BigGame: false",
+      "stakingOptions": [
+        "Safe: 1X (CD FAS or Draw)",
+        "Value: CD FAS Draw No Bet (1.68)",
+        "Risky: CD FAS to WIN by 2+ Goals (2.85)",
+        "BTTS: Both Teams To Score - Yes (1.78)",
+        "Alternative: Over 2.5 Total Goals (1.70)"
+      ]
+    }
+  },
+  {
     "id": "Independiente-Santa-Fe-Jaguares-de-Córdoba",
     "espnEventId": "401877844",
     "homeTeam": "Independiente Santa Fe",
@@ -9761,6 +10875,48 @@
         "Safe: Over 1.5 Goals",
         "Value: 15 de Agosto Draw No Bet (1.7)",
         "Risky: 15 de Agosto to WIN by 2+ Goals (2.85)",
+        "BTTS: Both Teams To Score - Yes (1.78)",
+        "Alternative: Over 2.5 Total Goals (1.70)"
+      ]
+    }
+  },
+  {
+    "id": "FC-Liefering-Mainz",
+    "espnEventId": "401923775",
+    "homeTeam": "FC Liefering",
+    "awayTeam": "Mainz",
+    "homeLogo": "",
+    "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/2950.png",
+    "league": "Club Friendly",
+    "date": "2026-10-21T12:00Z",
+    "status": "finished",
+    "statusShort": "Canceled",
+    "homeScore": 0,
+    "awayScore": 0,
+    "homeOdds": null,
+    "drawOdds": null,
+    "awayOdds": null,
+    "oddsRating": -18,
+    "homeRank": null,
+    "awayRank": null,
+    "homeForm": "",
+    "awayForm": "DLWLW",
+    "homePoints": 0,
+    "awayPoints": 0,
+    "homeLineup": null,
+    "awayLineup": null,
+    "h2hSummary": null,
+    "matchUrl": "https://www.espn.com/soccer/match/_/gameId/401923775/mainz-fc-liefering",
+    "prediction": {
+      "homeWinProbability": 50,
+      "drawProbability": 18,
+      "awayWinProbability": 32,
+      "recommendation": "Over 1.5 Goals",
+      "analysis": "Competitive Match: Goals Market (Over 1.5).\nHomeForm: 50%, AwayForm: 33%, BigGame: false",
+      "stakingOptions": [
+        "Safe: Over 1.5 Goals",
+        "Value: FC Liefering Draw No Bet (1.7)",
+        "Risky: FC Liefering to WIN by 2+ Goals (2.85)",
         "BTTS: Both Teams To Score - Yes (1.78)",
         "Alternative: Over 2.5 Total Goals (1.70)"
       ]
