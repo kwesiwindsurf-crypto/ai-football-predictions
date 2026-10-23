@@ -2,9 +2,9 @@ name = "ai-football-bot"
 main = "src/index.js"
 compatibility_date = "2023-10-30"
 
-# This tells the worker to run twice a day to get fresh data while avoiding FotMob blocking
+# Run every minute to get instant live scores and goal updates
 [triggers]
-crons = ["0 */12 * * *"]
+crons = ["* * * * *"]
 
 # We use KV to store the JSON so the flutter app can fetch it instantly
 [[kv_namespaces]]

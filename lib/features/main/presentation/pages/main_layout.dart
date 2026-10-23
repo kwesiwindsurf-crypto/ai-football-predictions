@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../matches/presentation/pages/home_screen.dart';
+import '../../../leagues/presentation/pages/leagues_hub_screen.dart';
 import '../../../tracker/presentation/pages/tracker_screen.dart';
 import '../../../settings/presentation/pages/settings_screen.dart';
 
@@ -16,6 +17,7 @@ class _MainLayoutState extends State<MainLayout> {
   
   final List<Widget> _screens = [
     const HomeScreen(),
+    const LeaguesHubScreen(),
     const TrackerScreen(),
     const SettingsScreen(),
   ];
@@ -56,8 +58,9 @@ class _MainLayoutState extends State<MainLayout> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _buildNavItem(0, Icons.sports_soccer_rounded, 'Home', primary),
-                _buildNavItem(1, Icons.insights_rounded, 'Tracker', primary),
-                _buildNavItem(2, Icons.tune_rounded, 'Settings', primary),
+                _buildNavItem(1, Icons.emoji_events_rounded, 'Leagues', primary),
+                _buildNavItem(2, Icons.insights_rounded, 'Tracker', primary),
+                _buildNavItem(3, Icons.tune_rounded, 'Settings', primary),
               ],
             ),
           ),

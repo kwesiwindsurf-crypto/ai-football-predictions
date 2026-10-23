@@ -50,8 +50,9 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
-  /// Starts a 60-second polling timer if any match is currently live.
-  /// Also schedules a one-shot refresh when the next upcoming match kicks off.
+  /// Starts a 60-second polling timer if any match is live or within 3 h of
+  /// kickoff (active window). Also schedules a one-shot refresh for the next
+  /// upcoming match so the transition notStarted → live is caught immediately.
   void _startLiveRefreshIfNeeded(List<model.Match> matches) {
     _liveRefreshTimer?.cancel();
     _liveRefreshTimer = null;
@@ -59,15 +60,22 @@ class _HomeScreenState extends State<HomeScreen> {
     final now = DateTime.now();
     final hasLive = matches.any((m) => m.status == model.MatchStatus.live);
 
-    if (hasLive) {
-      // Poll every 3 minutes (180s) to capture backend 20-minute KV updates efficiently
-      _liveRefreshTimer = Timer.periodic(const Duration(seconds: 180), (_) {
+    // Consider any match that kicked off in the last 3 h as "active"
+    // (covers backend lag where status is still notStarted at kickoff)
+    final hasActiveWindow = matches.any((m) {
+      final minsAfterKickoff = now.difference(m.date.toLocal()).inMinutes;
+      return minsAfterKickoff >= 0 && minsAfterKickoff < 180;
+    });
+
+    if (hasLive || hasActiveWindow) {
+      // Poll every 60 seconds to match the Cloudflare 1-minute live cron updates
+      _liveRefreshTimer = Timer.periodic(const Duration(seconds: 60), (_) {
         _loadData();
       });
       return;
     }
 
-    // No live match — find the next upcoming kickoff and schedule a one-shot refresh
+    // No live or active match — schedule a one-shot refresh at the next kickoff
     final upcoming = matches
         .where((m) => m.status == model.MatchStatus.notStarted && m.date.isAfter(now))
         .toList()
@@ -744,6 +752,35 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ],
               ),
+              
+              // Goal Scorers Row (if any goals have occurred)
+              if ((match.homeScorers != null && match.homeScorers!.isNotEmpty) ||
+                  (match.awayScorers != null && match.awayScorers!.isNotEmpty)) ...[
+                const SizedBox(height: 6),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        (match.homeScorers ?? []).map((s) => '⚽ $s').join(', '),
+                        style: const TextStyle(fontSize: 10, color: AppTheme.textSecondary),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        (match.awayScorers ?? []).map((s) => '⚽ $s').join(', '),
+                        textAlign: TextAlign.right,
+                        style: const TextStyle(fontSize: 10, color: AppTheme.textSecondary),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
               
               const SizedBox(height: 12),
               

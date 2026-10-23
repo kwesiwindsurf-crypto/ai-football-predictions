@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -5,6 +6,7 @@ import '../../../../models/match_model.dart' as model;
 import '../../../../core/theme/app_theme.dart';
 
 import '../../../../core/services/analytics_service.dart';
+import '../../../../core/services/api_service.dart';
 import '../../../../core/services/app_settings_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -23,12 +25,20 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
   late final AnimationController _headerAnim;
   late final Animation<double> _fadeIn;
 
+  late final AnimationController _pulseAnim;
+
   double _pitchRotateX = 0.8;
   double _pitchRotateZ = 0.0;
+
+  /// Live-refreshable match state (updated by the auto-refresh timer)
+  late model.Match _liveMatch;
+  Timer? _refreshTimer;
+  final ApiService _apiService = ApiService();
 
   @override
   void initState() {
     super.initState();
+    _liveMatch = widget.match;
     AnalyticsService.instance.logScreenView('MatchDetailsScreen');
     AnalyticsService.instance.logMatchView(
       matchId: widget.match.id,
@@ -36,15 +46,61 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
       awayTeam: widget.match.awayTeam,
       league: widget.match.league,
     );
-    _tabController = TabController(length: 2, vsync: this);
+    _pulseAnim = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..repeat(reverse: true);
+
+    final initialTab = (widget.match.status == model.MatchStatus.live ||
+            widget.match.status == model.MatchStatus.finished)
+        ? 0
+        : 1;
+    _tabController = TabController(length: 3, vsync: this, initialIndex: initialTab);
     _headerAnim =
         AnimationController(vsync: this, duration: const Duration(milliseconds: 700));
     _fadeIn = CurvedAnimation(parent: _headerAnim, curve: Curves.easeOut);
     _headerAnim.forward();
+    _startAutoRefreshIfNeeded();
+  }
+
+  /// Polls the API every 30 s while the match is live or within 3 h of kickoff.
+  void _startAutoRefreshIfNeeded() {
+    final isLive = _liveMatch.status == model.MatchStatus.live;
+    final now = DateTime.now();
+    final minsAfterKickoff = now.difference(_liveMatch.date.toLocal()).inMinutes;
+    // Active window: match is live OR kicked off in last 3 hours
+    final inActiveWindow = isLive || (minsAfterKickoff >= 0 && minsAfterKickoff < 180);
+    if (!inActiveWindow) return;
+
+    _refreshTimer?.cancel();
+    _refreshTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+      _refreshMatchData();
+    });
+  }
+
+  Future<void> _refreshMatchData() async {
+    try {
+      final matches = await _apiService.fetchMatches();
+      final updated = matches.where((m) => m.id == _liveMatch.id).firstOrNull;
+      if (updated != null && mounted) {
+        setState(() {
+          _liveMatch = updated;
+        });
+        // Stop polling once match is finished
+        if (updated.status == model.MatchStatus.finished) {
+          _refreshTimer?.cancel();
+          _refreshTimer = null;
+        }
+      }
+    } catch (_) {
+      // Silently ignore refresh errors — stale data is fine
+    }
   }
 
   @override
   void dispose() {
+    _refreshTimer?.cancel();
+    _pulseAnim.dispose();
     _tabController.dispose();
     _headerAnim.dispose();
     super.dispose();
@@ -75,7 +131,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          widget.match.league,
+          _liveMatch.league,
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 16,
@@ -84,7 +140,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
         ),
         centerTitle: true,
         actions: [
-          if (widget.match.matchUrl != null && widget.match.matchUrl!.isNotEmpty)
+          if (_liveMatch.matchUrl != null && _liveMatch.matchUrl!.isNotEmpty)
             IconButton(
               tooltip: 'Open Match Page',
               icon: Container(
@@ -96,7 +152,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
                 child: Icon(Icons.open_in_new_rounded, size: 16, color: textPrimary),
               ),
               onPressed: () async {
-                final uri = Uri.tryParse(widget.match.matchUrl!);
+                final uri = Uri.tryParse(_liveMatch.matchUrl!);
                 if (uri != null && await canLaunchUrl(uri)) {
                   await launchUrl(uri, mode: LaunchMode.externalApplication);
                 }
@@ -126,6 +182,10 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
               labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
               tabs: const [
                 Tab(
+                  icon: Icon(Icons.bolt_rounded, size: 18),
+                  text: 'Timeline',
+                ),
+                Tab(
                   icon: Icon(Icons.smart_toy_rounded, size: 18),
                   text: 'AI Insights',
                 ),
@@ -141,6 +201,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
       body: TabBarView(
         controller: _tabController,
         children: [
+          _buildTimelineTab(),
           _buildAIInsightsTab(),
           _buildLineupsTab(),
         ],
@@ -152,7 +213,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
   // HERO HEADER
   // ─────────────────────────────────────────────────────────────
   Widget _buildHeroHeader() {
-    final m = widget.match;
+    final m = _liveMatch;
     final isLive = m.status == model.MatchStatus.live;
     final isFinished = m.status == model.MatchStatus.finished;
     final timeStr = _formatTime(m.date);
@@ -208,7 +269,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
                   ),
                 ),
                 if (isLive)
-                  _buildLivePulse("${m.elapsed ?? 0}'")
+                  _buildLivePulse(m.statusShort == 'HT' ? 'HT' : "${m.elapsed ?? 0}'")
                 else if (isFinished)
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -242,7 +303,52 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: Column(
                     children: [
-                      if (isLive || isFinished) ...[
+                      if (isLive) ...[
+                        Text(
+                          '${m.homeScore ?? 0} - ${m.awayScore ?? 0}',
+                          style: TextStyle(
+                            color: textPrimary,
+                            fontSize: 32,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 2,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        FadeTransition(
+                          opacity: Tween<double>(begin: 0.45, end: 1.0).animate(_pulseAnim),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: Colors.red.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.red.withValues(alpha: 0.4)),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  width: 6,
+                                  height: 6,
+                                  decoration: const BoxDecoration(
+                                    color: Colors.red,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                                const SizedBox(width: 5),
+                                Text(
+                                  m.statusShort == 'HT' ? 'HALFTIME' : (m.statusShort ?? (m.elapsed != null ? "${m.elapsed}'" : 'LIVE')),
+                                  style: const TextStyle(
+                                    color: Colors.red,
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: 11,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ] else if (isFinished) ...[
                         Text(
                           '${m.homeScore ?? 0} - ${m.awayScore ?? 0}',
                           style: TextStyle(
@@ -250,6 +356,22 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
                             fontSize: 28,
                             fontWeight: FontWeight.w900,
                             letterSpacing: 2,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: textSecondary.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            'Full Time',
+                            style: TextStyle(
+                              color: textSecondary,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ] else ...[
@@ -274,6 +396,83 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
                 Expanded(child: _buildTeamCard(m.awayTeam, m.awayLogo, false)),
               ],
             ),
+
+            // Goal Scorers Row (FlashScore Style)
+            if ((m.homeScorers != null && m.homeScorers!.isNotEmpty) ||
+                (m.awayScorers != null && m.awayScorers!.isNotEmpty)) ...[
+              const SizedBox(height: 14),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.white10),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Home team scorers
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: (m.homeScorers ?? []).map((s) => Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 2),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text('⚽', style: TextStyle(fontSize: 12)),
+                              const SizedBox(width: 5),
+                              Flexible(
+                                child: Text(
+                                  s,
+                                  style: TextStyle(
+                                    color: textPrimary,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )).toList(),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    // Away team scorers
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: (m.awayScorers ?? []).map((s) => Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 2),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  s,
+                                  style: TextStyle(
+                                    color: textPrimary,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.right,
+                                ),
+                              ),
+                              const SizedBox(width: 5),
+                              const Text('⚽', style: TextStyle(fontSize: 12)),
+                            ],
+                          ),
+                        )).toList(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
 
             if (m.homeOdds != null || m.drawOdds != null || m.awayOdds != null) ...[
               const SizedBox(height: 14),
@@ -329,10 +528,10 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
           ),
         ),
         // Form badge under name
-        if ((isHome ? widget.match.homeForm : widget.match.awayForm) != null) ...[
+        if ((isHome ? _liveMatch.homeForm : _liveMatch.awayForm) != null) ...[
           const SizedBox(height: 4),
           _buildMiniForm(
-              (isHome ? widget.match.homeForm : widget.match.awayForm)!),
+              (isHome ? _liveMatch.homeForm : _liveMatch.awayForm)!),
         ],
       ],
     );
@@ -396,23 +595,35 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
   }
 
   Widget _buildLivePulse(String text) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 8,
-          height: 8,
-          decoration: const BoxDecoration(
-              color: Colors.red, shape: BoxShape.circle),
+    return FadeTransition(
+      opacity: Tween<double>(begin: 0.45, end: 1.0).animate(_pulseAnim),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        decoration: BoxDecoration(
+          color: Colors.red.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.red.withValues(alpha: 0.4)),
         ),
-        const SizedBox(width: 4),
-        Text(text,
-            style: const TextStyle(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 7,
+              height: 7,
+              decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+            ),
+            const SizedBox(width: 5),
+            Text(
+              text,
+              style: const TextStyle(
                 color: Colors.red,
-                fontWeight: FontWeight.bold,
-                fontSize: 12)),
-      ],
+                fontWeight: FontWeight.w900,
+                fontSize: 12,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -440,6 +651,152 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
   }
 
   // ─────────────────────────────────────────────────────────────
+  // TIMELINE / MATCH EVENTS TAB (FlashScore Style)
+  // ─────────────────────────────────────────────────────────────
+  Widget _buildTimelineTab() {
+    final m = _liveMatch;
+    final events = m.events ?? [];
+    final textPrimary = AppTheme.textPrimaryOf(context);
+    final textSecondary = AppTheme.textSecondaryOf(context);
+    final surface = AppTheme.surfaceOf(context);
+    final borderColor = AppTheme.cardBorderOf(context);
+
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        _buildHeroHeader(),
+        const SizedBox(height: 16),
+        if (events.isEmpty) ...[
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: surface,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: borderColor),
+            ),
+            child: Column(
+              children: [
+                Icon(Icons.bolt_rounded, size: 40, color: textSecondary.withValues(alpha: 0.5)),
+                const SizedBox(height: 10),
+                Text(
+                  m.status == model.MatchStatus.notStarted
+                      ? 'Match Has Not Started'
+                      : 'No Key Events Recorded Yet',
+                  style: TextStyle(color: textPrimary, fontSize: 15, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  m.status == model.MatchStatus.notStarted
+                      ? 'Live goals, cards, and key moments will stream here once kickoff begins.'
+                      : 'Events will update automatically in real-time as they happen on the pitch.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: textSecondary, fontSize: 12),
+                ),
+              ],
+            ),
+          ),
+        ] else ...[
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: surface,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: borderColor),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.bolt_rounded, color: AppTheme.secondary, size: 20),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Match Timeline & Events',
+                      style: TextStyle(color: textPrimary, fontSize: 15, fontWeight: FontWeight.bold),
+                    ),
+                    const Spacer(),
+                    if (m.status == model.MatchStatus.live)
+                      _buildLivePulse(m.statusShort ?? 'LIVE'),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                const Divider(color: Colors.white10, height: 1),
+                const SizedBox(height: 10),
+                ...events.map((ev) {
+                  final isHome = ev.team == 'home';
+                  final teamName = isHome ? m.homeTeam : m.awayTeam;
+
+                  IconData iconData = Icons.sports_soccer;
+                  Color eventColor = AppTheme.success;
+                  if (ev.redCard) {
+                    iconData = Icons.square_rounded;
+                    eventColor = Colors.red;
+                  } else if (ev.yellowCard) {
+                    iconData = Icons.square_rounded;
+                    eventColor = Colors.amber;
+                  } else if (ev.type.toLowerCase().contains('sub')) {
+                    iconData = Icons.swap_horiz_rounded;
+                    eventColor = Colors.blue;
+                  }
+
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Row(
+                      children: [
+                        // Minute Badge
+                        Container(
+                          width: 44,
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: eventColor.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(color: eventColor.withValues(alpha: 0.3)),
+                          ),
+                          child: Text(
+                            ev.clock.isNotEmpty ? ev.clock : ev.type,
+                            style: TextStyle(color: eventColor, fontWeight: FontWeight.w800, fontSize: 11),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        // Event icon
+                        Icon(iconData, size: 18, color: eventColor),
+                        const SizedBox(width: 10),
+                        // Event details
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                ev.player,
+                                style: TextStyle(
+                                  color: textPrimary,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                '$teamName • ${ev.type}${ev.penalty ? ' (Penalty)' : ''}${ev.ownGoal ? ' (Own Goal)' : ''}',
+                                style: TextStyle(color: textSecondary, fontSize: 11),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+              ],
+            ),
+          ),
+        ],
+        const SizedBox(height: 32),
+      ],
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────
   // AI INSIGHTS TAB
   // ─────────────────────────────────────────────────────────────
   Widget _buildAIInsightsTab() {
@@ -451,7 +808,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
         _buildPredictionGraph(),
         const SizedBox(height: 16),
         _buildAIPredictionCard(),
-        if (widget.match.h2hSummary != null && widget.match.h2hSummary!.isNotEmpty) ...[
+        if (_liveMatch.h2hSummary != null && _liveMatch.h2hSummary!.isNotEmpty) ...[
           const SizedBox(height: 16),
           _buildH2HGraphicalCard(),
         ],
@@ -465,7 +822,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
   }
 
   Widget _buildPredictionGraph() {
-    final m = widget.match;
+    final m = _liveMatch;
     final home = m.prediction.homeWinProbability;
     final draw = m.prediction.drawProbability;
     final away = m.prediction.awayWinProbability;
@@ -673,7 +1030,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
   }
 
   Widget _buildAIPredictionCard() {
-    final m = widget.match;
+    final m = _liveMatch;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -708,7 +1065,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
 
 
   Widget _buildH2HGraphicalCard() {
-    final m = widget.match;
+    final m = _liveMatch;
     final primary = Theme.of(context).primaryColor;
     final textSecondary = AppTheme.textSecondaryOf(context);
 
@@ -1017,7 +1374,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
 
 
   Widget _buildRecentFormCard() {
-    final m = widget.match;
+    final m = _liveMatch;
     final homeRecent = _buildRecentMatchesFromForm(m.homeForm);
     final awayRecent = _buildRecentMatchesFromForm(m.awayForm);
     if (homeRecent.isEmpty && awayRecent.isEmpty) return const SizedBox.shrink();
@@ -1133,7 +1490,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
   }
 
   Widget _buildStakingCard() {
-    final m = widget.match;
+    final m = _liveMatch;
     if (m.prediction.stakingOptions.isEmpty) return const SizedBox.shrink();
     return Container(
       padding: const EdgeInsets.all(20),
@@ -1199,7 +1556,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
   // LINEUPS TAB
   // ─────────────────────────────────────────────────────────────
   Widget _buildLineupsTab() {
-    final m = widget.match;
+    final m = _liveMatch;
 
     if (m.homeLineupData != null && m.awayLineupData != null) {
       return ListView(

@@ -33,6 +33,9 @@ class Match {
   final List<String>? awayLineup;
   final TeamLineupData? homeLineupData;
   final TeamLineupData? awayLineupData;
+  final List<String>? homeScorers;
+  final List<String>? awayScorers;
+  final List<MatchEvent>? events;
 
   Match({
     required this.id,
@@ -64,6 +67,9 @@ class Match {
     this.awayLineup,
     this.homeLineupData,
     this.awayLineupData,
+    this.homeScorers,
+    this.awayScorers,
+    this.events,
   });
 
   factory Match.fromJson(Map<String, dynamic> json, [Map<String, dynamic>? standingsData]) {
@@ -163,6 +169,13 @@ class Match {
       awayLineup: _parseLineupList(json['awayLineup']),
       homeLineupData: hLineupData,
       awayLineupData: aLineupData,
+      homeScorers: json['homeScorers'] is List ? List<String>.from(json['homeScorers']) : null,
+      awayScorers: json['awayScorers'] is List ? List<String>.from(json['awayScorers']) : null,
+      events: json['events'] is List
+          ? (json['events'] as List)
+              .map((e) => MatchEvent.fromJson(Map<String, dynamic>.from(e)))
+              .toList()
+          : null,
     );
   }
 
@@ -953,3 +966,54 @@ class MockData {
     return data[teamName] ?? [];
   }
 }
+
+class MatchEvent {
+  final String type;
+  final String clock;
+  final String team; // 'home' or 'away'
+  final String player;
+  final bool scoringPlay;
+  final bool redCard;
+  final bool yellowCard;
+  final bool penalty;
+  final bool ownGoal;
+
+  MatchEvent({
+    required this.type,
+    required this.clock,
+    required this.team,
+    required this.player,
+    this.scoringPlay = false,
+    this.redCard = false,
+    this.yellowCard = false,
+    this.penalty = false,
+    this.ownGoal = false,
+  });
+
+  factory MatchEvent.fromJson(Map<String, dynamic> json) {
+    return MatchEvent(
+      type: json['type']?.toString() ?? '',
+      clock: json['clock']?.toString() ?? '',
+      team: json['team']?.toString() ?? 'home',
+      player: json['player']?.toString() ?? '',
+      scoringPlay: json['scoringPlay'] == true,
+      redCard: json['redCard'] == true,
+      yellowCard: json['yellowCard'] == true,
+      penalty: json['penalty'] == true,
+      ownGoal: json['ownGoal'] == true,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'clock': clock,
+    'team': team,
+    'player': player,
+    'scoringPlay': scoringPlay,
+    'redCard': redCard,
+    'yellowCard': yellowCard,
+    'penalty': penalty,
+    'ownGoal': ownGoal,
+  };
+}
+

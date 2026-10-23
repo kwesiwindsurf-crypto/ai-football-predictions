@@ -1773,9 +1773,9 @@
       </div>
 
       <div class="filter-group">
-        <button class="filter-btn touch-haptic active" data-date="all" onclick="setDateFilter('all', this); triggerHaptic('light');">All Days</button>
+        <button class="filter-btn touch-haptic" data-date="all" onclick="setDateFilter('all', this); triggerHaptic('light');">All Days</button>
         <button class="filter-btn touch-haptic" data-date="yesterday" onclick="setDateFilter('yesterday', this); triggerHaptic('light');">Yesterday</button>
-        <button class="filter-btn touch-haptic" data-date="today" onclick="setDateFilter('today', this); triggerHaptic('light');">Today</button>
+        <button class="filter-btn touch-haptic active" data-date="today" onclick="setDateFilter('today', this); triggerHaptic('light');">Today</button>
         <button class="filter-btn touch-haptic" data-date="tomorrow" onclick="setDateFilter('tomorrow', this); triggerHaptic('light');">Tomorrow</button>
       </div>
 
@@ -1850,7 +1850,7 @@
   <script>
     const API_URL = 'https://ai-football-bot.xantechs00.workers.dev';
     let allMatches = [];
-    let currentDateFilter = 'all';
+    let currentDateFilter = 'today'; // Default to Today's matches
     let currentStatusFilter = 'all';
     let currentLeagueFilter = 'all';
     let currentQuickTag = 'all';
@@ -2012,10 +2012,12 @@
 
     async function loadData(force = false) {
       const loading = document.getElementById('loading-state');
-      if (loading) loading.style.display = 'block';
+      if (loading && force) loading.style.display = 'block';
 
       try {
-        const res = await fetch(API_URL);
+        // Add cache-busting timestamp to prevent browser HTTP caching of live scores
+        const cacheBustUrl = `${API_URL}?_t=${Date.now()}`;
+        const res = await fetch(cacheBustUrl);
         const json = await res.json();
         const rollingMatches = json.matchesData?.matches || json.matches || [];
         const historicalMatches = Array.isArray(json.historicalMatches) ? json.historicalMatches : [];
@@ -2255,14 +2257,24 @@
       const content = document.getElementById('content-area');
       content.innerHTML = '';
 
+      // Use local date strings (YYYY-MM-DD) so timezone differences don't mismatch
+      const toLocalDateStr = (d) => {
+        const date = new Date(d);
+        if (isNaN(date)) return '';
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+      };
+
       const now = new Date();
-      const todayIso = now.toISOString().slice(0, 10);
-      const yesterday = new Date(now.getTime() - 86400000).toISOString().slice(0, 10);
-      const tomorrow = new Date(now.getTime() + 86400000).toISOString().slice(0, 10);
+      const todayIso = toLocalDateStr(now);
+      const yesterday = toLocalDateStr(new Date(now.getTime() - 86400000));
+      const tomorrow = toLocalDateStr(new Date(now.getTime() + 86400000));
 
       const filtered = allMatches.filter(m => {
-        // Date filter
-        const matchIso = (m.date || '').slice(0, 10);
+        // Date filter using local date comparison
+        const matchIso = toLocalDateStr(m.date);
         if (currentDateFilter === 'yesterday' && matchIso !== yesterday) return false;
         if (currentDateFilter === 'today' && matchIso !== todayIso) return false;
         if (currentDateFilter === 'tomorrow' && matchIso !== tomorrow) return false;
@@ -2310,10 +2322,22 @@
       });
 
       if (filtered.length === 0) {
+        const hasAnyMatches = allMatches.length > 0;
+        let suggestionHtml = '';
+        if (currentDateFilter === 'today' && hasAnyMatches) {
+          suggestionHtml = `
+            <div style="margin-top: 14px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+              <button class="filter-btn touch-haptic" onclick="setDateFilter('tomorrow', document.querySelector('[data-date=tomorrow]')); triggerHaptic('medium');">📅 View Tomorrow's Games</button>
+              <button class="filter-btn touch-haptic" onclick="setDateFilter('all', document.querySelector('[data-date=all]')); triggerHaptic('medium');">📋 View All Days (${allMatches.length})</button>
+            </div>
+          `;
+        }
+
         content.innerHTML = `
           <div class="state-banner">
-            <p style="font-size: 1.15rem; font-weight: 700; color: #fff;">No matches found matching your filters.</p>
-            <p style="font-size: 0.9rem; margin-top: 8px;">Try clearing your search keyword, resetting quick tags, or switching dates above.</p>
+            <p style="font-size: 1.15rem; font-weight: 700; color: #fff;">No matches scheduled for ${currentDateFilter.toUpperCase()}.</p>
+            <p style="font-size: 0.9rem; margin-top: 8px; color: var(--text-dim);">There are no matches scheduled for this specific date filter.</p>
+            ${suggestionHtml}
           </div>
         `;
         return;
@@ -2472,6 +2496,11 @@
     // Initialize UI and data
     updateHapticUI();
     loadData();
+
+    // Auto-refresh live scores on the website every 60 seconds (silent background refresh)
+    setInterval(() => {
+      loadData();
+    }, 60000);
   </script>
 </body>
 </html>

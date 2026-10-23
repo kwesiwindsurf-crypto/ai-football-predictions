@@ -625,14 +625,19 @@ function determineLeagueStrategy(league, home, away, fHp, fDp, fAp, isBig, hOdds
   const probX2 = fAp + fDp;
   const maxProb = Math.max(fHp, fDp, fAp);
 
-  // Odds evaluation for Big vs Big / Blockbuster matches (never blindly assume home advantage)
+  // Clear odds evaluation (never let market underdog get picked against heavy favorite)
   const hasOdds = hOdds > 0 && aOdds > 0;
   const isHomeOddsFav = hasOdds ? hOdds < aOdds : fHp > fAp;
   const isAwayOddsFav = hasOdds ? aOdds < hOdds : fAp > fHp;
   const oddsGap = hasOdds ? Math.abs(hOdds - aOdds) : 0;
   const isOddsClose = hasOdds ? oddsGap <= 0.40 : Math.abs(fHp - fAp) <= 8;
 
-  // 1. UEFA Champions League (The Pinnacle of European Football)
+  // Symmetrical Favorite & Edge Determination
+  // If Away probability is noticeably higher OR Away odds are much shorter, Away is the true favorite.
+  const isAwayFav = (hasOdds && aOdds < hOdds && aOdds <= 2.20) || (fAp >= fHp + 5);
+  const isHomeFav = (hasOdds && hOdds < aOdds && hOdds <= 2.20) || (fHp >= fAp + 5);
+
+  // 1. UEFA Champions League
   const isUCL = lStr.includes('champions league') || lStr.includes('uefa.champions');
 
   // 2. UEFA Europa League & Conference League
@@ -687,10 +692,6 @@ function determineLeagueStrategy(league, home, away, fHp, fDp, fAp, isBig, hOdds
   let strategyAnalysis = '';
 
   // ── 0. BLOCKBUSTER CLASHES (Big vs Big across any league or tournament) ──
-  // Instead of blindly assuming 1X (Home pitch advantage), we evaluate bookmaker odds:
-  // 1. If odds / probabilities favor Away giant -> X2 (Double Chance)
-  // 2. If odds are close / dead heat -> Over 1.5 Goals (or Under 3.5 in defensive leagues)
-  // 3. If odds confirm Home giant -> 1X (Double Chance)
   if (isBig) {
     if (isOddsClose) {
       if (isDefensive || isSouthAmericanCups) {
@@ -711,193 +712,196 @@ function determineLeagueStrategy(league, home, away, fHp, fDp, fAp, isBig, hOdds
       primarySafe = `Safe: 1X (${home} or Draw)`;
       strategyAnalysis = `Blockbuster Clash (${league}): Market odds favor home giant ${home} (1X Double Chance).`;
     }
-    return { recommendation, primarySafe, strategyAnalysis };
   }
 
-  // ── SPECIALIZED LOGIC PER COMPETITION ARCHETYPE ──
+  // ── 1. SPECIALIZED TOURNAMENT LOGIC ──
+  else if (isUCL || isEuroCups) {
+    if (fHp >= 65 && !isAwayFav) {
+      recommendation = `${home} to Win (1)`;
+      primarySafe = `Safe: 1X (${home} or Draw)`;
+      strategyAnalysis = `European Cup: Heavy Home Favorite (${fHp}% Win).`;
+    } else if (fAp >= 60 && !isHomeFav) {
+      recommendation = `${away} to Win (2)`;
+      primarySafe = `Safe: X2 (${away} or Draw)`;
+      strategyAnalysis = `European Cup: Dominant Away Giant (${fAp}% Win).`;
+    } else if (isAwayFav && probX2 >= 65) {
+      recommendation = `X2 (${away} or Draw)`;
+      primarySafe = `Safe: X2 (${away} or Draw)`;
+      strategyAnalysis = `European Cup: Compound X2 Advantage for Away Quality (${probX2}%).`;
+    } else if (isHomeFav && prob1X >= 65) {
+      recommendation = `1X (${home} or Draw)`;
+      primarySafe = `Safe: 1X (${home} or Draw)`;
+      strategyAnalysis = `European Cup: Compound 1X Advantage for Home (${prob1X}%).`;
+    } else {
+      recommendation = `Over 1.5 Goals`;
+      primarySafe = `Safe: Over 1.5 Goals`;
+      strategyAnalysis = `European Cup Strategy: Open Goals Market (Over 1.5).`;
+    }
+  }
 
-  if (isUCL) {
-    // 👑 UEFA Champions League Strategy:
-    // Heavy favorites (Man City, Real Madrid vs pot 3/4) win cleanly.
-    if (fHp >= 68) {
+  // ── 2. SOUTH AMERICAN CONTINENTAL & INTERNATIONAL TOURNAMENTS ──
+  else if (isSouthAmericanCups || isInternational) {
+    if (fHp >= 65 && !isAwayFav) {
       recommendation = `${home} to Win (1)`;
       primarySafe = `Safe: 1X (${home} or Draw)`;
-      strategyAnalysis = `UEFA Champions League: Heavy Home Favorite (${fHp}% Win).`;
-    } else if (fAp >= 65) {
+      strategyAnalysis = `International/Continental: Strong Host Advantage (${fHp}%).`;
+    } else if (fAp >= 60 && !isHomeFav) {
       recommendation = `${away} to Win (2)`;
       primarySafe = `Safe: X2 (${away} or Draw)`;
-      strategyAnalysis = `UEFA Champions League: Dominant Away Giant (${fAp}% Win).`;
-    } else if (prob1X >= 70) {
-      recommendation = `1X (${home} or Draw)`;
-      primarySafe = `Safe: 1X (${home} or Draw)`;
-      strategyAnalysis = `UEFA Champions League: Compound 1X Advantage (${prob1X}%).`;
-    } else {
-      recommendation = `Over 1.5 Goals`;
-      primarySafe = `Safe: Over 1.5 Goals`;
-      strategyAnalysis = `UEFA Champions League Strategy: Fast-paced Goals Market (Over 1.5).`;
-    }
-  } else if (isEuroCups) {
-    // 🇪🇺 Europa League & Conference League:
-    // Highest goal volatility in Europe (avg 3.11 goals, 89% Over 1.5).
-    if (fHp >= 68) {
-      recommendation = `${home} to Win (1)`;
-      primarySafe = `Safe: 1X (${home} or Draw)`;
-      strategyAnalysis = `UEFA European Cup: Strong Home Favorite (${fHp}%).`;
-    } else if (fAp >= 65) {
-      recommendation = `${away} to Win (2)`;
+      strategyAnalysis = `International/Continental: Superior Away Giant (${fAp}%).`;
+    } else if (isAwayFav && probX2 >= 64) {
+      recommendation = `X2 (${away} or Draw)`;
       primarySafe = `Safe: X2 (${away} or Draw)`;
-      strategyAnalysis = `UEFA European Cup: Quality Away Giant (${fAp}%).`;
-    } else {
-      recommendation = `Over 1.5 Goals`;
-      primarySafe = `Safe: Over 1.5 Goals`;
-      strategyAnalysis = `UEFA European Cup Strategy: Reliable Over 1.5 Goals (89% historical win rate).`;
-    }
-  } else if (isSouthAmericanCups) {
-    // 🌎 Copa Libertadores & Sudamericana:
-    // Fierce altitude, hostile crowds, low scoring. Under 3.5 hits 90%.
-    if (prob1X >= 65) {
+      strategyAnalysis = `International/Continental: Compound X2 Coverage (${probX2}%).`;
+    } else if (isHomeFav && prob1X >= 64) {
       recommendation = `1X (${home} or Draw)`;
       primarySafe = `Safe: 1X (${home} or Draw)`;
-      strategyAnalysis = `Copa Libertadores: Home Fortress Advantage (1X).`;
+      strategyAnalysis = `International/Continental: Compound 1X Coverage (${prob1X}%).`;
     } else {
       recommendation = `Under 3.5 Goals`;
       primarySafe = `Safe: Under 3.5 Goals`;
-      strategyAnalysis = `Copa Libertadores Strategy: Intense Cautious Knockout (Under 3.5).`;
+      strategyAnalysis = `Tournament Strategy: Cautious Knockout Context (Under 3.5).`;
     }
-  } else if (isInternational) {
-    // 🌍 World Cup, Euro, AFCON, Copa America, Nations League:
-    // Tournament football is cautious and defensive (Under 3.5 hits 92%).
-    if (fHp >= 68) {
+  }
+
+  // ── 3. DOMESTIC KNOCKOUT CUPS ──
+  else if (isDomesticCup) {
+    if (fHp >= 70 && !isAwayFav) {
       recommendation = `${home} to Win (1)`;
       primarySafe = `Safe: 1X (${home} or Draw)`;
-      strategyAnalysis = `International Championship: Heavy National Team Dominance (${fHp}%).`;
-    } else if (fAp >= 65) {
+      strategyAnalysis = `Domestic Cup: Overwhelming Home Giant (Prob >= 70%).`;
+    } else if (fAp >= 65 && !isHomeFav) {
       recommendation = `${away} to Win (2)`;
       primarySafe = `Safe: X2 (${away} or Draw)`;
-      strategyAnalysis = `International Championship: Elite Nation Favoritism (${fAp}%).`;
-    } else if (prob1X >= 68) {
-      recommendation = `1X (${home} or Draw)`;
-      primarySafe = `Safe: 1X (${home} or Draw)`;
-      strategyAnalysis = `International Championship Strategy: 1X Double Chance Coverage.`;
-    } else {
-      recommendation = `Under 3.5 Goals`;
-      primarySafe = `Safe: Under 3.5 Goals`;
-      strategyAnalysis = `International Tournament Strategy: Cagey Knockout Tie (Under 3.5).`;
-    }
-  } else if (isDomesticCup) {
-    // 🏆 Domestic Knockout Cups (FA Cup, Copa del Rey, DFB Pokal, etc.):
-    // Squad rotation & giant-killings happen often. Never force straight 1X2 unless heavy favorite.
-    if (fHp >= 72) {
-      recommendation = `${home} to Win (1)`;
-      primarySafe = `Safe: 1X (${home} or Draw)`;
-      strategyAnalysis = `Domestic Cup: Overwhelming Home Giant (Prob >= 72%).`;
-    } else if (fAp >= 70) {
-      recommendation = `${away} to Win (2)`;
+      strategyAnalysis = `Domestic Cup: Quality Away Giant (Prob >= 65%).`;
+    } else if (isAwayFav && probX2 >= 65) {
+      recommendation = `X2 (${away} or Draw)`;
       primarySafe = `Safe: X2 (${away} or Draw)`;
-      strategyAnalysis = `Domestic Cup: Quality Away Giant (Prob >= 70%).`;
-    } else if (prob1X >= 65) {
+      strategyAnalysis = `Domestic Cup Strategy: Away Double Chance (X2 ${probX2}%).`;
+    } else if (isHomeFav && prob1X >= 65) {
       recommendation = `1X (${home} or Draw)`;
       primarySafe = `Safe: 1X (${home} or Draw)`;
-      strategyAnalysis = `Domestic Cup Strategy: 1X Upset Shield (${prob1X}% Win/Draw).`;
+      strategyAnalysis = `Domestic Cup Strategy: 1X Upset Shield (${prob1X}%).`;
     } else {
       recommendation = `Over 1.5 Goals`;
       primarySafe = `Safe: Over 1.5 Goals`;
       strategyAnalysis = `Domestic Cup Strategy: Open Knockout Action (Over 1.5).`;
     }
-  } else if (isDefensive) {
-    // 🛡️ Defensive Leagues (Brazil, La Liga, Argentina, Greece, etc.):
-    if (fHp >= 68) {
+  }
+
+  // ── 4. DEFENSIVE LEAGUES ──
+  else if (isDefensive) {
+    if (fHp >= 65 && !isAwayFav) {
       recommendation = `${home} to Win (1)`;
       primarySafe = `Safe: 1X (${home} or Draw)`;
-      strategyAnalysis = `Defensive League: Heavy Home Dominance (Prob >= 68%).`;
-    } else if (fAp >= 68) {
+      strategyAnalysis = `Defensive League: Heavy Home Dominance (${fHp}%).`;
+    } else if (fAp >= 60 && !isHomeFav) {
       recommendation = `${away} to Win (2)`;
       primarySafe = `Safe: X2 (${away} or Draw)`;
-      strategyAnalysis = `Defensive League: Heavy Away Dominance (Prob >= 68%).`;
-    } else if (prob1X >= 65) {
+      strategyAnalysis = `Defensive League: Heavy Away Dominance (${fAp}%).`;
+    } else if (isAwayFav && probX2 >= 65) {
+      recommendation = `X2 (${away} or Draw)`;
+      primarySafe = `Safe: X2 (${away} or Draw)`;
+      strategyAnalysis = `Defensive League: Away Double Chance (X2 ${probX2}%).`;
+    } else if (isHomeFav && prob1X >= 65) {
       recommendation = `1X (${home} or Draw)`;
       primarySafe = `Safe: 1X (${home} or Draw)`;
-      strategyAnalysis = `Defensive League Strategy: Home Double Chance (1X Prob ${prob1X}%).`;
+      strategyAnalysis = `Defensive League: Home Double Chance (1X ${prob1X}%).`;
     } else {
       recommendation = `Under 3.5 Goals`;
       primarySafe = `Safe: Under 3.5 Goals`;
       strategyAnalysis = `Defensive League Strategy: High-confidence Under 3.5 Goals.`;
     }
-  } else if (isHighDraw) {
-    // ⚖️ High-Draw Leagues (MLS, Serie B, Liga MX, Championship):
-    if (fHp >= 75) {
+  }
+
+  // ── 5. HIGH-DRAW LEAGUES ──
+  else if (isHighDraw) {
+    if (fHp >= 70 && !isAwayFav) {
       recommendation = `${home} to Win (1)`;
       primarySafe = `Safe: 1X (${home} or Draw)`;
-      strategyAnalysis = `High-Draw League: Overwhelming Home Favorite (Prob >= 75%).`;
-    } else if (fAp >= 72) {
+      strategyAnalysis = `High-Draw League: Overwhelming Home Favorite (${fHp}%).`;
+    } else if (fAp >= 65 && !isHomeFav) {
       recommendation = `${away} to Win (2)`;
       primarySafe = `Safe: X2 (${away} or Draw)`;
-      strategyAnalysis = `High-Draw League: Overwhelming Away Favorite (Prob >= 72%).`;
-    } else if (prob1X >= 68) {
-      recommendation = `1X (${home} or Draw)`;
-      primarySafe = `Safe: 1X (${home} or Draw)`;
-      strategyAnalysis = `High-Draw League Strategy: 1X covers high draw rate (${fDp}% Draw).`;
-    } else if (probX2 >= 66) {
+      strategyAnalysis = `High-Draw League: Overwhelming Away Favorite (${fAp}%).`;
+    } else if (isAwayFav && probX2 >= 62) {
       recommendation = `X2 (${away} or Draw)`;
       primarySafe = `Safe: X2 (${away} or Draw)`;
-      strategyAnalysis = `High-Draw League Strategy: X2 covers high draw rate (${fDp}% Draw).`;
+      strategyAnalysis = `High-Draw League: Away Compound Shield (X2 covers draw ${fDp}%).`;
+    } else if (isHomeFav && prob1X >= 62) {
+      recommendation = `1X (${home} or Draw)`;
+      primarySafe = `Safe: 1X (${home} or Draw)`;
+      strategyAnalysis = `High-Draw League: Home Compound Shield (1X covers draw ${fDp}%).`;
     } else {
       recommendation = `Over 1.5 Goals`;
       primarySafe = `Safe: Over 1.5 Goals`;
       strategyAnalysis = `High-Draw League Strategy: Tight match goals market.`;
     }
-  } else if (isHomeFortress) {
-    // 🏰 Home Fortress Leagues (Turkey, 2. Bundesliga, League One & Two):
-    if (fHp >= 55) {
+  }
+
+  // ── 6. HOME FORTRESS LEAGUES (Turkey, Saudi, 2. Bundesliga, etc.) ──
+  // CRITICAL: Never blindly give 1X to underdogs when an Away giant visits (e.g. Al Nassr)
+  else if (isHomeFortress) {
+    if (fHp >= 55 && !isAwayFav) {
       recommendation = `${home} to Win (1)`;
       primarySafe = `Safe: 1X (${home} or Draw)`;
-      strategyAnalysis = `Home Fortress League: Strong Home Edge (${fHp}% Win).`;
-    } else if (prob1X >= 65) {
+      strategyAnalysis = `Home Fortress League: Dominant Host (${fHp}% Win).`;
+    } else if (isAwayFav) {
+      if (fAp >= 58 || (hasOdds && aOdds <= 1.50)) {
+        recommendation = `${away} to Win (2)`;
+        primarySafe = `Safe: X2 (${away} or Draw)`;
+        strategyAnalysis = `Home Fortress League: Dominant Away Giant overcomes fortress (${away} ${fAp}% Win).`;
+      } else {
+        recommendation = `X2 (${away} or Draw)`;
+        primarySafe = `Safe: X2 (${away} or Draw)`;
+        strategyAnalysis = `Home Fortress League: Away Favorite Double Chance (X2 ${probX2}%).`;
+      }
+    } else if (prob1X >= 64) {
       recommendation = `1X (${home} or Draw)`;
       primarySafe = `Safe: 1X (${home} or Draw)`;
       strategyAnalysis = `Home Fortress League: 1X Home Shield (${prob1X}% Win/Draw).`;
-    } else if (fAp >= 68) {
-      recommendation = `${away} to Win (2)`;
-      primarySafe = `Safe: X2 (${away} or Draw)`;
-      strategyAnalysis = `Home Fortress League: Exceptional Away Giant (${fAp}% Win).`;
-    } else {
-      recommendation = `1X (${home} or Draw)`;
-      primarySafe = `Safe: 1X (${home} or Draw)`;
-      strategyAnalysis = `Home Fortress League: Backing Home Pitch (1X).`;
-    }
-  } else if (isHighScoring) {
-    // ⚽ High-Scoring Leagues (Eredivisie, Bundesliga, Austria, Scotland):
-    if (fHp >= 70) {
-      recommendation = `${home} to Win (1)`;
-      primarySafe = `Safe: 1X (${home} or Draw)`;
-      strategyAnalysis = `Goal-Fest League: Dominant Home Team (Prob >= 70%).`;
-    } else if (fAp >= 68) {
-      recommendation = `${away} to Win (2)`;
-      primarySafe = `Safe: X2 (${away} or Draw)`;
-      strategyAnalysis = `Goal-Fest League: Dominant Away Team (Prob >= 68%).`;
     } else {
       recommendation = `Over 1.5 Goals`;
       primarySafe = `Safe: Over 1.5 Goals`;
-      strategyAnalysis = `Goal-Fest League Strategy: Reliable Over 1.5 Goals (89-100% hit rate).`;
+      strategyAnalysis = `Home Fortress League: Competitive tie goals market.`;
     }
-  } else {
-    // 🌐 Universal Smart Baseline (Remaining World Competitions):
-    if (fHp >= 68) {
+  }
+
+  // ── 7. HIGH-SCORING LEAGUES ──
+  else if (isHighScoring) {
+    if (fHp >= 65 && !isAwayFav) {
       recommendation = `${home} to Win (1)`;
       primarySafe = `Safe: 1X (${home} or Draw)`;
-      strategyAnalysis = `Clear Home Favorite (Prob >= 68%): Direct Win.`;
-    } else if (fAp >= 65) {
+      strategyAnalysis = `Goal-Fest League: Dominant Home Team (${fHp}%).`;
+    } else if (fAp >= 60 && !isHomeFav) {
       recommendation = `${away} to Win (2)`;
       primarySafe = `Safe: X2 (${away} or Draw)`;
-      strategyAnalysis = `Clear Away Favorite (Prob >= 65%): Direct Win.`;
-    } else if (prob1X >= 70) {
-      recommendation = `1X (${home} or Draw)`;
+      strategyAnalysis = `Goal-Fest League: Dominant Away Team (${fAp}%).`;
+    } else {
+      recommendation = `Over 1.5 Goals`;
+      primarySafe = `Safe: Over 1.5 Goals`;
+      strategyAnalysis = `Goal-Fest League Strategy: Reliable Over 1.5 Goals.`;
+    }
+  }
+
+  // ── 8. UNIVERSAL BASELINE ──
+  else {
+    if (fHp >= 65 && !isAwayFav) {
+      recommendation = `${home} to Win (1)`;
       primarySafe = `Safe: 1X (${home} or Draw)`;
-      strategyAnalysis = `Compound 1X Edge (Win+Draw Prob ${prob1X}%): Covered.`;
-    } else if (probX2 >= 68) {
+      strategyAnalysis = `Clear Home Favorite (${fHp}%): Direct Win.`;
+    } else if (fAp >= 60 && !isHomeFav) {
+      recommendation = `${away} to Win (2)`;
+      primarySafe = `Safe: X2 (${away} or Draw)`;
+      strategyAnalysis = `Clear Away Favorite (${fAp}%): Direct Win.`;
+    } else if (isAwayFav && probX2 >= 64) {
       recommendation = `X2 (${away} or Draw)`;
       primarySafe = `Safe: X2 (${away} or Draw)`;
-      strategyAnalysis = `Compound X2 Edge (Win+Draw Prob ${probX2}%): Covered.`;
+      strategyAnalysis = `Away Compound Edge (X2 ${probX2}%): Covered.`;
+    } else if (isHomeFav && prob1X >= 64) {
+      recommendation = `1X (${home} or Draw)`;
+      primarySafe = `Safe: 1X (${home} or Draw)`;
+      strategyAnalysis = `Home Compound Edge (1X ${prob1X}%): Covered.`;
     } else if (maxProb >= 42) {
       recommendation = `Over 1.5 Goals`;
       primarySafe = `Safe: Over 1.5 Goals`;
@@ -906,6 +910,30 @@ function determineLeagueStrategy(league, home, away, fHp, fDp, fAp, isBig, hOdds
       recommendation = `Under 3.5 Goals`;
       primarySafe = `Safe: Under 3.5 Goals`;
       strategyAnalysis = `Balanced Contest: Low-risk Under 3.5 Goals.`;
+    }
+  }
+
+  // ── ANTI-CONTRADICTION FINAL SANITY GUARD ──
+  // Mathematically impossible for a 1/1X pick to stand if Away has overwhelming odds/probability advantage, and vice versa!
+  if (isAwayFav && (recommendation.includes(home) || recommendation.startsWith('1'))) {
+    if (fAp >= 58 || (hasOdds && aOdds <= 1.50)) {
+      recommendation = `${away} to Win (2)`;
+      primarySafe = `Safe: X2 (${away} or Draw)`;
+      strategyAnalysis = `Corrected Alignment: Away Giant Favoritism (${away} ${fAp}% vs ${home} ${fHp}%).`;
+    } else {
+      recommendation = `X2 (${away} or Draw)`;
+      primarySafe = `Safe: X2 (${away} or Draw)`;
+      strategyAnalysis = `Corrected Alignment: Away Compound Edge (X2 ${probX2}%).`;
+    }
+  } else if (isHomeFav && (recommendation.includes(away) || recommendation.startsWith('2'))) {
+    if (fHp >= 58 || (hasOdds && hOdds <= 1.50)) {
+      recommendation = `${home} to Win (1)`;
+      primarySafe = `Safe: 1X (${home} or Draw)`;
+      strategyAnalysis = `Corrected Alignment: Home Favorite Favoritism (${home} ${fHp}% vs ${away} ${fAp}%).`;
+    } else {
+      recommendation = `1X (${home} or Draw)`;
+      primarySafe = `Safe: 1X (${home} or Draw)`;
+      strategyAnalysis = `Corrected Alignment: Home Compound Edge (1X ${prob1X}%).`;
     }
   }
 
@@ -1695,6 +1723,66 @@ async function main() {
   const twoDaysAgo = new Date(Date.now() - 48 * 3600 * 1000).toISOString();
   activeTelegramPicks = activeTelegramPicks.filter(p => !p.date || p.date >= twoDaysAgo);
 
+  // 3.5. Fetch full table standings for major competitions
+  console.log('\nFetching live standings across major competitions...');
+  const standingsByLeague = [];
+  const MAJOR_STANDINGS_SLUGS = [
+    { slug: 'eng.1', name: 'Premier League', logo: 'https://a.espncdn.com/i/leaguelogos/soccer/500/23.png', id: 1 },
+    { slug: 'esp.1', name: 'La Liga', logo: 'https://a.espncdn.com/i/leaguelogos/soccer/500/15.png', id: 2 },
+    { slug: 'ita.1', name: 'Serie A', logo: 'https://a.espncdn.com/i/leaguelogos/soccer/500/12.png', id: 3 },
+    { slug: 'ger.1', name: 'Bundesliga', logo: 'https://a.espncdn.com/i/leaguelogos/soccer/500/10.png', id: 4 },
+    { slug: 'fra.1', name: 'Ligue 1', logo: 'https://a.espncdn.com/i/leaguelogos/soccer/500/9.png', id: 5 },
+    { slug: 'ned.1', name: 'Eredivisie', logo: 'https://a.espncdn.com/i/leaguelogos/soccer/500/11.png', id: 6 },
+    { slug: 'por.1', name: 'Primeira Liga', logo: 'https://a.espncdn.com/i/leaguelogos/soccer/500/14.png', id: 7 },
+    { slug: 'tur.1', name: 'Süper Lig', logo: 'https://a.espncdn.com/i/leaguelogos/soccer/500/18.png', id: 8 },
+    { slug: 'usa.1', name: 'Major League Soccer', logo: 'https://a.espncdn.com/i/leaguelogos/soccer/500/19.png', id: 9 },
+    { slug: 'sau.1', name: 'Saudi Pro League', logo: 'https://a.espncdn.com/i/leaguelogos/soccer/500/2800.png', id: 10 }
+  ];
+
+  for (const item of MAJOR_STANDINGS_SLUGS) {
+    try {
+      const sRes = await safeFetch(`https://site.api.espn.com/apis/v2/sports/soccer/${item.slug}/standings`, 1);
+      if (sRes && sRes.ok) {
+        const sData = await sRes.json();
+        const children = sData.children || [];
+        if (children.length > 0) {
+          const entries = children[0].standings?.entries || [];
+          const standings = [];
+          for (const entry of entries) {
+            const team = entry.team || {};
+            const stats = entry.stats || [];
+            const getStat = (n) => {
+              const st = stats.find(s => s.name === n || s.type === n);
+              return st ? (st.value || 0) : 0;
+            };
+            const logos = team.logos || [];
+            const logo = logos.length > 0 ? (logos[0].href || '') : '';
+
+            standings.push({
+              rank: getStat('rank') || (standings.length + 1),
+              name: team.displayName || team.name || 'Team',
+              logo,
+              points: getStat('points'),
+              goalsDiff: getStat('pointDifferential'),
+              played: getStat('gamesPlayed'),
+              win: getStat('wins'),
+              draw: getStat('ties'),
+              lose: getStat('losses')
+            });
+          }
+          standings.sort((a, b) => a.rank - b.rank);
+          standingsByLeague.push({
+            id: item.id,
+            name: item.name,
+            logo: item.logo,
+            standings
+          });
+        }
+      }
+    } catch (_) {}
+  }
+  console.log(`  Fetched full table standings for ${standingsByLeague.length} competitions.`);
+
   // 4. Accumulate permanent historical matches for the website (days ++)
   for (const m of matches) {
     if (m.status === 'finished' || m.statusShort === 'FT') {
@@ -1731,7 +1819,10 @@ async function main() {
       matches // Rolling 7-day window for the Flutter app
     },
     historicalMatches, // Accumulated permanent history for the website
-    standingsData: null,
+    standingsData: {
+      lastUpdated: new Date().toISOString(),
+      standingsByLeague
+    },
     lastTelegramPostDate,
     lastDashboardDate,
     activeTelegramPicks,

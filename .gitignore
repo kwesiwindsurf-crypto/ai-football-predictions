@@ -6,7 +6,14 @@
 !/.github/
 !/.gitignore
 !/docs/
+!/lib/
+!/assets/
+!/pubspec.yaml
+!/pubspec.lock
 !/README.md
 
 # Ignore node_modules inside the bot
 /bot/node_modules/
+/bot/service_account.json
+/bot/.dev.vars
+/android/app/google-services.json
