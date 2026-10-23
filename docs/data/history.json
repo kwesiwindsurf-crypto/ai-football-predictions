@@ -1,5 +1,1537 @@
 [
   {
+    "id": "Gateshead-Tamworth",
+    "espnEventId": "401889245",
+    "homeTeam": "Gateshead",
+    "awayTeam": "Tamworth",
+    "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/3138.png",
+    "awayLogo": "",
+    "league": "English National League",
+    "date": "2026-10-23T18:45Z",
+    "status": "finished",
+    "statusShort": "Postponed",
+    "homeScore": 0,
+    "awayScore": 0,
+    "homeOdds": 3.85,
+    "drawOdds": 4.1,
+    "awayOdds": 1.69,
+    "oddsRating": 53,
+    "homeRank": null,
+    "awayRank": null,
+    "homeForm": "DDLLL",
+    "awayForm": "DLWWL",
+    "homePoints": 4,
+    "awayPoints": 14,
+    "homeLineup": null,
+    "awayLineup": null,
+    "h2hSummary": null,
+    "matchUrl": "https://www.espn.com/soccer/match/_/gameId/401889245/tamworth-gateshead",
+    "prediction": {
+      "homeWinProbability": 16,
+      "drawProbability": 15,
+      "awayWinProbability": 69,
+      "recommendation": "Tamworth to Win (2)",
+      "analysis": "Clear Away Favorite (Prob >= 65%): Direct Win.\nHomeForm: 0%, AwayForm: 33%, BigGame: false",
+      "stakingOptions": [
+        "Safe: X2 (Tamworth or Draw)",
+        "Value: Tamworth Draw No Bet (1.39)",
+        "Risky: Tamworth to WIN by 2+ Goals (2.85)",
+        "BTTS: Both Teams To Score - Yes (1.78)",
+        "Alternative: Over 2.5 Total Goals (1.70)"
+      ]
+    }
+  },
+  {
+    "id": "Penicuik-Clyde",
+    "espnEventId": "401928436",
+    "homeTeam": "Penicuik",
+    "awayTeam": "Clyde",
+    "homeLogo": "",
+    "awayLogo": "",
+    "league": "Scottish Cup",
+    "date": "2026-10-23T18:30Z",
+    "status": "finished",
+    "statusShort": "Postponed",
+    "homeScore": 0,
+    "awayScore": 0,
+    "homeOdds": null,
+    "drawOdds": null,
+    "awayOdds": null,
+    "oddsRating": -41,
+    "homeRank": null,
+    "awayRank": null,
+    "homeForm": "DWWWL",
+    "awayForm": "DWLLL",
+    "homePoints": 0,
+    "awayPoints": 0,
+    "homeLineup": null,
+    "awayLineup": null,
+    "h2hSummary": null,
+    "matchUrl": "https://www.espn.com/soccer/match/_/gameId/401928436/clyde-penicuik",
+    "prediction": {
+      "homeWinProbability": 62,
+      "drawProbability": 17,
+      "awayWinProbability": 21,
+      "recommendation": "1X (Penicuik or Draw)",
+      "analysis": "Domestic Cup Strategy: 1X Upset Shield (79% Win/Draw).\nHomeForm: 60%, AwayForm: 7%, BigGame: false",
+      "stakingOptions": [
+        "Safe: 1X (Penicuik or Draw)",
+        "Value: Penicuik Draw No Bet (1.7)",
+        "Risky: Penicuik to WIN by 2+ Goals (2.85)",
+        "BTTS: Both Teams To Score - Yes (1.78)",
+        "Alternative: Over 2.5 Total Goals (1.70)"
+      ]
+    }
+  },
+  {
+    "id": "SV-Darmstadt-98-St.-Pauli",
+    "espnEventId": "401885082",
+    "homeTeam": "SV Darmstadt 98",
+    "awayTeam": "St. Pauli",
+    "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/3812.png",
+    "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/270.png",
+    "league": "Germany - 2. Bundesliga",
+    "date": "2026-10-23T16:30Z",
+    "status": "finished",
+    "statusShort": "FT",
+    "homeScore": 0,
+    "awayScore": 0,
+    "homeOdds": null,
+    "drawOdds": null,
+    "awayOdds": null,
+    "oddsRating": 15,
+    "homeRank": null,
+    "awayRank": null,
+    "homeForm": "DLWLW",
+    "awayForm": "DDWDW",
+    "homePoints": 8,
+    "awayPoints": 12,
+    "homeLineup": {
+      "avgRating": 0,
+      "startingXI": [
+        {
+          "number": "?",
+          "name": "Marcel Schuhen",
+          "position": "G",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Yannik Lührs",
+          "position": "CD-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Patric Pfeiffer",
+          "position": "CD-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Raoul Petretta",
+          "position": "LB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "William Mikelbrencis",
+          "position": "RB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Hiroki Akiyama",
+          "position": "CM-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Kai Klefisch",
+          "position": "CM-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Noah Weißhaupt",
+          "position": "LM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Marco Richter",
+          "position": "RM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Milan Smit",
+          "position": "CF-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Fynn-Luca Lakenmacher",
+          "position": "CF-R",
+          "rating": 0,
+          "stats": ""
+        }
+      ],
+      "bench": [
+        {
+          "number": "?",
+          "name": "Nicolas Verkooijen",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Lee Ho-Jae",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Christopher Lannert",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Lance Duijvestijn",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Florian Kleinhansl",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Lars Kehl",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Aleksandar Vukotic",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Alexander Brunst-Zöllner",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Ibrahim El Kadiri",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        }
+      ]
+    },
+    "awayLineup": {
+      "avgRating": 0,
+      "startingXI": [
+        {
+          "number": "?",
+          "name": "Ben Voll",
+          "position": "G",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Eric Smith",
+          "position": "CD",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Lars Ritzka",
+          "position": "CD-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Dávid Németh",
+          "position": "CD-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Joel Chima Fujita",
+          "position": "CM-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Mathias Rasmussen",
+          "position": "CM-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Connor Metcalfe",
+          "position": "AM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Louis Oppie",
+          "position": "LM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Arkadiusz Pyrka",
+          "position": "RM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Abdoulie Ceesay",
+          "position": "CF-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Youssoupha Niang",
+          "position": "CF-R",
+          "rating": 0,
+          "stats": ""
+        }
+      ],
+      "bench": [
+        {
+          "number": "?",
+          "name": "Marcus Mathiesen",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Taichi Hara",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Branimir Hrgota",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Tomoya Ando",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Adam Dzwigala",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Dimitar Mitov",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Samuel Klein",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Ricky-Jade Jones",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Martijn Kaars",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        }
+      ]
+    },
+    "h2hSummary": null,
+    "matchUrl": "https://www.espn.com/soccer/match/_/gameId/401885082/st-pauli-sv-darmstadt-98",
+    "prediction": {
+      "homeWinProbability": 34,
+      "drawProbability": 17,
+      "awayWinProbability": 49,
+      "recommendation": "Over 1.5 Goals",
+      "analysis": "Not Big Teams & Tight: Goals Market (Over 1.5).\nHomeForm: 7%, AwayForm: 33%, BigGame: false",
+      "stakingOptions": [
+        "Safe: Over 1.5 Goals",
+        "Value: St. Pauli Draw No Bet (1.7)",
+        "Risky: St. Pauli to WIN by 2+ Goals (2.85)",
+        "BTTS: Both Teams To Score - Yes (1.78)",
+        "Alternative: Over 2.5 Total Goals (1.70)"
+      ]
+    }
+  },
+  {
+    "id": "VfL-Bochum-VfL-Wolfsburg",
+    "espnEventId": "401885079",
+    "homeTeam": "VfL Bochum",
+    "awayTeam": "VfL Wolfsburg",
+    "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/121.png",
+    "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/138.png",
+    "league": "Germany - 2. Bundesliga",
+    "date": "2026-10-23T16:30Z",
+    "status": "finished",
+    "statusShort": "FT",
+    "homeScore": 1,
+    "awayScore": 1,
+    "homeOdds": null,
+    "drawOdds": null,
+    "awayOdds": null,
+    "oddsRating": 5,
+    "homeRank": null,
+    "awayRank": null,
+    "homeForm": "DLLLD",
+    "awayForm": "DWDWL",
+    "homePoints": 8,
+    "awayPoints": 16,
+    "homeLineup": {
+      "avgRating": 0,
+      "startingXI": [
+        {
+          "number": "?",
+          "name": "Timo Horn",
+          "position": "G",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Karol Mets",
+          "position": "CD-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Michael Steinwender",
+          "position": "CD-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Maximilian Wittek",
+          "position": "LB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Sean Klaiber",
+          "position": "RB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Gerrit Holtmann",
+          "position": "AM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Mats Pannewig",
+          "position": "LM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Tom Meyer",
+          "position": "RM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Philipp Hofmann",
+          "position": "F",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Koji Miyoshi",
+          "position": "AM-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Berkan Taz",
+          "position": "AM-R",
+          "rating": 0,
+          "stats": ""
+        }
+      ],
+      "bench": [
+        {
+          "number": "?",
+          "name": "Tino Casali",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Leon Sawas",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Mansour Ouro-Tagba",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Daniel Hanslik",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Lasse Isbruch",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Yigit Karademir",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jarne Steuckers",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Charlie Patino",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Christian Rasmussen",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        }
+      ]
+    },
+    "awayLineup": {
+      "avgRating": 0,
+      "startingXI": [
+        {
+          "number": "?",
+          "name": "Timon Wellenreuther",
+          "position": "G",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Cleiton",
+          "position": "CD-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Hauke Wahl",
+          "position": "CD-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Joakim Maehle",
+          "position": "LB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Saël Kumbedi",
+          "position": "RB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Muhammed Damar",
+          "position": "AM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Vinicius Souza",
+          "position": "LM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Yannick Gerhardt",
+          "position": "RM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Robert Glatzel",
+          "position": "F",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Fabian Reese",
+          "position": "AM-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Alexander Bernhardsson",
+          "position": "AM-R",
+          "rating": 0,
+          "stats": ""
+        }
+      ],
+      "bench": [
+        {
+          "number": "?",
+          "name": "Mathys Angély",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Elvis Rexhbecaj",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Kento Shiogai",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Aaron Zehnter",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Maximilian Arnold",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Bence Dárdai",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Kilian Fischer",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Alessio Besio",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jakub Zielinski",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        }
+      ]
+    },
+    "h2hSummary": null,
+    "matchUrl": "https://www.espn.com/soccer/match/_/gameId/401885079/vfl-wolfsburg-vfl-bochum",
+    "prediction": {
+      "homeWinProbability": 39,
+      "drawProbability": 17,
+      "awayWinProbability": 44,
+      "recommendation": "Over 1.5 Goals",
+      "analysis": "Not Big Teams & Tight: Goals Market (Over 1.5).\nHomeForm: 20%, AwayForm: 47%, BigGame: false",
+      "stakingOptions": [
+        "Safe: Over 1.5 Goals",
+        "Value: VfL Wolfsburg Draw No Bet (1.7)",
+        "Risky: VfL Wolfsburg to WIN by 2+ Goals (2.85)",
+        "BTTS: Both Teams To Score - Yes (1.78)",
+        "Alternative: Under 2.5 Goals (1.80)"
+      ]
+    }
+  },
+  {
+    "id": "Akhmat-Grozny-Gazovik-Orenburg",
+    "espnEventId": "401879829",
+    "homeTeam": "Akhmat Grozny",
+    "awayTeam": "Gazovik Orenburg",
+    "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/2991.png",
+    "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/18285.png",
+    "league": "Russia - Premier League",
+    "date": "2026-10-23T16:30Z",
+    "status": "finished",
+    "statusShort": "FT",
+    "homeScore": 0,
+    "awayScore": 1,
+    "homeOdds": null,
+    "drawOdds": null,
+    "awayOdds": null,
+    "oddsRating": -19,
+    "homeRank": null,
+    "awayRank": null,
+    "homeForm": "DLDLW",
+    "awayForm": "DDWDL",
+    "homePoints": 11,
+    "awayPoints": 16,
+    "homeLineup": {
+      "avgRating": 0,
+      "startingXI": [
+        {
+          "number": "?",
+          "name": "Vadim Uljanov",
+          "position": "G",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Klisman Cake",
+          "position": "CD-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Kalidou Sidibe",
+          "position": "CD-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Miroslav Bogosavac",
+          "position": "LB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Arsen Adamov",
+          "position": "RB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Egas Cacintura",
+          "position": "AM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Ismael Silva Lime",
+          "position": "LM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Turpal-Ali Ibishev",
+          "position": "RM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "George Melkadze",
+          "position": "F",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Kirill Shchetinin",
+          "position": "AM-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Lechii Sadulaev",
+          "position": "AM-R",
+          "rating": 0,
+          "stats": ""
+        }
+      ],
+      "bench": [
+        {
+          "number": "?",
+          "name": "Aleksey Kasadzhikov",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Rasul Mitsaev",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Kirill Kistenev",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Mohamed Konaté",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Abakar Gadzhiev",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Maksim Sidorov",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Maksim Samorodov",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Akhmed Elberdov",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Erald Maksuti",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Manuel Keliano",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        }
+      ]
+    },
+    "awayLineup": {
+      "avgRating": 0,
+      "startingXI": [
+        {
+          "number": "?",
+          "name": "Bogdan Ovsyannikov",
+          "position": "G",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Aleksei Tataev",
+          "position": "CD-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jhon Palacios",
+          "position": "CD-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Emil Tsenov",
+          "position": "LB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Maxime Sivis",
+          "position": "RB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Evgeni Bolotov",
+          "position": "CM-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Ruslan Kul",
+          "position": "CM-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Dmitri Rybchinsky",
+          "position": "LM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jordhy Thompson",
+          "position": "RM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Gedeon Guzina",
+          "position": "CF-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Damián Puebla",
+          "position": "CF-R",
+          "rating": 0,
+          "stats": ""
+        }
+      ],
+      "bench": [
+        {
+          "number": "?",
+          "name": "Mikhail Pykhcheev",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Omar Minatulaev",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Anton Lukashov",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Renat Golybin",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jersson González",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Egor Nazarenko",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Danila Khotulev",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Danila Vedernikov",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Vyacheslav Korobov",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Andrey Kasadzhikov",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Artem Kasimov",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Aleksandr Degtev",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        }
+      ]
+    },
+    "h2hSummary": null,
+    "matchUrl": "https://www.espn.com/soccer/match/_/gameId/401879829/gazovik-orenburg-akhmat-grozny",
+    "prediction": {
+      "homeWinProbability": 51,
+      "drawProbability": 17,
+      "awayWinProbability": 32,
+      "recommendation": "Over 1.5 Goals",
+      "analysis": "Not Big Teams & Tight: Goals Market (Over 1.5).\nHomeForm: 33%, AwayForm: 20%, BigGame: false",
+      "stakingOptions": [
+        "Safe: Over 1.5 Goals",
+        "Value: Akhmat Grozny Draw No Bet (1.7)",
+        "Risky: Akhmat Grozny to WIN by 2+ Goals (2.85)",
+        "BTTS: Both Teams To Score - Yes (1.78)",
+        "Alternative: Over 2.5 Total Goals (1.70)"
+      ]
+    }
+  },
+  {
+    "id": "Kaizer-Chiefs-Red-Arrows",
+    "espnEventId": "401912465",
+    "homeTeam": "Kaizer Chiefs",
+    "awayTeam": "Red Arrows",
+    "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/7081.png",
+    "awayLogo": "",
+    "league": "CAF Confederation Cup",
+    "date": "2026-10-23T16:00Z",
+    "status": "finished",
+    "statusShort": "FT",
+    "homeScore": 1,
+    "awayScore": 0,
+    "homeOdds": null,
+    "drawOdds": null,
+    "awayOdds": null,
+    "oddsRating": 1,
+    "homeRank": null,
+    "awayRank": null,
+    "homeForm": "DLDDD",
+    "awayForm": "LWWWW",
+    "homePoints": 0,
+    "awayPoints": 0,
+    "homeLineup": null,
+    "awayLineup": null,
+    "h2hSummary": null,
+    "matchUrl": "https://www.espn.com/soccer/match/_/gameId/401912465/red-arrows-kaizer-chiefs",
+    "prediction": {
+      "homeWinProbability": 41,
+      "drawProbability": 17,
+      "awayWinProbability": 42,
+      "recommendation": "Over 1.5 Goals",
+      "analysis": "Domestic Cup Strategy: Open Knockout Action (Over 1.5).\nHomeForm: 47%, AwayForm: 87%, BigGame: false",
+      "stakingOptions": [
+        "Safe: Over 1.5 Goals",
+        "Value: Red Arrows Draw No Bet (1.7)",
+        "Risky: Red Arrows to WIN by 2+ Goals (2.85)",
+        "BTTS: Both Teams To Score - Yes (1.78)",
+        "Alternative: Under 2.5 Goals (1.80)"
+      ]
+    }
+  },
+  {
+    "id": "Al-Ittihad-Al-Diriyah",
+    "espnEventId": "401900890",
+    "homeTeam": "Al Ittihad",
+    "awayTeam": "Al Diriyah",
+    "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/2276.png",
+    "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/131746.png",
+    "league": "Saudi Pro League",
+    "date": "2026-10-23T15:30Z",
+    "status": "finished",
+    "statusShort": "FT",
+    "homeScore": 2,
+    "awayScore": 0,
+    "homeOdds": 1.91,
+    "drawOdds": 4,
+    "awayOdds": 3.25,
+    "oddsRating": -4,
+    "homeRank": null,
+    "awayRank": null,
+    "homeForm": "DWLLD",
+    "awayForm": "DWDLD",
+    "homePoints": 23,
+    "awayPoints": 15,
+    "homeLineup": {
+      "avgRating": 0,
+      "startingXI": [
+        {
+          "number": "?",
+          "name": "Predrag Rajkovic",
+          "position": "G",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Danilo Pereira",
+          "position": "CD-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Saad Al Mosa",
+          "position": "CD-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Abdi Faris",
+          "position": "LB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Muhannad Al-Shanqiti",
+          "position": "RB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Houssem Aouar",
+          "position": "AM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Mukhtar Ali",
+          "position": "LM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Richard Ríos",
+          "position": "RM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "George Ilenikhena",
+          "position": "F",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Ahmed Al Ghamdi",
+          "position": "AM-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Georginio Wijnaldum",
+          "position": "AM-R",
+          "rating": 0,
+          "stats": ""
+        }
+      ],
+      "bench": [
+        {
+          "number": "?",
+          "name": "Muath",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Mohammed Fallatah",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Marwan Al-Sahafi",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Mohammed Ali Barnawi",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Mohammed Alabsi",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Ahmed Al-Julaydan",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Youssef En-Nesyri",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Dion Lopy",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Saleh Al-Shehri",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        }
+      ]
+    },
+    "awayLineup": {
+      "avgRating": 0,
+      "startingXI": [
+        {
+          "number": "?",
+          "name": "Ameen Al-Bukhari",
+          "position": "G",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Chancel Mbemba",
+          "position": "CD-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Berat Djimsiti",
+          "position": "CD-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Hussain Al-Sabiyani",
+          "position": "LB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Taher Wadi",
+          "position": "RB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Óscar Rodríguez",
+          "position": "AM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Enzo Millot",
+          "position": "LM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Hussain Al-Qahtani",
+          "position": "RM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Meshari Al Nemer",
+          "position": "F",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Adil Boulbina",
+          "position": "AM-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Lovro Chelfi",
+          "position": "AM-R",
+          "rating": 0,
+          "stats": ""
+        }
+      ],
+      "bench": [
+        {
+          "number": "?",
+          "name": "Sultan Al Farhan",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Mansour Hibatullah Al Sibyani",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Abdulelah Al-Malki",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Clayton Diandy",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Khalid Al Asiri",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Qassem Lajami",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Abdulaziz Al Faraj",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Darwin Núñez",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Mohamed Thaiban Hameran",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        }
+      ]
+    },
+    "h2hSummary": null,
+    "matchUrl": "https://www.espn.com/soccer/match/_/gameId/401900890/al-diriyah-al-ittihad",
+    "prediction": {
+      "homeWinProbability": 44,
+      "drawProbability": 16,
+      "awayWinProbability": 40,
+      "recommendation": "1X (Al Ittihad or Draw)",
+      "analysis": "Home Fortress League: Backing Home Pitch (1X).\nHomeForm: 20%, AwayForm: 33%, BigGame: false",
+      "stakingOptions": [
+        "Safe: 1X (Al Ittihad or Draw)",
+        "Value: Al Ittihad Draw No Bet (1.57)",
+        "Risky: Al Ittihad to WIN by 2+ Goals (2.85)",
+        "BTTS: Both Teams To Score - Yes (1.78)",
+        "Alternative: Under 2.5 Goals (1.80)"
+      ]
+    }
+  },
+  {
+    "id": "Petro-de-Luanda-Scottland-Mabvuku",
+    "espnEventId": "401914219",
+    "homeTeam": "Petro de Luanda",
+    "awayTeam": "Scottland Mabvuku",
+    "homeLogo": "",
+    "awayLogo": "",
+    "league": "CAF Champions League",
+    "date": "2026-10-23T14:30Z",
+    "status": "finished",
+    "statusShort": "FT",
+    "homeScore": 3,
+    "awayScore": 0,
+    "homeOdds": null,
+    "drawOdds": null,
+    "awayOdds": null,
+    "oddsRating": 1,
+    "homeRank": null,
+    "awayRank": null,
+    "homeForm": "DLDWL",
+    "awayForm": "DWDWW",
+    "homePoints": 0,
+    "awayPoints": 0,
+    "homeLineup": null,
+    "awayLineup": null,
+    "h2hSummary": null,
+    "matchUrl": "https://www.espn.com/soccer/match/_/gameId/401914219/scottland-mabvuku-petro-de-luanda",
+    "prediction": {
+      "homeWinProbability": 41,
+      "drawProbability": 17,
+      "awayWinProbability": 42,
+      "recommendation": "Over 1.5 Goals",
+      "analysis": "UEFA Champions League Strategy: Fast-paced Goals Market (Over 1.5).\nHomeForm: 33%, AwayForm: 60%, BigGame: false",
+      "stakingOptions": [
+        "Safe: Over 1.5 Goals",
+        "Value: Scottland Mabvuku Draw No Bet (1.7)",
+        "Risky: Scottland Mabvuku to WIN by 2+ Goals (2.85)",
+        "BTTS: Both Teams To Score - Yes (1.78)",
+        "Alternative: Under 2.5 Goals (1.80)"
+      ]
+    }
+  },
+  {
     "id": "Al-Faisaly-Al-Nassr",
     "espnEventId": "401900444",
     "homeTeam": "Al Faisaly",
