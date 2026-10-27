@@ -1,14 +1,18 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/match_model.dart';
 import '../../models/standings_model.dart';
 
 class ApiService {
-  // Production Cloudflare Worker URL
-  static const String _workerUrl = 'https://ai-football-bot.xantechs00.workers.dev';
+  // Production 24/7 Unlimited Live Engine URL on Render.com
+  static const String _workerUrl = 'https://ai-football-predictions.onrender.com';
   static const String _cacheMatchesKey = 'cached_cloudflare_matches_v1';
   static const String _cacheStandingsKey = 'cached_cloudflare_standings_v1';
+
+  // Global notifier for live matches updated from the worker
+  static final ValueNotifier<List<Match>> liveMatchesNotifier = ValueNotifier<List<Match>>([]);
 
   Future<List<Match>?> getCachedMatches() async {
     try {
@@ -121,6 +125,8 @@ class ApiService {
         }
       }
     }
+    final live = matches.where((m) => m.status == MatchStatus.live).toList();
+    liveMatchesNotifier.value = live;
     return matches;
   }
 
