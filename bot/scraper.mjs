@@ -1209,20 +1209,45 @@ async function getCloudflareKV() {
   }
 }
 
+async function pushToRender(data) {
+  try {
+    const renderUrl = process.env.RENDER_URL || 'https://ai-football-predictions.onrender.com/api/update';
+    const res = await fetch(renderUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: data
+    });
+    if (res.ok) {
+      console.log('  Pushed to Render Live Engine successfully');
+    } else {
+      console.warn(`  Render push returned status ${res.status}`);
+    }
+  } catch (err) {
+    console.warn('  Render push notice:', err.message);
+  }
+}
+
 async function pushToCloudflareKV(data) {
   if (!CF_ACCOUNT_ID || !CF_API_TOKEN || !CF_KV_NS_ID) {
     console.log('Skipping CF KV push (missing credentials).');
     return;
   }
-  const url = `https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/storage/kv/namespaces/${CF_KV_NS_ID}/values/${KV_KEY}`;
-  const res = await fetch(url, {
-    method: 'PUT',
-    headers: { 'Authorization': `Bearer ${CF_API_TOKEN}`, 'Content-Type': 'application/json' },
-    body: data
-  });
-  const json = await res.json();
-  if (!json.success) throw new Error(`KV write failed: ${JSON.stringify(json.errors)}`);
-  console.log('  Pushed to Cloudflare KV successfully');
+  try {
+    const url = `https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/storage/kv/namespaces/${CF_KV_NS_ID}/values/${KV_KEY}`;
+    const res = await fetch(url, {
+      method: 'PUT',
+      headers: { 'Authorization': `Bearer ${CF_API_TOKEN}`, 'Content-Type': 'application/json' },
+      body: data
+    });
+    const json = await res.json();
+    if (!json.success) {
+      console.warn(`  ⚠️ Cloudflare KV quota or write issue: ${JSON.stringify(json.errors)}`);
+      return;
+    }
+    console.log('  Pushed to Cloudflare KV successfully');
+  } catch (err) {
+    console.warn('  ⚠️ Cloudflare KV network error:', err.message);
+  }
 }
 
 // ─── Telegram Broadcasting ────────────────────────────────────────────────────
@@ -1829,9 +1854,12 @@ async function main() {
     todayResults
   });
 
+  console.log('\nPushing to Render Live Engine...');
+  await pushToRender(finalData);
+
   console.log('\nPushing to Cloudflare KV...');
   await pushToCloudflareKV(finalData);
-  console.log(`Done! ${matches.length} rolling matches and ${historicalMatches.length} historical matches live in KV.`);
+  console.log(`Done! ${matches.length} rolling matches and ${historicalMatches.length} historical matches live.`);
 }
 
 main().catch(e => { console.error('Fatal:', e); process.exit(1); });
