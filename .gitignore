@@ -11,6 +11,7 @@
 !/pubspec.yaml
 !/pubspec.lock
 !/README.md
+!/render.yaml
 
 # Ignore node_modules inside the bot
 /bot/node_modules/

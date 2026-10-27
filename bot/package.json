@@ -4,6 +4,8 @@
   "description": "Cloudflare Worker Bot for fetching live scores and generating AI predictions.",
   "main": "src/index.js",
   "scripts": {
+    "start": "node server.mjs",
+    "serve": "node server.mjs",
     "dev": "wrangler dev",
     "deploy": "wrangler deploy"
   },
