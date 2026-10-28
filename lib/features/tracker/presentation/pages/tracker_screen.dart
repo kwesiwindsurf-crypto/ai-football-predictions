@@ -4,6 +4,8 @@ import '../../../../core/services/api_service.dart';
 import '../../../../core/services/betting_tracker_service.dart';
 import '../../../../core/services/analytics_service.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../models/match_model.dart' as model;
+import '../../../matches/presentation/widgets/dynamic_live_island.dart';
 
 class TrackerScreen extends StatefulWidget {
   const TrackerScreen({super.key});
@@ -78,45 +80,94 @@ class _TrackerScreenState extends State<TrackerScreen> {
           return true;
         }).toList();
 
-        return Scaffold(
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          appBar: AppBar(
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            elevation: 0,
-            title: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Betting & AI Tracker',
-                  style: TextStyle(
-                    color: textPrimary,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                  ),
+        return ValueListenableBuilder<List<model.Match>>(
+          valueListenable: ApiService.liveMatchesNotifier,
+          builder: (context, liveMatches, _) {
+            final hasLive = liveMatches.isNotEmpty;
+            return Scaffold(
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              appBar: PreferredSize(
+                preferredSize: Size.fromHeight(hasLive ? 104 : 64),
+                child: Container(
+                  color: AppTheme.surfaceOf(context),
+                  child: SafeArea(
+                    bottom: false,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Centered Dynamic Live Island (Matching FotMob / iOS Island)
+                        if (hasLive)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4, bottom: 4),
+                            child: Center(
+                              child: DynamicLiveIsland(liveMatches: liveMatches),
+                            ),
+                          ),
+                        // Title Row: BETTING & AI TRACKER + Subtitle on left, Circular refresh button on right
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: const [
+                              Text(
+                                'BETTING & AI TRACKER',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 18,
+                                  letterSpacing: -0.3,
+                                ),
+                              ),
+                              SizedBox(height: 2),
+                              Text(
+                                'Continuous 1-unit flat simulation',
+                                style: TextStyle(
+                                  color: Color(0xFF8B949E),
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                          GestureDetector(
+                            onTap: _isRefreshing ? null : _refreshData,
+                            child: Container(
+                              width: 36,
+                              height: 36,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: const Color(0xFF161B22),
+                                border: Border.all(
+                                  color: const Color(0xFF272F3D),
+                                  width: 1,
+                                ),
+                              ),
+                              child: _isRefreshing
+                                  ? const Padding(
+                                      padding: EdgeInsets.all(9),
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: AppTheme.primary,
+                                      ),
+                                    )
+                                  : const Icon(
+                                      Icons.refresh_rounded,
+                                      size: 18,
+                                      color: Colors.white70,
+                                    ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                Text(
-                  'Tracked since day one of using AI Scorecast',
-                  style: TextStyle(
-                    color: textSecondary,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-              ],
-            ),
-            actions: [
-              IconButton(
-                icon: _isRefreshing
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : Icon(Icons.refresh_rounded, color: primary),
-                tooltip: 'Sync Latest Match Results',
-                onPressed: _isRefreshing ? null : _refreshData,
               ),
-            ],
+            ),
           ),
           body: RefreshIndicator(
             color: primary,
@@ -172,6 +223,8 @@ class _TrackerScreenState extends State<TrackerScreen> {
               ),
             ),
           ),
+        );
+          },
         );
       },
     );

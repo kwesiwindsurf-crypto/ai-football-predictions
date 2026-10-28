@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../core/services/api_service.dart';
 import '../../../../core/services/app_settings_service.dart';
 import '../../../../core/services/analytics_service.dart';
 import '../../../../core/theme/app_theme.dart';
-import 'league_display_order_screen.dart';
+import '../../../../models/match_model.dart' as model;
+import '../../../matches/presentation/widgets/dynamic_live_island.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -14,31 +16,11 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   final AppSettingsService _settings = AppSettingsService.instance;
-  int _activeLeaguesCount = 10;
 
   @override
   void initState() {
     super.initState();
     AnalyticsService.instance.logScreenView('SettingsScreen');
-    _loadLeagueCount();
-  }
-
-  Future<void> _loadLeagueCount() async {
-    final prefs = await SharedPreferences.getInstance();
-    final savedLeagues = prefs.getStringList('preferred_leagues') ?? [
-      'Premier League', 'La Liga', 'Serie A', 'Bundesliga', 'Ligue 1',
-      'UEFA Champions League', 'UEFA Europa League', 'Pro League',
-      'Major League Soccer', 'Championship'
-    ];
-    int count = 0;
-    for (var l in savedLeagues) {
-      if (prefs.getBool('show_$l') ?? true) count++;
-    }
-    if (mounted) {
-      setState(() {
-        _activeLeaguesCount = count;
-      });
-    }
   }
 
   @override
@@ -50,20 +32,51 @@ class _SettingsScreenState extends State<SettingsScreen> {
         final textPrimary = AppTheme.textPrimaryOf(context);
         final textSecondary = AppTheme.textSecondaryOf(context);
 
-        return Scaffold(
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          appBar: AppBar(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            title: Text(
-              'Settings',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-                color: textPrimary,
+        return ValueListenableBuilder<List<model.Match>>(
+          valueListenable: ApiService.liveMatchesNotifier,
+          builder: (context, liveMatches, _) {
+            final hasLive = liveMatches.isNotEmpty;
+            return Scaffold(
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              appBar: PreferredSize(
+                preferredSize: Size.fromHeight(hasLive ? 104 : 64),
+                child: Container(
+                  color: AppTheme.surfaceOf(context),
+                  child: SafeArea(
+                    bottom: false,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Centered Dynamic Live Island (Matching FotMob / iOS Island)
+                        if (hasLive)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4, bottom: 4),
+                            child: Center(
+                              child: DynamicLiveIsland(liveMatches: liveMatches),
+                            ),
+                          ),
+                        // Header Title: SETTINGS & ENGINE
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
+                          child: Row(
+                            children: const [
+                              Text(
+                                'SETTINGS & ENGINE',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 18,
+                                  letterSpacing: -0.3,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
-            ),
-          ),
           body: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             children: [
@@ -73,6 +86,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
               // SECTION 1: APPEARANCE & THEME
               _buildSectionHeader('APPEARANCE & THEME', textSecondary),
+              _buildCardCurveRadiusSelector(),
+              const SizedBox(height: 14),
               _buildGroupedCard([
                 _buildThemeModeSelector(primary, textPrimary, textSecondary),
                 _buildDivider(),
@@ -94,6 +109,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   subtitle: _settings.timeFormat == '24-hour' ? '24-Hour (20:45)' : '12-Hour (8:45 PM)',
                   trailing: Icon(Icons.chevron_right_rounded, color: textSecondary),
                   onTap: () => _showTimeFormatPicker(context),
+                ),
+                _buildDivider(),
+                _buildSettingsTile(
+                  icon: Icons.tab_rounded,
+                  iconBg: const Color(0xFF8B5CF6),
+                  title: 'Default Home Tab',
+                  subtitle: _settings.defaultHomeTab,
+                  trailing: Icon(Icons.chevron_right_rounded, color: textSecondary),
+                  onTap: () => _showDefaultTabPicker(context),
                 ),
               ]),
               const SizedBox(height: 24),
@@ -166,10 +190,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ]),
               const SizedBox(height: 24),
 
-              // SECTION 3: COMPETITIONS & FEED
-              _buildSectionHeader('COMPETITIONS & FEED', textSecondary),
+              // SECTION 3: FEED & DISPLAY
+              _buildSectionHeader('FEED & DISPLAY', textSecondary),
               _buildGroupedCard([
-
                 _buildSwitchTile(
                   icon: Icons.visibility_off_outlined,
                   iconBg: const Color(0xFF6B7280),
@@ -179,7 +202,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   onChanged: (val) => _settings.setHideFinishedMatches(val),
                   primary: primary,
                 ),
-
               ]),
               const SizedBox(height: 24),
 
@@ -202,18 +224,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   subtitle: 'Display positive EV percentage on match cards',
                   value: _settings.showExpectedValue,
                   onChanged: (val) => _settings.setShowExpectedValue(val),
-                  primary: primary,
-                ),
-                _buildDivider(),
-                _buildSwitchTile(
-                  icon: Icons.stadium_rounded,
-                  iconBg: const Color(0xFFF59E0B),
-                  title: '2D Tactical Board',
-                  subtitle: _settings.use2dPitch
-                      ? '2D Top-Down View (Uncheck for 3D Isometric)'
-                      : '3D Isometric Stadium Pitch Active',
-                  value: _settings.use2dPitch,
-                  onChanged: (val) => _settings.setUse2dPitch(val),
                   primary: primary,
                 ),
               ]),
@@ -275,6 +285,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ],
           ),
         );
+          },
+        );
       },
     );
   }
@@ -303,7 +315,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Container(
       decoration: BoxDecoration(
         color: surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
         border: Border.all(color: borderColor, width: 0.8),
         boxShadow: [
           BoxShadow(
@@ -441,6 +453,220 @@ class _SettingsScreenState extends State<SettingsScreen> {
             activeThumbColor: primary,
             activeTrackColor: primary.withValues(alpha: 0.4),
             onChanged: onChanged,
+          ),
+        ],
+      ),
+    );
+  }
+
+  // --- CARD CURVE RADIUS SELECTOR ---
+
+  Widget _buildCardCurveRadiusSelector() {
+    final surface = AppTheme.surfaceOf(context);
+    final borderColor = AppTheme.cardBorderOf(context);
+    final textSecondary = AppTheme.textSecondaryOf(context);
+    final currentPreset = _settings.cardCurveRadius;
+    final badgeLabel = _settings.cardCurveRadiusBadgeText;
+
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: surface,
+        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+        border: Border.all(color: borderColor, width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.12),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header: Shapes Icon + CARD CURVE RADIUS + Badge
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildShapesIcon(),
+                  const SizedBox(width: 10),
+                  Text(
+                    'CARD CURVE RADIUS',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.8,
+                      color: AppTheme.textPrimaryOf(context),
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF00D06C).withValues(alpha: 0.16),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusPill),
+                  border: Border.all(
+                    color: const Color(0xFF00D06C).withValues(alpha: 0.28),
+                    width: 1,
+                  ),
+                ),
+                child: Text(
+                  badgeLabel,
+                  style: const TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF00D06C),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Adjust the corner curvature of match cards, leagues, and modals live:',
+            style: TextStyle(
+              fontSize: 13,
+              height: 1.35,
+              color: textSecondary,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _buildCurveRadiusButton(
+                  title: 'Subtle',
+                  sizeLabel: '14px',
+                  presetKey: 'subtle',
+                  isSelected: currentPreset == 'subtle',
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _buildCurveRadiusButton(
+                  title: 'High',
+                  sizeLabel: '28px',
+                  presetKey: 'high',
+                  isSelected: currentPreset == 'high',
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _buildCurveRadiusButton(
+                  title: 'Ultra',
+                  sizeLabel: '36px',
+                  presetKey: 'ultra',
+                  isSelected: currentPreset == 'ultra',
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCurveRadiusButton({
+    required String title,
+    required String sizeLabel,
+    required String presetKey,
+    required bool isSelected,
+  }) {
+    final textPrimary = AppTheme.textPrimaryOf(context);
+    final textSecondary = AppTheme.textSecondaryOf(context);
+    final isDark = AppTheme.isDark(context);
+
+    final unselectedBg = isDark ? const Color(0xFF161C24) : const Color(0xFFF1F5F9);
+    final unselectedBorder = isDark ? const Color(0xFF263040) : const Color(0xFFCBD5E1);
+
+    return GestureDetector(
+      onTap: () => _settings.setCardCurveRadius(presetKey),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFF00D06C) : unselectedBg,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected ? const Color(0xFF00D06C) : unselectedBorder,
+            width: isSelected ? 1.5 : 1,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: const Color(0xFF00D06C).withValues(alpha: 0.35),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
+                  ),
+                ]
+              : null,
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
+                color: isSelected ? Colors.black : textPrimary,
+              ),
+            ),
+            const SizedBox(height: 3),
+            Text(
+              sizeLabel,
+              style: TextStyle(
+                fontSize: 12.5,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                color: isSelected ? const Color(0xFF0A2E16) : textSecondary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildShapesIcon() {
+    const color = Color(0xFF00D06C);
+    return SizedBox(
+      width: 18,
+      height: 18,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CustomPaint(
+            size: const Size(10, 8),
+            painter: const _TrianglePainter(color),
+          ),
+          const SizedBox(height: 2),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 5.5,
+                height: 5.5,
+                decoration: const BoxDecoration(
+                  color: color,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 3),
+              Container(
+                width: 5.5,
+                height: 5.5,
+                decoration: const BoxDecoration(
+                  color: color,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -666,98 +892,74 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _buildProBanner(Color primary) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            const Color(0xFF1E1B4B), // Deep indigo
-            const Color(0xFF0F172A),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+        color: const Color(0xFF09140F),
+        borderRadius: BorderRadius.circular(36),
+        border: Border.all(
+          color: const Color(0xFF00D06C).withValues(alpha: 0.35),
+          width: 1.2,
         ),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: primary.withValues(alpha: 0.3), width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: primary.withValues(alpha: 0.15),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.amber.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(Icons.workspace_premium_rounded, color: Colors.amber, size: 24),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text(
-                      'AI Scorecast PRO',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      'Active Member • Tier 1 Neural Predictions',
-                      style: TextStyle(color: Colors.white70, fontSize: 11),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.amber,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: const Text(
-                  'ACTIVE',
-                  style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 10),
-                ),
-              ),
-            ],
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: const Color(0xFF0B2E1D),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: const Center(
+              child: _CrownIcon(size: 22, color: Color(0xFF00D06C)),
+            ),
           ),
-          const SizedBox(height: 16),
-          Wrap(
-            spacing: 12,
-            runSpacing: 8,
-            children: [
-              _buildProFeatureBullet('60s Live Polling'),
-              _buildProFeatureBullet('+EV Calculations'),
-              _buildProFeatureBullet('Tactical Lineups'),
-            ],
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: const [
+                Text(
+                  'AI Scorecast PRO',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16.5,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.2,
+                  ),
+                ),
+                SizedBox(height: 3),
+                Text(
+                  'Tier 1 Neural Predictions Active',
+                  style: TextStyle(
+                    color: Color(0xFF94A3B8),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+            decoration: BoxDecoration(
+              color: const Color(0xFF00D06C),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Text(
+              'ACTIVE',
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.w900,
+                fontSize: 12,
+                letterSpacing: 0.6,
+              ),
+            ),
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildProFeatureBullet(String text) {
-    return Row(
-      children: [
-        const Icon(Icons.check_circle_rounded, color: Color(0xFF4ADE80), size: 14),
-        const SizedBox(width: 4),
-        Text(
-          text,
-          style: const TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w500),
-        ),
-      ],
     );
   }
 
@@ -938,3 +1140,75 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 }
+
+class _TrianglePainter extends CustomPainter {
+  final Color color;
+  const _TrianglePainter(this.color);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+    final path = Path()
+      ..moveTo(size.width / 2, 0)
+      ..lineTo(size.width, size.height)
+      ..lineTo(0, size.height)
+      ..close();
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _CrownIcon extends StatelessWidget {
+  final double size;
+  final Color color;
+
+  const _CrownIcon({this.size = 22, this.color = const Color(0xFF00D06C)});
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      size: Size(size, size * 0.72),
+      painter: _CrownPainter(color: color),
+    );
+  }
+}
+
+class _CrownPainter extends CustomPainter {
+  final Color color;
+  _CrownPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+
+    final w = size.width;
+    final h = size.height;
+
+    final path = Path();
+    path.moveTo(w * 0.12, h * 0.88);
+    path.lineTo(w * 0.88, h * 0.88);
+    path.lineTo(w * 0.86, h * 0.38);
+    path.lineTo(w * 0.66, h * 0.60);
+    path.lineTo(w * 0.50, h * 0.18);
+    path.lineTo(w * 0.34, h * 0.60);
+    path.lineTo(w * 0.14, h * 0.38);
+    path.close();
+
+    canvas.drawPath(path, paint);
+
+    final r = w * 0.055;
+    canvas.drawCircle(Offset(w * 0.14, h * 0.34), r, paint);
+    canvas.drawCircle(Offset(w * 0.50, h * 0.14), r * 1.15, paint);
+    canvas.drawCircle(Offset(w * 0.86, h * 0.34), r, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+

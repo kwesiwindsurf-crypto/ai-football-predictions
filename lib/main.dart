@@ -1,9 +1,23 @@
 import 'package:flutter/material.dart';
 import 'core/services/app_settings_service.dart';
 import 'core/theme/app_theme.dart';
-import 'features/splash/presentation/pages/splash_screen.dart';
+import 'core/widgets/app_bottom_nav_bar.dart';
 
+import 'dart:ui';
 import 'package:google_fonts/google_fonts.dart';
+
+class CustomAppScrollBehavior extends MaterialScrollBehavior {
+  const CustomAppScrollBehavior();
+
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.stylus,
+        PointerDeviceKind.trackpad,
+        PointerDeviceKind.unknown,
+      };
+}
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,10 +40,11 @@ class AIScorecastApp extends StatelessWidget {
         return MaterialApp(
           title: 'AI Scorecast',
           debugShowCheckedModeBanner: false,
+          scrollBehavior: const CustomAppScrollBehavior(),
           themeMode: settings.themeMode,
           theme: AppTheme.lightTheme(accent),
           darkTheme: AppTheme.darkTheme(accent),
-          home: const SplashScreen(),
+          home: const MainNavigationShell(),
         );
       },
     );

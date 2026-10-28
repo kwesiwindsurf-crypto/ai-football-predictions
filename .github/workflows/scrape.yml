@@ -2,11 +2,9 @@ name: Scrape Football Matches
 
 on:
   schedule:
-    # Every 20 mins during peak match hours (10:00 - 23:00 UTC) = 42 runs/day
-    - cron: '*/20 10-23 * * *'
-    # Hourly overnight (00:00 - 09:00 UTC) = 10 runs/day
-    # Total = 52 runs/day * 30 = ~1,560 mins/month (stays well under the 2,000 monthly limit)
-    - cron: '0 0-9 * * *'
+    # Run once daily at 05:00 UTC (early morning before fixtures begin)
+    # Uses only 1 KV write/day and saves ~98% of monthly GitHub Actions runner minutes
+    - cron: '0 5 * * *'
   push:
     branches:
       - main

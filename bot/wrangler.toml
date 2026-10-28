@@ -2,9 +2,9 @@ name = "ai-football-bot"
 main = "src/index.js"
 compatibility_date = "2023-10-30"
 
-# Run every minute to get instant live scores and goal updates
-[triggers]
-crons = ["* * * * *"]
+# Cron trigger disabled to prevent KV write quota exhaustion (Render handles live polling 24/7)
+# [triggers]
+# crons = ["* * * * *"]
 
 # We use KV to store the JSON so the flutter app can fetch it instantly
 [[kv_namespaces]]

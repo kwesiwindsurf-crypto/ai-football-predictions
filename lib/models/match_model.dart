@@ -36,6 +36,11 @@ class Match {
   final List<String>? homeScorers;
   final List<String>? awayScorers;
   final List<MatchEvent>? events;
+  final String? referee;
+  final MatchStats? stats;
+  final String? venue;
+  final int? attendance;
+  final String? seriesSummary;
 
   Match({
     required this.id,
@@ -70,7 +75,59 @@ class Match {
     this.homeScorers,
     this.awayScorers,
     this.events,
+    this.referee,
+    this.stats,
+    this.venue,
+    this.attendance,
+    this.seriesSummary,
   });
+
+  /// Merges live telemetry deltas (scores, clock, status, events, scorers, stats, lineups)
+  /// from the lightweight Render /live endpoint while preserving the static AI prediction,
+  /// H2H, and odds loaded from Cloudflare KV.
+  Match mergeLiveDelta(Match delta) {
+    return Match(
+      id: id,
+      homeTeam: homeTeam,
+      awayTeam: awayTeam,
+      homeLogo: homeLogo.isNotEmpty ? homeLogo : delta.homeLogo,
+      awayLogo: awayLogo.isNotEmpty ? awayLogo : delta.awayLogo,
+      league: league.isNotEmpty ? league : delta.league,
+      date: date,
+      status: delta.status,
+      homeScore: delta.homeScore ?? homeScore,
+      awayScore: delta.awayScore ?? awayScore,
+      prediction: (delta.prediction.analysis.isNotEmpty && delta.prediction.analysis != 'Match analysis in progress')
+          ? delta.prediction
+          : prediction,
+      homeRank: homeRank,
+      homePoints: homePoints,
+      homeForm: homeForm,
+      awayRank: awayRank,
+      awayPoints: awayPoints,
+      awayForm: awayForm,
+      h2hSummary: h2hSummary,
+      elapsed: delta.elapsed ?? elapsed,
+      statusShort: delta.statusShort ?? statusShort,
+      homeOdds: homeOdds,
+      drawOdds: drawOdds,
+      awayOdds: awayOdds,
+      oddsRating: oddsRating,
+      matchUrl: matchUrl ?? delta.matchUrl,
+      homeLineup: delta.homeLineup ?? homeLineup,
+      awayLineup: delta.awayLineup ?? awayLineup,
+      homeLineupData: delta.homeLineupData ?? homeLineupData,
+      awayLineupData: delta.awayLineupData ?? awayLineupData,
+      homeScorers: delta.homeScorers ?? homeScorers,
+      awayScorers: delta.awayScorers ?? awayScorers,
+      events: delta.events ?? events,
+      referee: delta.referee ?? referee,
+      stats: delta.stats ?? stats,
+      venue: delta.venue ?? venue,
+      attendance: delta.attendance ?? attendance,
+      seriesSummary: delta.seriesSummary ?? seriesSummary,
+    );
+  }
 
   factory Match.fromJson(Map<String, dynamic> json, [Map<String, dynamic>? standingsData]) {
     int? hRank = json['homeRank'];
@@ -176,6 +233,11 @@ class Match {
               .map((e) => MatchEvent.fromJson(Map<String, dynamic>.from(e)))
               .toList()
           : null,
+      referee: json['referee']?.toString(),
+      stats: json['stats'] is Map ? MatchStats.fromJson(Map<String, dynamic>.from(json['stats'])) : null,
+      venue: json['venue']?.toString(),
+      attendance: (json['attendance'] as num?)?.toInt(),
+      seriesSummary: json['seriesSummary']?.toString(),
     );
   }
 
@@ -240,11 +302,13 @@ class PlayerLineup {
 
 class TeamLineupData {
   final int? avgRating;
+  final String? formation;
   final List<PlayerLineup> startingXI;
   final List<PlayerLineup> bench;
 
   const TeamLineupData({
     this.avgRating,
+    this.formation,
     required this.startingXI,
     required this.bench,
   });
@@ -254,6 +318,7 @@ class TeamLineupData {
     final rawBench = json['bench'];
     return TeamLineupData(
       avgRating: json['avgRating'] is int ? json['avgRating'] : int.tryParse(json['avgRating']?.toString() ?? ''),
+      formation: json['formation']?.toString(),
       startingXI: (rawXI is List)
               ? rawXI.whereType<Map>().map((e) => PlayerLineup.fromJson(Map<String, dynamic>.from(e))).toList()
               : [],
@@ -265,6 +330,7 @@ class TeamLineupData {
 
   Map<String, dynamic> toJson() => {
     'avgRating': avgRating,
+    'formation': formation,
     'startingXI': startingXI.map((e) => e.toJson()).toList(),
     'bench': bench.map((e) => e.toJson()).toList(),
   };
@@ -315,6 +381,11 @@ class AIPrediction {
     required this.analysis,
     required this.stakingOptions,
   });
+
+  double get confidence {
+    double maxP = homeWinProbability > awayWinProbability ? homeWinProbability : awayWinProbability;
+    return maxP > drawProbability ? maxP : drawProbability;
+  }
 
   factory AIPrediction.fromJson(Map<String, dynamic> json) {
     final rawStaking = json['stakingOptions'];
@@ -843,129 +914,7 @@ class AIPrediction {
   }
 }
 
-class MockData {
-  static List<Match> getMatches() {
-    final now = DateTime.now();
-    return [
-      Match(
-        id: '1',
-        homeTeam: 'Arsenal',
-        awayTeam: 'Chelsea',
-        homeLogo: 'ARS',
-        awayLogo: 'CHE',
-        league: 'Premier League',
-        date: now.add(const Duration(hours: 2)),
-        status: MatchStatus.notStarted,
-        homeRank: 2,
-        homePoints: 58,
-        homeForm: 'WWWWL',
-        awayRank: 6,
-        awayPoints: 41,
-        awayForm: 'LWDLL',
-        h2hSummary: 'Arsenal won 3 of last 5 meetings.',
-        homeOdds: 1.65,
-        drawOdds: 4.00,
-        awayOdds: 5.50,
-        prediction: AIPrediction.generateLocal('Arsenal', 'Chelsea', 'WWWWL', 'LWDLL', 'Arsenal won 3 of last 5 meetings.', homeRank: 2, homePts: 58, awayRank: 6, awayPts: 41, realHomeOdds: 1.65, realDrawOdds: 4.00, realAwayOdds: 5.50),
-        homeLineup: ['Raya (GK)', 'White (DF)', 'Saliba (DF)', 'Gabriel (DF)', 'Zinchenko (DF)', 'Rice (MF)', 'Odegaard (MF)', 'Partey (MF)', 'Saka (FW)', 'Havertz (FW)', 'Martinelli (FW)'],
-        awayLineup: ['Petrovic (GK)', 'Gusto (DF)', 'Disasi (DF)', 'Badiashile (DF)', 'Cucurella (DF)', 'Caicedo (MF)', 'Fernandez (MF)', 'Gallagher (MF)', 'Palmer (FW)', 'Jackson (FW)', 'Sterling (FW)'],
-      ),
-      Match(
-        id: '2',
-        homeTeam: 'Real Madrid',
-        awayTeam: 'Barcelona',
-        homeLogo: 'RMA',
-        awayLogo: 'FCB',
-        league: 'La Liga',
-        date: now.subtract(const Duration(minutes: 45)),
-        status: MatchStatus.live,
-        homeScore: 1,
-        awayScore: 1,
-        homeRank: 1,
-        homePoints: 72,
-        homeForm: 'WWWWW',
-        awayRank: 2,
-        awayPoints: 69,
-        awayForm: 'WWWWW',
-        h2hSummary: 'Real Madrid won 2, Barcelona won 2, 1 Draw.',
-        homeOdds: 2.20,
-        drawOdds: 3.50,
-        awayOdds: 3.10,
-        prediction: AIPrediction.generateLocal('Real Madrid', 'Barcelona', 'WWWDW', 'WWDWW', 'Even split in last 5 (2W-1D-2L each).', homeRank: 1, homePts: 72, awayRank: 2, awayPts: 69, realHomeOdds: 2.10, realDrawOdds: 3.50, realAwayOdds: 3.20),
-      ),
-      Match(
-        id: '3',
-        homeTeam: 'Bayern Munich',
-        awayTeam: 'Dortmund',
-        homeLogo: 'BAY',
-        awayLogo: 'BVB',
-        league: 'Bundesliga',
-        date: now.add(const Duration(days: 1)),
-        status: MatchStatus.notStarted,
-        homeRank: 1,
-        homePoints: 64,
-        homeForm: 'WWWLD',
-        awayRank: 4,
-        awayPoints: 48,
-        awayForm: 'LLWWD',
-        h2hSummary: 'Bayern Munich dominated last 5 (4 Wins).',
-        homeOdds: 1.45,
-        drawOdds: 4.50,
-        awayOdds: 6.50,
-        prediction: AIPrediction.generateLocal('Bayern Munich', 'Dortmund', 'WWWLD', 'LLWWD', 'Bayern Munich dominated last 5 (4 Wins).', homeRank: 1, homePts: 64, awayRank: 4, awayPts: 48, realHomeOdds: 1.45, realDrawOdds: 4.50, realAwayOdds: 6.50),
-      ),
-    ];
-  }
 
-  /// Returns last 5 recent matches for a given team name (mock data).
-  static List<RecentMatch> getRecentMatches(String teamName) {
-    final data = <String, List<RecentMatch>>{
-      'Arsenal': [
-        const RecentMatch(opponent: 'Man City', goalsFor: 2, goalsAgainst: 0, result: 'W', isHome: true),
-        const RecentMatch(opponent: 'Tottenham', goalsFor: 3, goalsAgainst: 1, result: 'W', isHome: false),
-        const RecentMatch(opponent: 'Liverpool', goalsFor: 1, goalsAgainst: 1, result: 'D', isHome: true),
-        const RecentMatch(opponent: 'Aston Villa', goalsFor: 2, goalsAgainst: 1, result: 'W', isHome: false),
-        const RecentMatch(opponent: 'Man United', goalsFor: 0, goalsAgainst: 1, result: 'L', isHome: true),
-      ],
-      'Chelsea': [
-        const RecentMatch(opponent: 'Newcastle', goalsFor: 1, goalsAgainst: 2, result: 'L', isHome: false),
-        const RecentMatch(opponent: 'West Ham', goalsFor: 0, goalsAgainst: 1, result: 'L', isHome: true),
-        const RecentMatch(opponent: 'Brighton', goalsFor: 1, goalsAgainst: 1, result: 'D', isHome: false),
-        const RecentMatch(opponent: 'Wolves', goalsFor: 0, goalsAgainst: 2, result: 'L', isHome: true),
-        const RecentMatch(opponent: 'Brentford', goalsFor: 0, goalsAgainst: 1, result: 'L', isHome: false),
-      ],
-      'Real Madrid': [
-        const RecentMatch(opponent: 'Atletico Madrid', goalsFor: 3, goalsAgainst: 1, result: 'W', isHome: true),
-        const RecentMatch(opponent: 'Sevilla', goalsFor: 2, goalsAgainst: 0, result: 'W', isHome: false),
-        const RecentMatch(opponent: 'Villarreal', goalsFor: 4, goalsAgainst: 1, result: 'W', isHome: true),
-        const RecentMatch(opponent: 'Betis', goalsFor: 2, goalsAgainst: 0, result: 'W', isHome: false),
-        const RecentMatch(opponent: 'Valencia', goalsFor: 3, goalsAgainst: 2, result: 'W', isHome: true),
-      ],
-      'Barcelona': [
-        const RecentMatch(opponent: 'Atletico Madrid', goalsFor: 2, goalsAgainst: 1, result: 'W', isHome: false),
-        const RecentMatch(opponent: 'Girona', goalsFor: 3, goalsAgainst: 0, result: 'W', isHome: true),
-        const RecentMatch(opponent: 'Osasuna', goalsFor: 2, goalsAgainst: 1, result: 'W', isHome: false),
-        const RecentMatch(opponent: 'Celta Vigo', goalsFor: 4, goalsAgainst: 2, result: 'W', isHome: true),
-        const RecentMatch(opponent: 'Getafe', goalsFor: 1, goalsAgainst: 0, result: 'W', isHome: false),
-      ],
-      'Bayern Munich': [
-        const RecentMatch(opponent: 'Leipzig', goalsFor: 3, goalsAgainst: 0, result: 'W', isHome: true),
-        const RecentMatch(opponent: 'Leverkusen', goalsFor: 2, goalsAgainst: 2, result: 'D', isHome: false),
-        const RecentMatch(opponent: 'Frankfurt', goalsFor: 4, goalsAgainst: 1, result: 'W', isHome: true),
-        const RecentMatch(opponent: 'Stuttgart', goalsFor: 1, goalsAgainst: 2, result: 'L', isHome: false),
-        const RecentMatch(opponent: 'Wolfsburg', goalsFor: 3, goalsAgainst: 0, result: 'W', isHome: true),
-      ],
-      'Dortmund': [
-        const RecentMatch(opponent: 'Leipzig', goalsFor: 0, goalsAgainst: 2, result: 'L', isHome: false),
-        const RecentMatch(opponent: 'Mainz', goalsFor: 0, goalsAgainst: 1, result: 'L', isHome: true),
-        const RecentMatch(opponent: 'Frankfurt', goalsFor: 2, goalsAgainst: 1, result: 'W', isHome: false),
-        const RecentMatch(opponent: 'Leverkusen', goalsFor: 1, goalsAgainst: 1, result: 'D', isHome: true),
-        const RecentMatch(opponent: 'Cologne', goalsFor: 2, goalsAgainst: 0, result: 'W', isHome: false),
-      ],
-    };
-    return data[teamName] ?? [];
-  }
-}
 
 class MatchEvent {
   final String type;
@@ -1014,6 +963,133 @@ class MatchEvent {
     'yellowCard': yellowCard,
     'penalty': penalty,
     'ownGoal': ownGoal,
+  };
+}
+
+/// Real-time in-game telemetry statistics (possession, shots, corners, fouls, passes, tackles)
+class MatchStats {
+  final double possessionHome;
+  final double possessionAway;
+  final int shotsHome;
+  final int shotsAway;
+  final int shotsOnTargetHome;
+  final int shotsOnTargetAway;
+  final int cornersHome;
+  final int cornersAway;
+  final int foulsHome;
+  final int foulsAway;
+  final int yellowCardsHome;
+  final int yellowCardsAway;
+  final int redCardsHome;
+  final int redCardsAway;
+  final int savesHome;
+  final int savesAway;
+  final int offsidesHome;
+  final int offsidesAway;
+  final int accuratePassesHome;
+  final int accuratePassesAway;
+  final int totalPassesHome;
+  final int totalPassesAway;
+  final int passAccuracyHome;
+  final int passAccuracyAway;
+  final int tacklesHome;
+  final int tacklesAway;
+  final int interceptionsHome;
+  final int interceptionsAway;
+
+  const MatchStats({
+    this.possessionHome = 50.0,
+    this.possessionAway = 50.0,
+    this.shotsHome = 0,
+    this.shotsAway = 0,
+    this.shotsOnTargetHome = 0,
+    this.shotsOnTargetAway = 0,
+    this.cornersHome = 0,
+    this.cornersAway = 0,
+    this.foulsHome = 0,
+    this.foulsAway = 0,
+    this.yellowCardsHome = 0,
+    this.yellowCardsAway = 0,
+    this.redCardsHome = 0,
+    this.redCardsAway = 0,
+    this.savesHome = 0,
+    this.savesAway = 0,
+    this.offsidesHome = 0,
+    this.offsidesAway = 0,
+    this.accuratePassesHome = 0,
+    this.accuratePassesAway = 0,
+    this.totalPassesHome = 0,
+    this.totalPassesAway = 0,
+    this.passAccuracyHome = 0,
+    this.passAccuracyAway = 0,
+    this.tacklesHome = 0,
+    this.tacklesAway = 0,
+    this.interceptionsHome = 0,
+    this.interceptionsAway = 0,
+  });
+
+  factory MatchStats.fromJson(Map<String, dynamic> json) {
+    return MatchStats(
+      possessionHome: (json['possessionHome'] as num?)?.toDouble() ?? 50.0,
+      possessionAway: (json['possessionAway'] as num?)?.toDouble() ?? 50.0,
+      shotsHome: (json['shotsHome'] as num?)?.toInt() ?? 0,
+      shotsAway: (json['shotsAway'] as num?)?.toInt() ?? 0,
+      shotsOnTargetHome: (json['shotsOnTargetHome'] as num?)?.toInt() ?? 0,
+      shotsOnTargetAway: (json['shotsOnTargetAway'] as num?)?.toInt() ?? 0,
+      cornersHome: (json['cornersHome'] as num?)?.toInt() ?? 0,
+      cornersAway: (json['cornersAway'] as num?)?.toInt() ?? 0,
+      foulsHome: (json['foulsHome'] as num?)?.toInt() ?? 0,
+      foulsAway: (json['foulsAway'] as num?)?.toInt() ?? 0,
+      yellowCardsHome: (json['yellowCardsHome'] as num?)?.toInt() ?? 0,
+      yellowCardsAway: (json['yellowCardsAway'] as num?)?.toInt() ?? 0,
+      redCardsHome: (json['redCardsHome'] as num?)?.toInt() ?? 0,
+      redCardsAway: (json['redCardsAway'] as num?)?.toInt() ?? 0,
+      savesHome: (json['savesHome'] as num?)?.toInt() ?? 0,
+      savesAway: (json['savesAway'] as num?)?.toInt() ?? 0,
+      offsidesHome: (json['offsidesHome'] as num?)?.toInt() ?? 0,
+      offsidesAway: (json['offsidesAway'] as num?)?.toInt() ?? 0,
+      accuratePassesHome: (json['accuratePassesHome'] as num?)?.toInt() ?? 0,
+      accuratePassesAway: (json['accuratePassesAway'] as num?)?.toInt() ?? 0,
+      totalPassesHome: (json['totalPassesHome'] as num?)?.toInt() ?? 0,
+      totalPassesAway: (json['totalPassesAway'] as num?)?.toInt() ?? 0,
+      passAccuracyHome: (json['passAccuracyHome'] as num?)?.toInt() ?? 0,
+      passAccuracyAway: (json['passAccuracyAway'] as num?)?.toInt() ?? 0,
+      tacklesHome: (json['tacklesHome'] as num?)?.toInt() ?? 0,
+      tacklesAway: (json['tacklesAway'] as num?)?.toInt() ?? 0,
+      interceptionsHome: (json['interceptionsHome'] as num?)?.toInt() ?? 0,
+      interceptionsAway: (json['interceptionsAway'] as num?)?.toInt() ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'possessionHome': possessionHome,
+    'possessionAway': possessionAway,
+    'shotsHome': shotsHome,
+    'shotsAway': shotsAway,
+    'shotsOnTargetHome': shotsOnTargetHome,
+    'shotsOnTargetAway': shotsOnTargetAway,
+    'cornersHome': cornersHome,
+    'cornersAway': cornersAway,
+    'foulsHome': foulsHome,
+    'foulsAway': foulsAway,
+    'yellowCardsHome': yellowCardsHome,
+    'yellowCardsAway': yellowCardsAway,
+    'redCardsHome': redCardsHome,
+    'redCardsAway': redCardsAway,
+    'savesHome': savesHome,
+    'savesAway': savesAway,
+    'offsidesHome': offsidesHome,
+    'offsidesAway': offsidesAway,
+    'accuratePassesHome': accuratePassesHome,
+    'accuratePassesAway': accuratePassesAway,
+    'totalPassesHome': totalPassesHome,
+    'totalPassesAway': totalPassesAway,
+    'passAccuracyHome': passAccuracyHome,
+    'passAccuracyAway': passAccuracyAway,
+    'tacklesHome': tacklesHome,
+    'tacklesAway': tacklesAway,
+    'interceptionsHome': interceptionsHome,
+    'interceptionsAway': interceptionsAway,
   };
 }
 

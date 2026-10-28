@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import '../../../../core/services/api_service.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../models/country_leagues_model.dart';
+import '../../../../models/match_model.dart' as model;
+import '../../../matches/presentation/widgets/dynamic_live_island.dart';
 import 'country_leagues_sheet.dart';
 
 class LeaguesHubScreen extends StatefulWidget {
@@ -29,60 +32,116 @@ class _LeaguesHubScreenState extends State<LeaguesHubScreen> {
       return countryMatch || leagueMatch;
     }).toList();
 
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Leagues & Competitions',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-                color: textPrimary,
-              ),
+    return ValueListenableBuilder<List<model.Match>>(
+      valueListenable: ApiService.liveMatchesNotifier,
+      builder: (context, liveMatches, _) {
+        final hasLive = liveMatches.isNotEmpty;
+        return Scaffold(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          appBar: PreferredSize(
+            preferredSize: Size.fromHeight(hasLive ? 108 : 64),
+            child: Container(
+              color: AppTheme.surfaceOf(context),
+              child: SafeArea(
+                bottom: false,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Centered Dynamic Live Island (Matching FotMob / iOS Island)
+                    if (hasLive)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4, bottom: 4),
+                        child: Center(
+                          child: DynamicLiveIsland(liveMatches: liveMatches),
+                        ),
+                      ),
+                    // Header Row: Trophy + LEAGUES & CUPS on left, 14 Scraped badge on right
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          Icon(
+                            Icons.emoji_events_rounded,
+                            color: Color(0xFF00D06C),
+                            size: 22,
+                          ),
+                          SizedBox(width: 8),
+                          Text(
+                            'LEAGUES & CUPS',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: -0.3,
+                              fontSize: 18,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF131821),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(color: const Color(0xFF272F3D), width: 1),
+                        ),
+                        child: const Text(
+                          '14 Scraped',
+                          style: TextStyle(
+                            fontFamily: 'monospace',
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF8B949E),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            Text(
-              '${LeagueRegistry.totalLeaguesCount}+ Competitions Scraped & Predicted',
-              style: TextStyle(
-                fontSize: 12,
-                color: primary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
       body: Column(
         children: [
-          // Search Bar
+          // Search Bar (Matching Image 1)
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
             child: Container(
+              height: 42,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(
-                color: surface,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: borderColor),
+                color: const Color(0xFF161C24),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFF272F3D), width: 1),
               ),
-              child: TextField(
-                onChanged: (val) => setState(() => _searchQuery = val.trim()),
-                style: TextStyle(color: textPrimary, fontSize: 14),
-                decoration: InputDecoration(
-                  hintText: 'Search country or competition...',
-                  hintStyle: TextStyle(color: textSecondary, fontSize: 14),
-                  prefixIcon: Icon(Icons.search_rounded, color: textSecondary, size: 20),
-                  suffixIcon: _searchQuery.isNotEmpty
-                      ? IconButton(
-                          icon: Icon(Icons.clear_rounded, color: textSecondary, size: 18),
-                          onPressed: () => setState(() => _searchQuery = ''),
-                        )
-                      : null,
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                ),
+              child: Row(
+                children: [
+                  const Icon(Icons.search_rounded, color: Color(0xFF64748B), size: 18),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: TextField(
+                      onChanged: (val) => setState(() => _searchQuery = val.trim()),
+                      style: const TextStyle(color: Colors.white, fontSize: 13),
+                      decoration: const InputDecoration(
+                        hintText: 'Search country, Premier League, La Liga...',
+                        hintStyle: TextStyle(color: Color(0xFF64748B), fontSize: 13),
+                        border: InputBorder.none,
+                        isDense: true,
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                    ),
+                  ),
+                  if (_searchQuery.isNotEmpty)
+                    GestureDetector(
+                      onTap: () => setState(() => _searchQuery = ''),
+                      child: const Icon(Icons.cancel_rounded, size: 16, color: Colors.white54),
+                    ),
+                ],
               ),
             ),
           ),
@@ -99,7 +158,7 @@ class _LeaguesHubScreenState extends State<LeaguesHubScreen> {
                 : ListView.separated(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     itemCount: filteredCountries.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 10),
+                    separatorBuilder: (_, _) => const SizedBox(height: 10),
                     itemBuilder: (context, index) {
                       final country = filteredCountries[index];
                       return InkWell(
@@ -192,6 +251,8 @@ class _LeaguesHubScreenState extends State<LeaguesHubScreen> {
           ),
         ],
       ),
+    );
+      },
     );
   }
 }
