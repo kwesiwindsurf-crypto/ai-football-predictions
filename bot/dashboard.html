@@ -1748,7 +1748,7 @@
         <div class="section-title">
           <span>⭐</span>
           <span>Featured Banker Picks</span>
-          <span class="badge">Top Confidence</span>
+          <span class="badge" id="banker-title-badge">Today's Top Locks</span>
         </div>
       </div>
       <div class="featured-grid" id="featured-grid"></div>
@@ -1848,7 +1848,9 @@
   </button>
 
   <script>
-    const API_URL = 'https://ai-football-predictions.onrender.com';
+    const RENDER_API_URL = 'https://ai-football-predictions.onrender.com';
+    const CF_API_URL = 'https://ai-football-bot.xantechs00.workers.dev';
+    const API_URL = RENDER_API_URL;
     let allMatches = [];
     let currentDateFilter = 'today'; // Default to Today's matches
     let currentStatusFilter = 'all';
@@ -2016,9 +2018,28 @@
 
       try {
         // Add cache-busting timestamp to prevent browser HTTP caching of live scores
-        const cacheBustUrl = `${API_URL}?_t=${Date.now()}`;
-        const res = await fetch(cacheBustUrl);
-        const json = await res.json();
+        const cacheBuster = `?_t=${Date.now()}`;
+        let json = null;
+
+        // Resilient Dual-Stream Fetch:
+        // Try Render live server first with a 3.2s timeout; fallback to Cloudflare Edge CDN (<30ms) if Render is cold or slow
+        try {
+          const controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), 3200);
+          const res = await fetch(`${RENDER_API_URL}${cacheBuster}`, { signal: controller.signal });
+          clearTimeout(timer);
+          if (res.ok) json = await res.json();
+        } catch (_) {}
+
+        if (!json || (!json.matchesData && !json.matches)) {
+          try {
+            const cfRes = await fetch(`${CF_API_URL}${cacheBuster}`);
+            if (cfRes.ok) json = await cfRes.json();
+          } catch (_) {}
+        }
+
+        if (!json) throw new Error('Unable to reach data servers');
+
         const rollingMatches = json.matchesData?.matches || json.matches || [];
         const historicalMatches = Array.isArray(json.historicalMatches) ? json.historicalMatches : [];
 
@@ -2133,26 +2154,69 @@
     function renderFeaturedBankers() {
       const showcaseEl = document.getElementById('featured-showcase');
       const gridEl = document.getElementById('featured-grid');
+      const titleBadge = document.getElementById('banker-title-badge');
       if (!showcaseEl || !gridEl) return;
 
-      // Pick top upcoming matches with highest probability >= 65%
-      const candidates = allMatches.filter(m => {
+      const toLocalDateStr = (d) => {
+        const date = new Date(d);
+        if (isNaN(date)) return '';
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+      };
+
+      const now = new Date();
+      const todayIso = toLocalDateStr(now);
+      const yesterdayIso = toLocalDateStr(new Date(now.getTime() - 86400000));
+      const tomorrowIso = toLocalDateStr(new Date(now.getTime() + 86400000));
+
+      let targetIso = todayIso;
+      let badgeLabel = "Today's Top Locks";
+
+      if (currentDateFilter === 'yesterday') {
+        targetIso = yesterdayIso;
+        badgeLabel = "Yesterday's Top Picks";
+      } else if (currentDateFilter === 'tomorrow') {
+        targetIso = tomorrowIso;
+        badgeLabel = "Tomorrow's Top Locks";
+      } else if (currentDateFilter === 'all') {
+        targetIso = null;
+        badgeLabel = "Top Confidence Overall";
+      }
+
+      if (titleBadge) {
+        titleBadge.innerText = badgeLabel;
+      }
+
+      // Filter matches matching the active date filter
+      const datePool = targetIso
+        ? allMatches.filter(m => toLocalDateStr(m.date) === targetIso)
+        : allMatches;
+
+      // Filter candidates: For Today/Tomorrow/All, prioritize upcoming or live games
+      let candidatePool = datePool.filter(m => {
+        if (currentDateFilter === 'yesterday') return true;
         const isFT = m.status === 'finished' || m.statusShort === 'FT';
-        if (isFT) return false;
-        const hp = m.prediction?.homeWinProbability || 0;
-        const ap = m.prediction?.awayWinProbability || 0;
-        const maxProb = Math.max(hp, ap);
-        return maxProb >= 65 || (m.oddsRating && Math.abs(m.oddsRating) >= 30);
+        return !isFT;
       });
 
-      // Sort by highest probability / confidence
-      candidates.sort((a, b) => {
-        const probA = Math.max(a.prediction?.homeWinProbability || 0, a.prediction?.awayWinProbability || 0);
-        const probB = Math.max(b.prediction?.homeWinProbability || 0, b.prediction?.awayWinProbability || 0);
-        return probB - probA;
+      // If all matches for the day have completed, show how the day's top picks performed!
+      if (candidatePool.length === 0 && datePool.length > 0) {
+        candidatePool = datePool;
+      }
+
+      // Sort candidate matches by highest win probability and confidence rating
+      candidatePool.sort((a, b) => {
+        const probA = Math.max(a.prediction?.homeWinProbability || 0, a.prediction?.awayWinProbability || 0, a.prediction?.drawProbability || 0);
+        const probB = Math.max(b.prediction?.homeWinProbability || 0, b.prediction?.awayWinProbability || 0, b.prediction?.drawProbability || 0);
+        if (probB !== probA) return probB - probA;
+        const edgeA = Math.abs(a.oddsRating || 0);
+        const edgeB = Math.abs(b.oddsRating || 0);
+        return edgeB - edgeA;
       });
 
-      const featured = candidates.slice(0, 4);
+      const featured = candidatePool.slice(0, 4);
 
       if (featured.length === 0) {
         showcaseEl.style.display = 'none';
@@ -2169,16 +2233,32 @@
 
         const hp = m.prediction?.homeWinProbability || 33;
         const ap = m.prediction?.awayWinProbability || 33;
-        const maxProb = Math.max(hp, ap);
+        const dp = m.prediction?.drawProbability || 33;
+        const maxProb = Math.max(hp, ap, dp);
         const rec = m.prediction?.recommendation || 'AI Banker';
         const primarySafe = m.prediction?.stakingOptions?.[0] || 'High Confidence';
+
+        // Live / FT / Upcoming status badge
+        let statusBadgeHtml = `<span class="banker-confidence">⭐ ${maxProb}% Edge</span>`;
+        if (m.status === 'live' || m.statusShort === 'LIVE') {
+          const clock = m.elapsed ? `${m.elapsed}'` : 'LIVE';
+          statusBadgeHtml = `<span class="banker-confidence" style="background: rgba(239, 68, 68, 0.2); border-color: #ef4444; color: #f87171;">🔴 ${clock} (${m.homeScore ?? 0} - ${m.awayScore ?? 0})</span>`;
+        } else if (m.status === 'finished' || m.statusShort === 'FT') {
+          if (m.evalResult === 'WON') {
+            statusBadgeHtml = `<span class="banker-confidence" style="background: rgba(16, 185, 129, 0.2); border-color: #10b981; color: #34d399;">✅ WON (${m.homeScore ?? 0} - ${m.awayScore ?? 0})</span>`;
+          } else if (m.evalResult === 'LOST') {
+            statusBadgeHtml = `<span class="banker-confidence" style="background: rgba(239, 68, 68, 0.2); border-color: #ef4444; color: #f87171;">❌ LOST (${m.homeScore ?? 0} - ${m.awayScore ?? 0})</span>`;
+          } else {
+            statusBadgeHtml = `<span class="banker-confidence">🏁 FT (${m.homeScore ?? 0} - ${m.awayScore ?? 0})</span>`;
+          }
+        }
 
         const card = document.createElement('div');
         card.className = 'banker-card touch-haptic';
         card.innerHTML = `
           <div class="banker-top">
             <span class="banker-league">🏆 ${m.league || 'Featured'}</span>
-            <span class="banker-confidence">⭐ ${maxProb}% Edge</span>
+            ${statusBadgeHtml}
           </div>
 
           <div class="banker-teams">
@@ -2228,6 +2308,7 @@
       currentDateFilter = filter;
       document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
       el.classList.add('active');
+      renderFeaturedBankers();
       renderMatches();
     }
 
@@ -2235,6 +2316,7 @@
       currentQuickTag = tag;
       document.querySelectorAll('.quick-tag').forEach(b => b.classList.remove('active'));
       el.classList.add('active');
+      renderFeaturedBankers();
       renderMatches();
     }
 
