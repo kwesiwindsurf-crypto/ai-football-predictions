@@ -84,6 +84,403 @@
     }
   },
   {
+    "id": "Al-Diriyah-Neom-SC-2026-10-30",
+    "espnEventId": "401900877",
+    "homeTeam": "Al Diriyah",
+    "awayTeam": "Neom SC",
+    "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/131746.png",
+    "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/130899.png",
+    "league": "Saudi Pro League",
+    "date": "2026-10-30T14:50Z",
+    "status": "finished",
+    "statusShort": "FT",
+    "homeScore": 1,
+    "awayScore": 2,
+    "homeOdds": 2.55,
+    "drawOdds": 3.55,
+    "awayOdds": 2.5,
+    "oddsRating": -11,
+    "homeRank": null,
+    "awayRank": null,
+    "homeForm": "DLWDL",
+    "awayForm": "DWLLD",
+    "homePoints": 15,
+    "awayPoints": 22,
+    "homeLineup": {
+      "avgRating": 0,
+      "formation": "4-2-3-1",
+      "startingXI": [
+        {
+          "number": "?",
+          "name": "Ameen Al-Bukhari",
+          "position": "G",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Chancel Mbemba",
+          "position": "CD-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Berat Djimsiti",
+          "position": "CD-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Hussain Al-Sabiyani",
+          "position": "LB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Taher Wadi",
+          "position": "RB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Óscar Rodríguez",
+          "position": "AM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Enzo Millot",
+          "position": "LM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Idrissa Gueye",
+          "position": "RM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Darwin Núñez",
+          "position": "F",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Adil Boulbina",
+          "position": "AM-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Clayton Diandy",
+          "position": "AM-R",
+          "rating": 0,
+          "stats": ""
+        }
+      ],
+      "bench": [
+        {
+          "number": "?",
+          "name": "Hussain Al-Qahtani",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Mansour Hibatullah Al Sibyani",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Qassem Lajami",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Abdulaziz Al Faraj",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Meshari Al Nemer",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Khalid Al Asiri",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Mohammed Dheban",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Sultan Al Farhan",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Abdullah Al Zaid",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        }
+      ]
+    },
+    "awayLineup": {
+      "avgRating": 0,
+      "formation": "4-2-3-1",
+      "startingXI": [
+        {
+          "number": "?",
+          "name": "Luís Maximiano",
+          "position": "G",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Nathan Zeze",
+          "position": "CD-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Malang Sarr",
+          "position": "CD-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Islam Hawsawi",
+          "position": "LB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Khalifah Al-Dawsari",
+          "position": "RB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Saïd Benrahma",
+          "position": "AM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Abbas Al Hassan",
+          "position": "LM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Abdulmalik Al Oyayari",
+          "position": "RM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Georgios Masouras",
+          "position": "F",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Mohannad Abu Taha",
+          "position": "AM-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Khalil Al-Absi",
+          "position": "AM-R",
+          "rating": 0,
+          "stats": ""
+        }
+      ],
+      "bench": [
+        {
+          "number": "?",
+          "name": "Alexandre Lacazette",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Abdulrhman Daghreeri",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Geovanny Balanta",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Muhannad Al-Saad",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Mohammed Al Dossari",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Khalid Al Rammah",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Faisal Al-Ghamdi",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Abdulaziz Al Othman",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Mohammed Al-Burayk",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        }
+      ]
+    },
+    "h2hSummary": null,
+    "matchUrl": "https://www.espn.com/soccer/match/_/gameId/401900877/neom-sc-al-diriyah",
+    "stats": null,
+    "events": [
+      {
+        "type": "Goal",
+        "clock": "17'",
+        "team": "home",
+        "player": "Idrissa Gueye",
+        "playerIn": "Idrissa Gueye",
+        "playerOut": null,
+        "scoringPlay": true,
+        "redCard": false,
+        "yellowCard": false,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Penalty - Scored",
+        "clock": "45'+5'",
+        "team": "away",
+        "player": "Saïd Benrahma",
+        "playerIn": "Saïd Benrahma",
+        "playerOut": null,
+        "scoringPlay": true,
+        "redCard": false,
+        "yellowCard": false,
+        "penalty": true,
+        "ownGoal": false
+      },
+      {
+        "type": "Goal",
+        "clock": "68'",
+        "team": "away",
+        "player": "Alexandre Lacazette",
+        "playerIn": "Alexandre Lacazette",
+        "playerOut": null,
+        "scoringPlay": true,
+        "redCard": false,
+        "yellowCard": false,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Yellow Card",
+        "clock": "90'+8'",
+        "team": "away",
+        "player": "Muhannad Al-Saad",
+        "playerIn": "Muhannad Al-Saad",
+        "playerOut": null,
+        "scoringPlay": false,
+        "redCard": false,
+        "yellowCard": true,
+        "penalty": false,
+        "ownGoal": false
+      }
+    ],
+    "venue": "Al-Awwal Park, King Fahd International Stadium",
+    "venueName": "Al-Awwal Park",
+    "venueCity": "King Fahd International Stadium",
+    "attendance": null,
+    "seriesSummary": null,
+    "referee": null,
+    "prediction": {
+      "homeWinProbability": 47,
+      "drawProbability": 18,
+      "awayWinProbability": 36,
+      "recommendation": "1X (Al Diriyah or Draw)",
+      "analysis": "Home Fortress League: 1X Home Shield (65% Win/Draw).\nHomeForm: 33%, AwayForm: 20%, BigGame: false",
+      "stakingOptions": [
+        "Safe: 1X (Al Diriyah or Draw)",
+        "Value: Al Diriyah Draw No Bet (2.09)",
+        "Risky: Al Diriyah to WIN by 2+ Goals (2.85)",
+        "BTTS: Both Teams To Score - Yes (1.78)",
+        "Alternative: Over 2.5 Total Goals (1.70)"
+      ]
+    }
+  },
+  {
     "id": "NorthEast-United-FC-Bengaluru-FC-2026-10-30",
     "espnEventId": "401925422",
     "homeTeam": "NorthEast United FC",
