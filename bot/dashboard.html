@@ -236,6 +236,7 @@
       line-height: 1.1;
       background: linear-gradient(135deg, #ffffff 20%, #38bdf8 70%, #818cf8 100%);
       -webkit-background-clip: text;
+      background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
@@ -1852,12 +1853,97 @@
     const CF_API_URL = 'https://ai-football-bot.xantechs00.workers.dev';
     const API_URL = RENDER_API_URL;
     let allMatches = [];
+    let datasetLastUpdated = null;
     let currentDateFilter = 'today'; // Default to Today's matches
     let currentStatusFilter = 'all';
     let currentLeagueFilter = 'all';
     let currentQuickTag = 'all';
     let currentResultFilter = 'ALL';
     let searchQuery = '';
+
+    const toLocalDateStr = (d) => {
+      const date = new Date(d);
+      if (isNaN(date)) return '';
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    };
+
+    function getReferenceDates() {
+      const now = new Date();
+      const clientToday = toLocalDateStr(now);
+
+      // 1. If client's device clock matches fixtures in the dataset, use it!
+      if (allMatches.some(m => toLocalDateStr(m.date) === clientToday)) {
+        const prev = new Date(now);
+        prev.setDate(prev.getDate() - 1);
+        const next = new Date(now);
+        next.setDate(next.getDate() + 1);
+        return {
+          todayIso: clientToday,
+          yesterdayIso: toLocalDateStr(prev),
+          tomorrowIso: toLocalDateStr(next)
+        };
+      }
+
+      // 2. If client device clock doesn't match dataset dates (e.g. system clock year discrepancy),
+      // dynamically resolve the effective reference date from the fixture data:
+      let effectiveDate = null;
+      if (datasetLastUpdated) {
+        const dsToday = toLocalDateStr(datasetLastUpdated);
+        if (allMatches.some(m => toLocalDateStr(m.date) === dsToday)) {
+          effectiveDate = new Date(datasetLastUpdated);
+        }
+      }
+
+      if (!effectiveDate) {
+        const activeMatches = allMatches.filter(m => m.status === 'live' || m.status === 'notStarted' || m.statusShort === 'NS');
+        if (activeMatches.length > 0) {
+          activeMatches.sort((a, b) => new Date(a.date) - new Date(b.date));
+          effectiveDate = new Date(activeMatches[0].date);
+        } else if (allMatches.length > 0) {
+          effectiveDate = new Date(allMatches[0].date);
+        } else {
+          effectiveDate = now;
+        }
+      }
+
+      const prev = new Date(effectiveDate);
+      prev.setDate(prev.getDate() - 1);
+      const next = new Date(effectiveDate);
+      next.setDate(next.getDate() + 1);
+
+      return {
+        todayIso: toLocalDateStr(effectiveDate),
+        yesterdayIso: toLocalDateStr(prev),
+        tomorrowIso: toLocalDateStr(next)
+      };
+    }
+
+    function updateDateFilterCounts() {
+      const { todayIso, yesterdayIso, tomorrowIso } = getReferenceDates();
+      let todayCount = 0;
+      let yesterdayCount = 0;
+      let tomorrowCount = 0;
+
+      allMatches.forEach(m => {
+        const matchIso = toLocalDateStr(m.date);
+        if (matchIso === todayIso) todayCount++;
+        else if (matchIso === yesterdayIso) yesterdayCount++;
+        else if (matchIso === tomorrowIso) tomorrowCount++;
+      });
+
+      const btnAll = document.querySelector('[data-date="all"]');
+      const btnYest = document.querySelector('[data-date="yesterday"]');
+      const btnToday = document.querySelector('[data-date="today"]');
+      const btnTmrw = document.querySelector('[data-date="tomorrow"]');
+
+      if (btnAll) btnAll.textContent = `All Days (${allMatches.length})`;
+      if (btnYest) btnYest.textContent = `Yesterday (${yesterdayCount})`;
+      if (btnToday) btnToday.textContent = `Today (${todayCount})`;
+      if (btnTmrw) btnTmrw.textContent = `Tomorrow (${tomorrowCount})`;
+    }
 
     // ==========================================
     // 📳 HAPTICS ENGINE (Vibration API + Touch Feedback)
@@ -2041,6 +2127,7 @@
         if (!json) throw new Error('Unable to reach data servers');
 
         const rollingMatches = json.matchesData?.matches || json.matches || [];
+        datasetLastUpdated = json.matchesData?.lastUpdated || null;
         const historicalMatches = Array.isArray(json.historicalMatches) ? json.historicalMatches : [];
 
         // Also fetch static history archive if available
@@ -2079,6 +2166,7 @@
 
         populateLeagueDropdown();
         updateScorecard();
+        updateDateFilterCounts();
         renderFeaturedBankers();
         renderMatches();
         if (force) {
@@ -2157,19 +2245,7 @@
       const titleBadge = document.getElementById('banker-title-badge');
       if (!showcaseEl || !gridEl) return;
 
-      const toLocalDateStr = (d) => {
-        const date = new Date(d);
-        if (isNaN(date)) return '';
-        const y = date.getFullYear();
-        const m = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${y}-${m}-${day}`;
-      };
-
-      const now = new Date();
-      const todayIso = toLocalDateStr(now);
-      const yesterdayIso = toLocalDateStr(new Date(now.getTime() - 86400000));
-      const tomorrowIso = toLocalDateStr(new Date(now.getTime() + 86400000));
+      const { todayIso, yesterdayIso, tomorrowIso } = getReferenceDates();
 
       let targetIso = todayIso;
       let badgeLabel = "Today's Top Locks";
@@ -2307,7 +2383,7 @@
     function setDateFilter(filter, el) {
       currentDateFilter = filter;
       document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      el.classList.add('active');
+      if (el) el.classList.add('active');
       renderFeaturedBankers();
       renderMatches();
     }
@@ -2315,7 +2391,7 @@
     function setQuickTag(tag, el) {
       currentQuickTag = tag;
       document.querySelectorAll('.quick-tag').forEach(b => b.classList.remove('active'));
-      el.classList.add('active');
+      if (el) el.classList.add('active');
       renderFeaturedBankers();
       renderMatches();
     }
@@ -2339,27 +2415,14 @@
       const content = document.getElementById('content-area');
       content.innerHTML = '';
 
-      // Use local date strings (YYYY-MM-DD) so timezone differences don't mismatch
-      const toLocalDateStr = (d) => {
-        const date = new Date(d);
-        if (isNaN(date)) return '';
-        const y = date.getFullYear();
-        const m = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${y}-${m}-${day}`;
-      };
-
-      const now = new Date();
-      const todayIso = toLocalDateStr(now);
-      const yesterday = toLocalDateStr(new Date(now.getTime() - 86400000));
-      const tomorrow = toLocalDateStr(new Date(now.getTime() + 86400000));
+      const { todayIso, yesterdayIso, tomorrowIso } = getReferenceDates();
 
       const filtered = allMatches.filter(m => {
-        // Date filter using local date comparison
+        // Date filter
         const matchIso = toLocalDateStr(m.date);
-        if (currentDateFilter === 'yesterday' && matchIso !== yesterday) return false;
+        if (currentDateFilter === 'yesterday' && matchIso !== yesterdayIso) return false;
         if (currentDateFilter === 'today' && matchIso !== todayIso) return false;
-        if (currentDateFilter === 'tomorrow' && matchIso !== tomorrow) return false;
+        if (currentDateFilter === 'tomorrow' && matchIso !== tomorrowIso) return false;
 
         // Status filter
         if (currentStatusFilter === 'live' && m.status !== 'live') return false;
