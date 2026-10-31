@@ -8,10 +8,15 @@ class MatchCardShimmer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
-      baseColor: AppTheme.surface,
-      highlightColor: AppTheme.surface.withValues(alpha: 0.5),
+      baseColor: const Color(0xFF1A2230),
+      highlightColor: const Color(0xFF28354A),
       child: Card(
-        margin: const EdgeInsets.only(bottom: 16),
+        color: const Color(0xFF161B22),
+        margin: const EdgeInsets.only(bottom: 14),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Color(0xFF272F3D), width: 1),
+        ),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -19,8 +24,16 @@ class MatchCardShimmer extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Container(width: 100, height: 12, color: Colors.white),
-                  Container(width: 40, height: 12, color: Colors.white),
+                  Container(
+                    width: 120,
+                    height: 12,
+                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4)),
+                  ),
+                  Container(
+                    width: 48,
+                    height: 12,
+                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4)),
+                  ),
                 ],
               ),
               const SizedBox(height: 16),
@@ -28,14 +41,26 @@ class MatchCardShimmer extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   _buildTeamShimmer(),
-                  Container(width: 40, height: 30, color: Colors.white),
+                  Container(
+                    width: 40,
+                    height: 24,
+                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(6)),
+                  ),
                   _buildTeamShimmer(),
                 ],
               ),
-              const SizedBox(height: 16),
-              const Divider(color: Colors.white),
-              const SizedBox(height: 8),
-              Container(width: 150, height: 16, color: Colors.white),
+              const SizedBox(height: 14),
+              Container(
+                width: double.infinity,
+                height: 1,
+                color: Colors.white12,
+              ),
+              const SizedBox(height: 10),
+              Container(
+                width: 180,
+                height: 14,
+                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4)),
+              ),
             ],
           ),
         ),
@@ -48,15 +73,19 @@ class MatchCardShimmer extends StatelessWidget {
       child: Column(
         children: [
           Container(
-            width: 40,
-            height: 40,
+            width: 38,
+            height: 38,
             decoration: const BoxDecoration(
               color: Colors.white,
               shape: BoxShape.circle,
             ),
           ),
           const SizedBox(height: 8),
-          Container(width: 60, height: 12, color: Colors.white),
+          Container(
+            width: 70,
+            height: 12,
+            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4)),
+          ),
         ],
       ),
     );
@@ -68,32 +97,71 @@ class MatchListShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: 4,
-      itemBuilder: (context, index) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (index % 2 == 0) ...[
-              Shimmer.fromColors(
-                baseColor: AppTheme.surface,
-                highlightColor: AppTheme.surface.withValues(alpha: 0.5),
-                child: Container(
-                  width: 150,
-                  height: 24,
-                  margin: const EdgeInsets.symmetric(vertical: 12),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(4),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Active pulsing status indicator
+          Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF10141D),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFF00D06C).withValues(alpha: 0.3)),
+            ),
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 14,
+                  height: 14,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Color(0xFF00D06C),
                   ),
                 ),
-              ),
-            ],
-            const MatchCardShimmer(),
-          ],
-        );
-      },
+                SizedBox(width: 10),
+                Text(
+                  'Syncing live match scores & predictions...',
+                  style: TextStyle(
+                    color: Color(0xFF00D06C),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Direct placeholder cards (safe inside scrollable slivers with unbounded height)
+          ...List.generate(4, (index) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (index % 2 == 0) ...[
+                  Shimmer.fromColors(
+                    baseColor: const Color(0xFF1A2230),
+                    highlightColor: const Color(0xFF28354A),
+                    child: Container(
+                      width: 140,
+                      height: 22,
+                      margin: const EdgeInsets.symmetric(vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                    ),
+                  ),
+                ],
+                const MatchCardShimmer(),
+              ],
+            );
+          }),
+        ],
+      ),
     );
   }
 }

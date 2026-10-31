@@ -10,6 +10,7 @@ class AppSettingsService extends ChangeNotifier {
   String _accentKey = 'cyan'; // 'cyan', 'emerald', 'violet', 'amber'
   String _oddsFormat = 'Decimal'; // 'Decimal', 'Fractional', 'American'
   String _timeFormat = '24-hour'; // '24-hour', '12-hour'
+  String _cardCurveRadius = 'ultra'; // 'subtle' (14px), 'high' (28px), 'ultra' (36px)
 
   // Alert & Notification settings
   bool _masterAlerts = true;
@@ -34,6 +35,55 @@ class AppSettingsService extends ChangeNotifier {
   String get accentKey => _accentKey;
   String get oddsFormat => _oddsFormat;
   String get timeFormat => _timeFormat;
+  String get cardCurveRadius => _cardCurveRadius;
+
+  double get radiusLg {
+    switch (_cardCurveRadius) {
+      case 'subtle':
+        return 14.0;
+      case 'high':
+        return 28.0;
+      case 'ultra':
+      default:
+        return 36.0;
+    }
+  }
+
+  double get radiusMd {
+    switch (_cardCurveRadius) {
+      case 'subtle':
+        return 10.0;
+      case 'high':
+        return 20.0;
+      case 'ultra':
+      default:
+        return 26.0;
+    }
+  }
+
+  double get radiusSm {
+    switch (_cardCurveRadius) {
+      case 'subtle':
+        return 8.0;
+      case 'high':
+        return 14.0;
+      case 'ultra':
+      default:
+        return 18.0;
+    }
+  }
+
+  String get cardCurveRadiusBadgeText {
+    switch (_cardCurveRadius) {
+      case 'subtle':
+        return '14px (Subtle)';
+      case 'high':
+        return '28px (High)';
+      case 'ultra':
+      default:
+        return '36px (Ultra Pill)';
+    }
+  }
 
   bool get masterAlerts => _masterAlerts;
   bool get alertKickoff => _alertKickoff;
@@ -82,6 +132,7 @@ class AppSettingsService extends ChangeNotifier {
     _accentKey = prefs.getString('app_accent_key') ?? 'cyan';
     _oddsFormat = prefs.getString('app_odds_format') ?? 'Decimal';
     _timeFormat = prefs.getString('app_time_format') ?? '24-hour';
+    _cardCurveRadius = prefs.getString('app_card_curve_radius') ?? 'ultra';
 
     _masterAlerts = prefs.getBool('app_master_alerts') ?? true;
     _alertKickoff = prefs.getBool('app_alert_kickoff') ?? true;
@@ -233,12 +284,20 @@ class AppSettingsService extends ChangeNotifier {
     await prefs.setString('app_default_home_tab', value);
   }
 
+  Future<void> setCardCurveRadius(String preset) async {
+    _cardCurveRadius = preset;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('app_card_curve_radius', preset);
+  }
+
   Future<void> resetAllSettings() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('app_theme_mode');
     await prefs.remove('app_accent_key');
     await prefs.remove('app_odds_format');
     await prefs.remove('app_time_format');
+    await prefs.remove('app_card_curve_radius');
     await prefs.remove('app_master_alerts');
     await prefs.remove('app_alert_kickoff');
     await prefs.remove('app_alert_goals');

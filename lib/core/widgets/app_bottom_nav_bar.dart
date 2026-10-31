@@ -84,7 +84,6 @@ class AppBottomNavBar extends StatelessWidget {
     final textSecondary = AppTheme.textSecondaryOf(context);
 
     return Container(
-      height: 68,
       decoration: BoxDecoration(
         color: surface.withValues(alpha: 0.98),
         border: Border(top: BorderSide(color: borderColor, width: 1)),
@@ -98,15 +97,19 @@ class AppBottomNavBar extends StatelessWidget {
       ),
       child: SafeArea(
         top: false,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-          child: Row(
-            children: [
-              _buildNavItem(context, 0, Icons.sports_soccer_rounded, 'Matches', primary, textSecondary),
-              _buildNavItem(context, 1, Icons.emoji_events_rounded, 'Leagues', primary, textSecondary),
-              _buildNavItem(context, 2, Icons.insights_rounded, 'Tracker', primary, textSecondary),
-              _buildNavItem(context, 3, Icons.tune_rounded, 'Settings', primary, textSecondary),
-            ],
+        bottom: true,
+        child: SizedBox(
+          height: 64,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+            child: Row(
+              children: [
+                _buildNavItem(context, 0, Icons.sports_soccer_rounded, 'Matches', primary, textSecondary),
+                _buildNavItem(context, 1, Icons.emoji_events_rounded, 'Leagues', primary, textSecondary),
+                _buildNavItem(context, 2, Icons.insights_rounded, 'Tracker', primary, textSecondary),
+                _buildNavItem(context, 3, Icons.tune_rounded, 'Settings', primary, textSecondary),
+              ],
+            ),
           ),
         ),
       ),

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../../../core/services/api_service.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../models/country_leagues_model.dart';
 import '../../../../models/match_model.dart' as model;
+import 'package:provider/provider.dart';
+import '../../../../core/services/matches_provider.dart';
+import '../../../../core/services/leagues_provider.dart';
 import '../../../matches/presentation/widgets/dynamic_live_island.dart';
 import 'country_leagues_sheet.dart';
 
@@ -13,11 +15,15 @@ class LeaguesHubScreen extends StatefulWidget {
   State<LeaguesHubScreen> createState() => _LeaguesHubScreenState();
 }
 
-class _LeaguesHubScreenState extends State<LeaguesHubScreen> {
+class _LeaguesHubScreenState extends State<LeaguesHubScreen> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   String _searchQuery = '';
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final primary = Theme.of(context).primaryColor;
     final surface = AppTheme.surfaceOf(context);
     final borderColor = AppTheme.cardBorderOf(context);
@@ -32,29 +38,42 @@ class _LeaguesHubScreenState extends State<LeaguesHubScreen> {
       return countryMatch || leagueMatch;
     }).toList();
 
-    return ValueListenableBuilder<List<model.Match>>(
-      valueListenable: ApiService.liveMatchesNotifier,
-      builder: (context, liveMatches, _) {
-        final hasLive = liveMatches.isNotEmpty;
-        return Scaffold(
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          appBar: PreferredSize(
-            preferredSize: Size.fromHeight(hasLive ? 108 : 64),
-            child: Container(
-              color: AppTheme.surfaceOf(context),
-              child: SafeArea(
-                bottom: false,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Centered Dynamic Live Island (Matching FotMob / iOS Island)
-                    if (hasLive)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 4, bottom: 4),
-                        child: Center(
-                          child: DynamicLiveIsland(liveMatches: liveMatches),
-                        ),
+    return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(context.select<MatchesProvider, bool>((p) => p.hasLiveMatches) ? 108 : 64),
+        child: Container(
+          color: AppTheme.surfaceOf(context),
+          child: SafeArea(
+            bottom: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Centered Dynamic Live Island (Matching FotMob / iOS Island)
+                Selector<MatchesProvider, List<model.Match>>(
+                  selector: (_, p) => p.liveMatches,
+                  shouldRebuild: (prev, next) {
+                    if (prev.length != next.length) return true;
+                    for (int i = 0; i < prev.length; i++) {
+                      if (prev[i].id != next[i].id ||
+                          prev[i].homeScore != next[i].homeScore ||
+                          prev[i].awayScore != next[i].awayScore ||
+                          prev[i].elapsed != next[i].elapsed) {
+                        return true;
+                      }
+                    }
+                    return false;
+                  },
+                  builder: (context, liveList, _) {
+                    if (liveList.isEmpty) return const SizedBox.shrink();
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 4, bottom: 4),
+                      child: Center(
+                        child: DynamicLiveIsland(liveMatches: liveList),
                       ),
+                    );
+                  },
+                ),
                     // Header Row: Trophy + LEAGUES & CUPS on left, 14 Scraped badge on right
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
@@ -224,6 +243,48 @@ class _LeaguesHubScreenState extends State<LeaguesHubScreen> {
                                 ),
                               ),
 
+                              // Live match badge (if any match is live in this country)
+                              Selector<LeaguesProvider, int>(
+                                selector: (_, p) {
+                                  int count = 0;
+                                  for (final l in country.leagues) {
+                                    count += p.getLiveCountForLeague(l.name);
+                                  }
+                                  return count;
+                                },
+                                builder: (context, liveCount, _) {
+                                  if (liveCount <= 0) return const SizedBox.shrink();
+                                  return Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    margin: const EdgeInsets.only(right: 6),
+                                    decoration: BoxDecoration(
+                                      color: Colors.red.withValues(alpha: 0.15),
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Container(
+                                          width: 4,
+                                          height: 4,
+                                          decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          '$liveCount LIVE',
+                                          style: const TextStyle(
+                                            color: Colors.red,
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+
                               // Badge count
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -251,8 +312,6 @@ class _LeaguesHubScreenState extends State<LeaguesHubScreen> {
           ),
         ],
       ),
-    );
-      },
     );
   }
 }

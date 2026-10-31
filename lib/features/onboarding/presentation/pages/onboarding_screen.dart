@@ -28,8 +28,8 @@ class OnboardingScreen extends StatelessWidget {
     }
 
     // Set flag and navigate to MainLayout
+    await AppSettingsService.instance.setHasSeenOnboarding(true);
     if (context.mounted) {
-      await AppSettingsService.instance.setHasSeenOnboarding(true);
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const MainLayout()),
       );
@@ -56,7 +56,7 @@ class OnboardingScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(40),
                   boxShadow: [
                     BoxShadow(
-                      color: AppTheme.primary.withOpacity(0.4),
+                      color: AppTheme.primary.withValues(alpha: 0.4),
                       blurRadius: 40,
                       spreadRadius: 5,
                     ),
@@ -99,7 +99,7 @@ class OnboardingScreen extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: AppTheme.surface,
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: AppTheme.primary.withOpacity(0.3)),
+                      border: Border.all(color: AppTheme.primary.withValues(alpha: 0.3)),
                     ),
                     child: Row(
                       children: [
@@ -149,7 +149,7 @@ class OnboardingScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     elevation: 8,
-                    shadowColor: AppTheme.primary.withOpacity(0.5),
+                    shadowColor: AppTheme.primary.withValues(alpha: 0.5),
                   ),
                   child: const Text(
                     'Join Telegram & Continue',

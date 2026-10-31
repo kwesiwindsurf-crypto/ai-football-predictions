@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../models/country_leagues_model.dart';
+import 'package:provider/provider.dart';
+import '../../../../core/services/leagues_provider.dart';
 import 'league_table_screen.dart';
 
 class CountryLeaguesSheet extends StatelessWidget {
@@ -22,11 +24,15 @@ class CountryLeaguesSheet extends StatelessWidget {
         color: surface,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+      child: SafeArea(
+        top: false,
+        bottom: true,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
           // Drag handle
           Center(
             child: Container(
@@ -87,7 +93,7 @@ class CountryLeaguesSheet extends StatelessWidget {
             child: ListView.separated(
               shrinkWrap: true,
               itemCount: countryData.leagues.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 10),
+              separatorBuilder: (context, index) => const SizedBox(height: 10),
               itemBuilder: (context, index) {
                 final league = countryData.leagues[index];
                 return InkWell(
@@ -114,7 +120,7 @@ class CountryLeaguesSheet extends StatelessWidget {
                             imageUrl: league.logo,
                             width: 32,
                             height: 32,
-                            errorWidget: (_, __, ___) => const Icon(Icons.emoji_events_rounded, size: 28),
+                            errorWidget: (context, url, error) => const Icon(Icons.emoji_events_rounded, size: 28),
                           ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -139,6 +145,40 @@ class CountryLeaguesSheet extends StatelessWidget {
                               ),
                             ],
                           ),
+                        ),
+                        Selector<LeaguesProvider, int>(
+                          selector: (_, p) => p.getLiveCountForLeague(league.name),
+                          builder: (context, liveCount, _) {
+                            if (liveCount <= 0) return const SizedBox.shrink();
+                            return Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              margin: const EdgeInsets.only(right: 8),
+                              decoration: BoxDecoration(
+                                color: Colors.red.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    width: 4,
+                                    height: 4,
+                                    decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '$liveCount Live',
+                                    style: const TextStyle(
+                                      color: Colors.red,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
                         ),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -172,6 +212,8 @@ class CountryLeaguesSheet extends StatelessWidget {
           const SizedBox(height: 12),
         ],
       ),
-    );
+    ),
+  ),
+);
   }
 }

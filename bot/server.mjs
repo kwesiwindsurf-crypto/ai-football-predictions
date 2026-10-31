@@ -170,11 +170,20 @@ async function pollLiveScores() {
       const home = comp.competitors?.find(c => c.homeAway === 'home');
       const away = comp.competitors?.find(c => c.homeAway === 'away');
       const state = comp.status?.type?.state; // 'pre', 'in', 'post'
-      const detail = comp.status?.type?.detail || '';
+      const statusName = (comp.status?.type?.name || '').toUpperCase();
+      const detail = comp.status?.type?.detail || comp.status?.type?.description || '';
       const shortDetail = comp.status?.type?.shortDetail || detail;
       const clock = comp.status?.displayClock || '';
 
-      if (state === 'in') {
+      const isPostponed = statusName.includes('POSTPONED') ||
+        statusName.includes('CANCEL') ||
+        statusName.includes('SUSPEND') ||
+        statusName.includes('DELAY') ||
+        statusName.includes('ABANDON') ||
+        /postp|ppd|canc|susp/i.test(shortDetail) ||
+        /postponed|cancel|suspend/i.test(detail);
+
+      if (state === 'in' && !isPostponed) {
         hasLiveGame = true;
       }
 
@@ -210,6 +219,20 @@ function extractTeamStats(statistics) {
     tackles: parseInt(map.effectiveTackles || map.totalTackles || '0', 10) || 0,
     interceptions: parseInt(map.interceptions || '0', 10) || 0,
   };
+}
+
+function extractTeamLogo(compObj) {
+  if (!compObj || !compObj.team) return '';
+  const t = compObj.team;
+  if (t.logo && typeof t.logo === 'string' && t.logo.startsWith('http')) return t.logo;
+  if (Array.isArray(t.logos) && t.logos.length > 0) {
+    const href = t.logos[0]?.href;
+    if (href && typeof href === 'string' && href.startsWith('http')) return href;
+  }
+  if (t.id) {
+    return `https://a.espncdn.com/i/teamlogos/soccer/500/${t.id}.png`;
+  }
+  return '';
 }
 
       const homeId = String(home?.id || '');
@@ -295,6 +318,7 @@ function extractTeamStats(statistics) {
         id: evt.id,
         name: evt.name,
         state: state,
+        isPostponed: isPostponed,
         clock: clock,
         detail: detail,
         shortDetail: shortDetail,
@@ -306,6 +330,8 @@ function extractTeamStats(statistics) {
         homeScorers: homeScorers,
         awayScorers: awayScorers,
         stats: stats,
+        homeLogo: extractTeamLogo(home),
+        awayLogo: extractTeamLogo(away),
         venue: venue,
         venueName: venueName || null,
         venueCity: venueCity || null,
@@ -314,7 +340,9 @@ function extractTeamStats(statistics) {
         referee: referee,
       };
 
+      const dateKey = (evt.date || '').slice(0, 10);
       liveSnapshot.set(String(evt.id), matchData);
+      if (dateKey) liveSnapshot.set(`${slugKey}-${dateKey}`, matchData);
       liveSnapshot.set(slugKey, matchData);
       liveSnapshot.set(normKey, matchData);
     }
@@ -363,8 +391,10 @@ function extractTeamStats(statistics) {
     for (const m of existingMatches) {
       const slugKey = `${m.homeTeam}-${m.awayTeam}`.replace(/\s+/g, '-').toLowerCase();
       const normKey = `${(m.homeTeam || '').toLowerCase().replace(/[^a-z0-9]/g, '')}-${(m.awayTeam || '').toLowerCase().replace(/[^a-z0-9]/g, '')}`;
+      const mDateKey = (m.date || '').slice(0, 10);
       const live = (m.espnEventId && liveSnapshot.get(String(m.espnEventId))) ||
                    liveSnapshot.get(String(m.id)) ||
+                   (mDateKey && liveSnapshot.get(`${slugKey}-${mDateKey}`)) ||
                    liveSnapshot.get(slugKey) ||
                    liveSnapshot.get(normKey);
 
@@ -375,12 +405,19 @@ function extractTeamStats(statistics) {
         m.homeScorers = live.homeScorers || [];
         m.awayScorers = live.awayScorers || [];
         if (live.stats) m.stats = live.stats;
+        if (live.homeLogo && (!m.homeLogo || !m.homeLogo.startsWith('http'))) m.homeLogo = live.homeLogo;
+        if (live.awayLogo && (!m.awayLogo || !m.awayLogo.startsWith('http'))) m.awayLogo = live.awayLogo;
         if (live.venue) m.venue = live.venue;
         if (live.attendance) m.attendance = live.attendance;
         if (live.seriesSummary) m.seriesSummary = live.seriesSummary;
         if (live.referee) m.referee = live.referee;
 
-        if (live.state === 'in') {
+        if (live.isPostponed) {
+          m.status = 'postponed';
+          m.statusShort = 'PT';
+          m.homeScore = null;
+          m.awayScore = null;
+        } else if (live.state === 'in') {
           m.status = 'live';
           m.statusShort = live.shortDetail || live.detail || live.clock || 'LIVE';
           const parsedMin = parseInt(live.clock || live.detail || '0', 10);

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
+import '../../../../core/services/api_service.dart';
 import '../../../../core/services/analytics_service.dart';
 import '../../../../core/services/app_settings_service.dart';
 import '../../../../core/services/betting_tracker_service.dart';
@@ -95,6 +96,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     await BettingTrackerService.instance.init();
     await NotificationService.instance.init();
     await AnalyticsService.instance.init();
+    try {
+      await ApiService().getCachedMatches();
+    } catch (_) {}
 
     // 4. Wait for animation to finish if it's faster than init
     await Future.wait([
@@ -138,7 +142,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                   borderRadius: BorderRadius.circular(32),
                   boxShadow: [
                     BoxShadow(
-                      color: AppTheme.primary.withOpacity(0.4),
+                      color: AppTheme.primary.withValues(alpha: 0.4),
                       blurRadius: 30,
                       spreadRadius: 5,
                     ),

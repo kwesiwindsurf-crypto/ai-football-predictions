@@ -38,6 +38,13 @@ class TrackedBet {
     required this.isSettled,
   });
 
+  /// Canonical identifier key based on alphanumeric team names
+  String get normalizedTeamsKey {
+    final h = homeTeam.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
+    final a = awayTeam.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
+    return '$h-$a';
+  }
+
   Map<String, dynamic> toJson() => {
     'id': id,
     'homeTeam': homeTeam,
@@ -121,6 +128,23 @@ class TrackerStats {
     required this.recentForm,
     required this.progression,
   });
+
+  factory TrackerStats.empty() => TrackerStats(
+    totalBets: 0,
+    settledBets: 0,
+    wins: 0,
+    losses: 0,
+    voids: 0,
+    live: 0,
+    pending: 0,
+    winRate: 0.0,
+    netProfit: 0.0,
+    roi: 0.0,
+    averageOdds: 0.0,
+    currentStreak: 0,
+    recentForm: const [],
+    progression: const [],
+  );
 }
 
 class BettingTrackerService extends ChangeNotifier {
@@ -132,11 +156,24 @@ class BettingTrackerService extends ChangeNotifier {
 
   DateTime _userStartDate = DateTime.now();
   List<TrackedBet> _bets = [];
+  final Map<String, TrackedBet> _betsById = {};
   bool _isInitialized = false;
+
+  TrackerStats _cachedStats = TrackerStats.empty();
+  TrackerStats _cachedTodayStats = TrackerStats.empty();
 
   DateTime get userStartDate => _userStartDate;
   List<TrackedBet> get bets => List.unmodifiable(_bets);
   bool get isInitialized => _isInitialized;
+  TrackerStats get cachedStats => _cachedStats;
+  TrackerStats get cachedTodayStats => _cachedTodayStats;
+
+  TrackerStats getCachedStats({String timeframe = 'all'}) {
+    return timeframe == 'today' ? _cachedTodayStats : _cachedStats;
+  }
+
+  /// O(1) lookup for leaf bet card selectors
+  TrackedBet? getBetById(String id) => _betsById[id];
 
   int get daysActive {
     final now = DateTime.now();
@@ -166,12 +203,22 @@ class BettingTrackerService extends ChangeNotifier {
         final now = DateTime.now();
         final endOfToday = DateTime(now.year, now.month, now.day, 23, 59, 59, 999);
 
-        _bets = decoded
+        final rawLoaded = decoded
             .map((e) => TrackedBet.fromJson(e as Map<String, dynamic>))
             .where((b) =>
                 !b.id.startsWith('hist_') &&
                 (b.isSettled || b.status == 'live' || b.date.isBefore(endOfToday)))
             .toList();
+
+        // Deduplicate any duplicates across different ID feeds
+        final seenKeys = <String>{};
+        _bets = [];
+        for (final b in rawLoaded) {
+          final dayKey = '${b.normalizedTeamsKey}-${b.date.year}-${b.date.month}-${b.date.day}';
+          if (seenKeys.add(dayKey)) {
+            _bets.add(b);
+          }
+        }
       } catch (_) {
         _bets = [];
       }
@@ -179,7 +226,8 @@ class BettingTrackerService extends ChangeNotifier {
       _bets = [];
     }
 
-    // Save cleaned bets list
+    // Save cleaned bets list and build lookup map + precomputed stats
+    _rebuildLookupAndStats();
     await _saveBets(prefs);
 
     _isInitialized = true;
@@ -190,6 +238,9 @@ class BettingTrackerService extends ChangeNotifier {
   Future<void> clearAllBets() async {
     final prefs = await SharedPreferences.getInstance();
     _bets = [];
+    _betsById.clear();
+    _cachedStats = TrackerStats.empty();
+    _cachedTodayStats = TrackerStats.empty();
     await prefs.remove(_trackedBetsKey);
     notifyListeners();
   }
@@ -205,15 +256,20 @@ class BettingTrackerService extends ChangeNotifier {
     for (final match in matches) {
       final isFinished = match.status == MatchStatus.finished;
       final isLive = match.status == MatchStatus.live;
+      final isPostponed = match.isPostponed;
       final isTodayOrPast = match.date.isBefore(endOfToday);
 
-      // Option 2: Tracker strictly focuses on today + settled/live results.
+      // Option 2: Tracker strictly focuses on today + settled/live/postponed results.
       // Future dates (tomorrow and beyond) belong on the Home Screen.
-      if (!isFinished && !isLive && !isTodayOrPast) {
+      if (!isFinished && !isLive && !isPostponed && !isTodayOrPast) {
         continue;
       }
 
-      final existingIndex = _bets.indexWhere((b) => b.id == match.id);
+      final matchDayKey = '${match.normalizedTeamsKey}-${match.date.year}-${match.date.month}-${match.date.day}';
+      final existingIndex = _bets.indexWhere((b) =>
+          b.id == match.id ||
+          b.normalizedTeamsKey == match.normalizedTeamsKey ||
+          '${b.normalizedTeamsKey}-${b.date.year}-${b.date.month}-${b.date.day}' == matchDayKey);
       final eval = _evaluateMatchBet(match);
 
       if (existingIndex >= 0) {
@@ -222,7 +278,8 @@ class BettingTrackerService extends ChangeNotifier {
         if (existing.status != eval.status ||
             existing.homeScore != eval.homeScore ||
             existing.awayScore != eval.awayScore ||
-            existing.pick != eval.pick) {
+            existing.pick != eval.pick ||
+            existing.id != eval.id) {
           _bets[existingIndex] = eval;
           changed = true;
         }
@@ -242,9 +299,41 @@ class BettingTrackerService extends ChangeNotifier {
     if (changed) {
       // Sort newest first
       _bets.sort((a, b) => b.date.compareTo(a.date));
+      _rebuildLookupAndStats();
       await _saveBets(prefs);
+      debugPrint('⚡ [BettingTrackerService] Synced matches & updated cached stats. Notifying selectors...');
       notifyListeners();
     }
+  }
+
+  void _rebuildLookupAndStats() {
+    _betsById.clear();
+    for (final b in _bets) {
+      _betsById[b.id] = b;
+      _betsById[b.normalizedTeamsKey] = b;
+    }
+    _cachedStats = _computeStats(timeframe: 'all');
+    _cachedTodayStats = _computeStats(timeframe: 'today');
+  }
+
+  /// Structural accessor: returns filtered list of Bet IDs.
+  /// Tier 1 list Selectors use this with [listEquals] so card lists only re-layout
+  /// when a match transitions status (e.g. LIVE -> FT / WON / LOST).
+  List<String> getBetIdsForFilter({String timeframe = 'all', String statusFilter = 'all'}) {
+    final now = DateTime.now();
+    return _bets.where((b) {
+      // Timeframe filter
+      if (timeframe == 'today') {
+        if (b.date.year != now.year || b.date.month != now.month || b.date.day != now.day) {
+          return false;
+        }
+      }
+      // Status filter
+      if (statusFilter != 'all' && b.status != statusFilter) {
+        return false;
+      }
+      return true;
+    }).map((b) => b.id).toList();
   }
 
   TrackedBet _evaluateMatchBet(Match match) {
@@ -264,6 +353,26 @@ class BettingTrackerService extends ChangeNotifier {
       odds = match.awayOdds!;
     } else if (recLower.contains('draw') && match.drawOdds != null) {
       odds = match.drawOdds!;
+    }
+
+    // Postponed / Cancelled / Suspended matches -> VOID (stake refunded, 0 profit)
+    if (match.isPostponed) {
+      return TrackedBet(
+        id: match.id,
+        homeTeam: match.homeTeam,
+        awayTeam: match.awayTeam,
+        homeLogo: match.homeLogo,
+        awayLogo: match.awayLogo,
+        league: match.league,
+        date: match.date,
+        pick: rec,
+        odds: odds,
+        homeScore: null,
+        awayScore: null,
+        status: 'void',
+        profit: 0.0,
+        isSettled: true,
+      );
     }
 
     // Pending / Upcoming
@@ -391,6 +500,14 @@ class BettingTrackerService extends ChangeNotifier {
   }
 
   TrackerStats getStats({String timeframe = 'all', String statusFilter = 'all'}) {
+    // 🎯 Fast O(1) path for standard views: return pre-calculated cache without looping
+    if (statusFilter == 'all') {
+      return timeframe == 'today' ? _cachedTodayStats : _cachedStats;
+    }
+    return _computeStats(timeframe: timeframe, statusFilter: statusFilter);
+  }
+
+  TrackerStats _computeStats({String timeframe = 'all', String statusFilter = 'all'}) {
     final now = DateTime.now();
 
     // 1. Timeframe filtering

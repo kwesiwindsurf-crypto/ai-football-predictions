@@ -28,21 +28,15 @@ class _StandingsScreenState extends State<StandingsScreen> {
   }
 
   Future<void> _loadStandings() async {
-    // 1. Load cached standings immediately
-    final cached = await _apiService.getCachedStandings();
-    if (cached != null && cached.isNotEmpty && mounted) {
+    // Show shimmer loading while fetching fresh standings
+    if (_allLeagues.isEmpty && mounted) {
       setState(() {
-        _allLeagues = cached;
-        _selectedLeague = cached.firstWhere(
-          (l) => l.id == _selectedLeague?.id,
-          orElse: () => cached.first,
-        );
-        _isLoading = false;
+        _isLoading = true;
         _error = null;
       });
     }
 
-    // 2. Fetch fresh standings from Cloudflare
+    // Fetch fresh standings from Render
     try {
       final fresh = await _apiService.fetchStandings();
       if (mounted && fresh.isNotEmpty) {
@@ -55,16 +49,23 @@ class _StandingsScreenState extends State<StandingsScreen> {
           _isLoading = false;
           _error = null;
         });
+        return;
       }
     } catch (e) {
-      if (mounted) {
-        setState(() {
-          if (_allLeagues.isEmpty) {
-            _error = e.toString();
-          }
-          _isLoading = false;
-        });
-      }
+      debugPrint('⚠️ Standings fresh fetch note: $e');
+    }
+
+    // If user has no data yet, keep them on shimmering and retry
+    if (mounted && _allLeagues.isEmpty) {
+      setState(() {
+        _isLoading = true;
+        _error = null;
+      });
+      Future.delayed(const Duration(seconds: 3), () {
+        if (mounted && _allLeagues.isEmpty) {
+          _loadStandings();
+        }
+      });
     }
   }
 
@@ -247,6 +248,7 @@ class _StandingsScreenState extends State<StandingsScreen> {
                 // Table Rows
                 Expanded(
                   child: ListView.separated(
+                    padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom + 24),
                     itemCount: league.standings.length,
                     separatorBuilder: (context, index) => const Divider(color: Colors.white10, height: 1),
                     itemBuilder: (context, index) {

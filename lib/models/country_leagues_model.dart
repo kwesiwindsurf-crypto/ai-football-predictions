@@ -68,6 +68,22 @@ class LeagueRegistry {
           tier: 'Tier 4',
           logo: 'https://a.espncdn.com/i/leaguelogos/soccer/500/26.png',
         ),
+        ScrapedLeagueInfo(
+          slug: 'eng.league_cup',
+          name: 'EFL Cup (Carabao Cup)',
+          country: 'England',
+          flagEmoji: '🏴󠁧󠁢󠁥󠁮󠁧󠁿',
+          tier: 'Cup',
+          logo: 'https://a.espncdn.com/i/leaguelogos/soccer/500/29.png',
+        ),
+        ScrapedLeagueInfo(
+          slug: 'eng.fa',
+          name: 'FA Cup',
+          country: 'England',
+          flagEmoji: '🏴󠁧󠁢󠁥󠁮󠁧󠁿',
+          tier: 'Cup',
+          logo: 'https://a.espncdn.com/i/leaguelogos/soccer/500/28.png',
+        ),
       ],
     ),
     CountryLeagues(

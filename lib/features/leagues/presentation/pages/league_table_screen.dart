@@ -135,7 +135,7 @@ class _LeagueTableScreenState extends State<LeagueTableScreen> {
                 imageUrl: widget.league.logo,
                 width: 24,
                 height: 24,
-                errorWidget: (_, __, ___) => const Icon(Icons.emoji_events_rounded, size: 22),
+                errorWidget: (context, url, error) => const Icon(Icons.emoji_events_rounded, size: 22),
               ),
             const SizedBox(width: 10),
             Expanded(
@@ -229,95 +229,128 @@ class _LeagueTableScreenState extends State<LeagueTableScreen> {
               borderRadius: BorderRadius.circular(16),
               child: Column(
                 children: [
-                  // Table Header
+                  // Table Header (Image 4)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                    color: primary.withValues(alpha: 0.08),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                    color: const Color(0xFF10141D),
                     child: Row(
                       children: [
                         SizedBox(
                           width: 28,
-                          child: Text('#', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: textSecondary)),
+                          child: Text('#', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: textSecondary)),
                         ),
                         Expanded(
-                          child: Text('Club', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: textSecondary)),
+                          child: Text('CLUB', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: textSecondary)),
+                        ),
+                        SizedBox(
+                          width: 22,
+                          child: Text('P', textAlign: TextAlign.center, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: textSecondary, fontFamily: 'monospace')),
+                        ),
+                        SizedBox(
+                          width: 22,
+                          child: Text('W', textAlign: TextAlign.center, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: textSecondary, fontFamily: 'monospace')),
+                        ),
+                        SizedBox(
+                          width: 22,
+                          child: Text('D', textAlign: TextAlign.center, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: textSecondary, fontFamily: 'monospace')),
+                        ),
+                        SizedBox(
+                          width: 22,
+                          child: Text('L', textAlign: TextAlign.center, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: textSecondary, fontFamily: 'monospace')),
                         ),
                         SizedBox(
                           width: 28,
-                          child: Text('P', textAlign: TextAlign.center, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: textSecondary)),
+                          child: Text('GD', textAlign: TextAlign.center, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: textSecondary, fontFamily: 'monospace')),
                         ),
                         SizedBox(
                           width: 28,
-                          child: Text('W', textAlign: TextAlign.center, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: textSecondary)),
+                          child: const Text('PTS', textAlign: TextAlign.center, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: Colors.white, fontFamily: 'monospace')),
                         ),
                         SizedBox(
-                          width: 28,
-                          child: Text('D', textAlign: TextAlign.center, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: textSecondary)),
-                        ),
-                        SizedBox(
-                          width: 28,
-                          child: Text('L', textAlign: TextAlign.center, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: textSecondary)),
-                        ),
-                        SizedBox(
-                          width: 32,
-                          child: Text('GD', textAlign: TextAlign.center, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: textSecondary)),
-                        ),
-                        SizedBox(
-                          width: 36,
-                          child: Text('PTS', textAlign: TextAlign.center, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: primary)),
+                          width: 66,
+                          child: Text('FORM', textAlign: TextAlign.center, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: textSecondary)),
                         ),
                       ],
                     ),
                   ),
 
-                  // Table Rows
+                  // Table Rows (Image 4)
                   ListView.separated(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: table.length,
-                    separatorBuilder: (_, __) => Divider(color: borderColor, height: 1),
+                    separatorBuilder: (_, _) => Divider(color: borderColor.withValues(alpha: 0.6), height: 1),
                     itemBuilder: (context, idx) {
                       final team = table[idx];
-                      final isTop4 = idx < 4;
-                      final isRelegation = idx >= table.length - 3;
+                      Color zoneColor = Colors.transparent;
+                      if (idx < 4) {
+                        zoneColor = const Color(0xFF3B82F6); // UCL blue
+                      } else if (idx == 4) {
+                        zoneColor = const Color(0xFFF59E0B); // UEL amber
+                      } else if (idx >= table.length - 3) {
+                        zoneColor = const Color(0xFFEF4444); // Relegation red
+                      }
 
-                      Color rankColor = textSecondary;
-                      if (isTop4) rankColor = const Color(0xFF10B981); // Champions League green
-                      if (isRelegation) rankColor = const Color(0xFFEF4444); // Relegation red
-
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+                      return Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                         child: Row(
                           children: [
+                            // Left Zone Bar
+                            Container(
+                              width: 3.5,
+                              height: 16,
+                              decoration: BoxDecoration(
+                                color: zoneColor,
+                                borderRadius: BorderRadius.circular(2),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+
+                            // Rank Number
                             SizedBox(
-                              width: 28,
+                              width: 18,
                               child: Text(
                                 '${team.rank}',
-                                style: TextStyle(
-                                  fontSize: 13,
+                                style: const TextStyle(
+                                  fontSize: 11,
                                   fontWeight: FontWeight.bold,
-                                  color: rankColor,
+                                  color: Colors.white70,
+                                  fontFamily: 'monospace',
                                 ),
                               ),
                             ),
+
+                            // Team Badge Box + Name
                             Expanded(
                               child: Row(
                                 children: [
-                                  if (team.logo.isNotEmpty)
-                                    CachedNetworkImage(
-                                      imageUrl: team.logo,
-                                      width: 18,
-                                      height: 18,
-                                      errorWidget: (_, __, ___) => const Icon(Icons.shield_outlined, size: 16),
+                                  Container(
+                                    width: 22,
+                                    height: 22,
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF161B22),
+                                      borderRadius: BorderRadius.circular(6),
+                                      border: Border.all(color: Colors.white12),
                                     ),
+                                    alignment: Alignment.center,
+                                    child: Text(
+                                      _teamCode(team.name),
+                                      style: const TextStyle(
+                                        fontSize: 7.5,
+                                        fontWeight: FontWeight.w900,
+                                        color: Colors.white70,
+                                        fontFamily: 'monospace',
+                                      ),
+                                    ),
+                                  ),
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
                                       team.name,
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w600,
-                                        color: textPrimary,
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
                                       ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
@@ -326,45 +359,44 @@ class _LeagueTableScreenState extends State<LeagueTableScreen> {
                                 ],
                               ),
                             ),
+
+                            // Stats Columns: P, W, D, L, GD, PTS
+                            SizedBox(width: 22, child: Text('${team.played}', textAlign: TextAlign.center, style: TextStyle(fontSize: 11, color: textSecondary, fontFamily: 'monospace'))),
+                            SizedBox(width: 22, child: Text('${team.win}', textAlign: TextAlign.center, style: TextStyle(fontSize: 11, color: textSecondary, fontFamily: 'monospace'))),
+                            SizedBox(width: 22, child: Text('${team.draw}', textAlign: TextAlign.center, style: TextStyle(fontSize: 11, color: textSecondary, fontFamily: 'monospace'))),
+                            SizedBox(width: 22, child: Text('${team.lose}', textAlign: TextAlign.center, style: TextStyle(fontSize: 11, color: textSecondary, fontFamily: 'monospace'))),
                             SizedBox(
                               width: 28,
-                              child: Text('${team.played}', textAlign: TextAlign.center, style: TextStyle(fontSize: 12, color: textSecondary)),
-                            ),
-                            SizedBox(
-                              width: 28,
-                              child: Text('${team.win}', textAlign: TextAlign.center, style: TextStyle(fontSize: 12, color: textSecondary)),
-                            ),
-                            SizedBox(
-                              width: 28,
-                              child: Text('${team.draw}', textAlign: TextAlign.center, style: TextStyle(fontSize: 12, color: textSecondary)),
-                            ),
-                            SizedBox(
-                              width: 28,
-                              child: Text('${team.lose}', textAlign: TextAlign.center, style: TextStyle(fontSize: 12, color: textSecondary)),
-                            ),
-                            SizedBox(
-                              width: 32,
                               child: Text(
                                 '${team.goalsDiff > 0 ? '+' : ''}${team.goalsDiff}',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
-                                  color: team.goalsDiff > 0 ? const Color(0xFF10B981) : (team.goalsDiff < 0 ? const Color(0xFFEF4444) : textSecondary),
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'monospace',
+                                  color: team.goalsDiff > 0
+                                      ? const Color(0xFF00D06C)
+                                      : (team.goalsDiff < 0 ? const Color(0xFFEF4444) : textSecondary),
                                 ),
                               ),
                             ),
                             SizedBox(
-                              width: 36,
+                              width: 28,
                               child: Text(
                                 '${team.points}',
                                 textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.bold,
-                                  color: primary,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w900,
+                                  color: Colors.white,
+                                  fontFamily: 'monospace',
                                 ),
                               ),
+                            ),
+                            const SizedBox(width: 4),
+                            SizedBox(
+                              width: 66,
+                              child: _buildFormBadges(team.form),
                             ),
                           ],
                         ),
@@ -375,22 +407,125 @@ class _LeagueTableScreenState extends State<LeagueTableScreen> {
               ),
             ),
           ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(width: 8, height: 8, decoration: const BoxDecoration(color: Color(0xFF10B981), shape: BoxShape.circle)),
-              const SizedBox(width: 6),
-              Text('Continental / Top Tier', style: TextStyle(fontSize: 11, color: textSecondary)),
-              const SizedBox(width: 16),
-              Container(width: 8, height: 8, decoration: const BoxDecoration(color: Color(0xFFEF4444), shape: BoxShape.circle)),
-              const SizedBox(width: 6),
-              Text('Relegation Zone', style: TextStyle(fontSize: 11, color: textSecondary)),
-            ],
+          const SizedBox(height: 14),
+
+          // Qualification & Relegation Zones Legend (Image 4)
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: surface,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: borderColor),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'QUALIFICATION & RELEGATION ZONES',
+                  style: TextStyle(
+                    fontSize: 9,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.8,
+                    color: AppTheme.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Container(width: 8, height: 8, decoration: BoxDecoration(color: const Color(0xFF3B82F6), borderRadius: BorderRadius.circular(2))),
+                    const SizedBox(width: 6),
+                    Text('UEFA Champions League (1-4)', style: TextStyle(fontSize: 11, color: textSecondary)),
+                  ],
+                ),
+                const SizedBox(height: 5),
+                Row(
+                  children: [
+                    Container(width: 8, height: 8, decoration: BoxDecoration(color: const Color(0xFFF59E0B), borderRadius: BorderRadius.circular(2))),
+                    const SizedBox(width: 6),
+                    Text('UEFA Europa League (5)', style: TextStyle(fontSize: 11, color: textSecondary)),
+                  ],
+                ),
+                const SizedBox(height: 5),
+                Row(
+                  children: [
+                    Container(width: 8, height: 8, decoration: BoxDecoration(color: const Color(0xFFEF4444), borderRadius: BorderRadius.circular(2))),
+                    const SizedBox(width: 6),
+                    Text('Relegation Zone (18-20)', style: TextStyle(fontSize: 11, color: textSecondary)),
+                  ],
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: MediaQuery.of(context).padding.bottom + 32),
         ],
       ),
+    );
+  }
+
+  String _teamCode(String name) {
+    if (name.contains('Arsenal')) return 'ARS';
+    if (name.contains('City')) return 'MCI';
+    if (name.contains('Liverpool')) return 'LIV';
+    if (name.contains('Villa')) return 'AVL';
+    if (name.contains('Tottenham') || name.contains('Spurs')) return 'TOT';
+    if (name.contains('United')) return 'MUN';
+    if (name.contains('Newcastle')) return 'NEW';
+    if (name.contains('Chelsea')) return 'CHE';
+    if (name.contains('Brighton')) return 'BHA';
+    if (name.contains('West Ham')) return 'WHU';
+    if (name.contains('Bournemouth')) return 'BOU';
+    if (name.contains('Fulham')) return 'FUL';
+    if (name.contains('Wolves')) return 'WOL';
+    if (name.contains('Palace')) return 'CRY';
+    if (name.contains('Brentford')) return 'BRE';
+    if (name.contains('Everton')) return 'EVE';
+    if (name.contains('Forest')) return 'NFO';
+    if (name.contains('Luton')) return 'LUT';
+    if (name.contains('Burnley')) return 'BUR';
+    if (name.contains('Sheffield')) return 'SHU';
+    if (name.contains('Hilal')) return 'HIL';
+    if (name.contains('Nassr')) return 'NAS';
+    if (name.contains('Ittihad')) return 'ITT';
+    if (name.contains('Ahli')) return 'AHL';
+    if (name.contains('Faisaly')) return 'FAI';
+    final parts = name.split(' ');
+    if (parts.length >= 2) return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    return name.substring(0, name.length >= 3 ? 3 : name.length).toUpperCase();
+  }
+
+  Widget _buildFormBadges(String? formStr) {
+    if (formStr == null || formStr.trim().isEmpty) return const SizedBox.shrink();
+    final form = formStr.trim();
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: form.split('').take(5).map((c) {
+        Color bg = const Color(0xFFF59E0B);
+        Color textC = Colors.black;
+        if (c == 'W') {
+          bg = const Color(0xFF10B981);
+        } else if (c == 'L') {
+          bg = const Color(0xFFEF4444);
+          textC = Colors.white;
+        }
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 1),
+          width: 11,
+          height: 11,
+          decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
+          child: Center(
+            child: Text(
+              c,
+              style: TextStyle(
+                color: textC,
+                fontSize: 6.5,
+                fontWeight: FontWeight.w900,
+                fontFamily: 'monospace',
+              ),
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 }

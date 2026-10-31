@@ -1,8 +1,11 @@
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' show DateFormat;
+import 'package:provider/provider.dart';
 import '../../../../core/services/api_service.dart';
 import '../../../../core/services/betting_tracker_service.dart';
 import '../../../../core/services/analytics_service.dart';
+import '../../../../core/services/matches_provider.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../models/match_model.dart' as model;
 import '../../../matches/presentation/widgets/dynamic_live_island.dart';
@@ -14,7 +17,10 @@ class TrackerScreen extends StatefulWidget {
   State<TrackerScreen> createState() => _TrackerScreenState();
 }
 
-class _TrackerScreenState extends State<TrackerScreen> {
+class _TrackerScreenState extends State<TrackerScreen> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   final ApiService _apiService = ApiService();
   final BettingTrackerService _tracker = BettingTrackerService.instance;
 
@@ -45,6 +51,7 @@ class _TrackerScreenState extends State<TrackerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final primary = Theme.of(context).primaryColor;
     final surface = AppTheme.surfaceOf(context);
     final borderColor = AppTheme.cardBorderOf(context);
@@ -52,57 +59,31 @@ class _TrackerScreenState extends State<TrackerScreen> {
     final textSecondary = AppTheme.textSecondaryOf(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return ListenableBuilder(
-      listenable: _tracker,
-      builder: (context, _) {
-        final stats = _tracker.getStats(
-          timeframe: _selectedTimeframe,
-          statusFilter: _selectedStatusFilter,
-        );
-
-        final startDate = _tracker.userStartDate;
-        final daysActive = _tracker.daysActive;
-        final formattedStartDate = DateFormat('MMM d, yyyy').format(startDate);
-
-        // Filter list items according to selection
-        final now = DateTime.now();
-        final displayBets = _tracker.bets.where((b) {
-          // Timeframe filter
-          if (_selectedTimeframe == 'today') {
-            if (b.date.year != now.year || b.date.month != now.month || b.date.day != now.day) {
-              return false;
-            }
-          }
-          // Status filter
-          if (_selectedStatusFilter != 'all' && b.status != _selectedStatusFilter) {
-            return false;
-          }
-          return true;
-        }).toList();
-
-        return ValueListenableBuilder<List<model.Match>>(
-          valueListenable: ApiService.liveMatchesNotifier,
-          builder: (context, liveMatches, _) {
-            final hasLive = liveMatches.isNotEmpty;
-            return Scaffold(
-              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-              appBar: PreferredSize(
-                preferredSize: Size.fromHeight(hasLive ? 104 : 64),
-                child: Container(
-                  color: AppTheme.surfaceOf(context),
-                  child: SafeArea(
-                    bottom: false,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Centered Dynamic Live Island (Matching FotMob / iOS Island)
-                        if (hasLive)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 4, bottom: 4),
-                            child: Center(
-                              child: DynamicLiveIsland(liveMatches: liveMatches),
-                            ),
-                          ),
+    return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(104),
+        child: Container(
+          color: AppTheme.surfaceOf(context),
+          child: SafeArea(
+            bottom: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Centered Dynamic Live Island (Matching FotMob / iOS Island)
+                Selector<MatchesProvider, List<model.Match>>(
+                  selector: (_, p) => p.liveMatches,
+                  shouldRebuild: (prev, next) => prev.length != next.length,
+                  builder: (context, liveMatches, _) {
+                    if (liveMatches.isEmpty) return const SizedBox.shrink();
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 4, bottom: 4),
+                      child: Center(
+                        child: DynamicLiveIsland(liveMatches: liveMatches),
+                      ),
+                    );
+                  },
+                ),
                         // Title Row: BETTING & AI TRACKER + Subtitle on left, Circular refresh button on right
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
@@ -178,55 +159,120 @@ class _TrackerScreenState extends State<TrackerScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // 1. User Start Date Timeline Banner
-                  _buildUserTimelineBanner(
+              // 1. User Start Date Timeline Banner
+              Selector<BettingTrackerService, ({DateTime startDate, int daysActive})>(
+                selector: (_, tracker) => (
+                  startDate: tracker.userStartDate,
+                  daysActive: tracker.daysActive,
+                ),
+                builder: (context, data, _) {
+                  final formattedStartDate = DateFormat('MMM d, yyyy').format(data.startDate);
+                  return _buildUserTimelineBanner(
                     formattedStartDate: formattedStartDate,
-                    daysActive: daysActive,
+                    daysActive: data.daysActive,
                     primary: primary,
                     surface: surface,
                     borderColor: borderColor,
                     textPrimary: textPrimary,
                     textSecondary: textSecondary,
-                  ),
-                  const SizedBox(height: 14),
-
-                  // 2. Timeframe Selector Pills
-                  _buildTimeframeSelector(primary, surface, borderColor, textPrimary, textSecondary),
-                  const SizedBox(height: 16),
-
-                  // 3. Main Hero Analytics Card (Win Rate, Units Profit, ROI)
-                  _buildHeroPerformanceCard(stats, primary, surface, borderColor, isDark),
-                  const SizedBox(height: 16),
-
-                  // 4. Cumulative Units & Win Rate Trend Chart
-                  _buildTrendProgressionCard(stats, primary, surface, borderColor, textPrimary, textSecondary),
-                  const SizedBox(height: 20),
-
-                  // 5. Recent Form Row
-                  if (stats.recentForm.isNotEmpty) ...[
-                    _buildFormGuideRow(stats.recentForm, surface, borderColor, textPrimary, textSecondary),
-                    const SizedBox(height: 20),
-                  ],
-
-                  // 6. Outcome Filter Header & Chips
-                  _buildOutcomeFilterBar(stats, primary, surface, borderColor, textPrimary, textSecondary),
-                  const SizedBox(height: 12),
-
-                  // 7. Tracked Bets List
-                  if (displayBets.isEmpty)
-                    _buildEmptyState(surface, borderColor, textSecondary)
-                  else
-                    _buildTrackedBetsList(displayBets, surface, borderColor, textPrimary, textSecondary, primary),
-
-                  const SizedBox(height: 32),
-                ],
+                  );
+                },
               ),
-            ),
+              const SizedBox(height: 14),
+
+              // 2. Timeframe Selector Pills
+              _buildTimeframeSelector(primary, surface, borderColor, textPrimary, textSecondary),
+              const SizedBox(height: 16),
+
+              // 3. Main Hero Analytics Card (Win Rate, Units Profit, ROI)
+              Selector<BettingTrackerService, TrackerStats>(
+                selector: (_, tracker) => tracker.getCachedStats(timeframe: _selectedTimeframe),
+                builder: (context, stats, _) {
+                  return _buildHeroPerformanceCard(stats, primary, surface, borderColor, isDark);
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // 4. Cumulative Units & Win Rate Trend Chart (Vintage Points)
+              Selector<BettingTrackerService, List<CumulativePoint>>(
+                selector: (_, tracker) => tracker.getCachedStats(timeframe: _selectedTimeframe).progression,
+                shouldRebuild: (prev, next) {
+                  if (prev.length != next.length) return true;
+                  if (prev.isEmpty) return false;
+                  return prev.last.cumulativeUnits != next.last.cumulativeUnits;
+                },
+                builder: (context, points, _) {
+                  return _buildTrendProgressionCard(points, primary, surface, borderColor, textPrimary, textSecondary);
+                },
+              ),
+              const SizedBox(height: 20),
+
+              // 5. Recent Form Row
+              Selector<BettingTrackerService, List<String>>(
+                selector: (_, tracker) => tracker.cachedStats.recentForm,
+                shouldRebuild: (prev, next) => !listEquals(prev, next),
+                builder: (context, recentForm, _) {
+                  if (recentForm.isEmpty) return const SizedBox.shrink();
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 20),
+                    child: _buildFormGuideRow(recentForm, surface, borderColor, textPrimary, textSecondary),
+                  );
+                },
+              ),
+
+              // 6. Outcome Filter Header & Chips (Tabs)
+              Selector<BettingTrackerService, ({int total, int won, int lost, int live, int pending})>(
+                selector: (_, tracker) {
+                  final s = tracker.getCachedStats(timeframe: _selectedTimeframe);
+                  return (
+                    total: s.totalBets,
+                    won: s.wins,
+                    lost: s.losses,
+                    live: s.live,
+                    pending: s.pending,
+                  );
+                },
+                builder: (context, counts, _) {
+                  return _buildOutcomeFilterBar(counts, primary, surface, borderColor, textPrimary, textSecondary);
+                },
+              ),
+              const SizedBox(height: 12),
+
+              // 7. Tracked Bets List (Tier 1 Structural Selector)
+              Selector<BettingTrackerService, List<String>>(
+                selector: (_, tracker) => tracker.getBetIdsForFilter(
+                  timeframe: _selectedTimeframe,
+                  statusFilter: _selectedStatusFilter,
+                ),
+                shouldRebuild: (prev, next) => !listEquals(prev, next),
+                builder: (context, betIds, _) {
+                  if (betIds.isEmpty) {
+                    return _buildEmptyState(surface, borderColor, textSecondary);
+                  }
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: betIds.length,
+                    itemBuilder: (context, index) {
+                      return TrackedBetCardTile(
+                        key: ValueKey(betIds[index]),
+                        betId: betIds[index],
+                        surface: surface,
+                        borderColor: borderColor,
+                        textPrimary: textPrimary,
+                        textSecondary: textSecondary,
+                        primary: primary,
+                      );
+                    },
+                  );
+                },
+              ),
+
+              const SizedBox(height: 32),
+            ],
           ),
-        );
-          },
-        );
-      },
+        ),
+      ),
     );
   }
 
@@ -586,14 +632,13 @@ class _TrackerScreenState extends State<TrackerScreen> {
   }
 
   Widget _buildTrendProgressionCard(
-    TrackerStats stats,
+    List<CumulativePoint> points,
     Color primary,
     Color surface,
     Color borderColor,
     Color textPrimary,
     Color textSecondary,
   ) {
-    final points = stats.progression;
 
     return Container(
       padding: const EdgeInsets.all(18),
@@ -752,7 +797,7 @@ class _TrackerScreenState extends State<TrackerScreen> {
   }
 
   Widget _buildOutcomeFilterBar(
-    TrackerStats stats,
+    ({int total, int won, int lost, int live, int pending}) counts,
     Color primary,
     Color surface,
     Color borderColor,
@@ -760,11 +805,11 @@ class _TrackerScreenState extends State<TrackerScreen> {
     Color textSecondary,
   ) {
     final filters = [
-      {'id': 'all', 'label': 'All (${stats.totalBets})'},
-      {'id': 'won', 'label': 'Won (${stats.wins})'},
-      {'id': 'lost', 'label': 'Lost (${stats.losses})'},
-      if (stats.live > 0) {'id': 'live', 'label': 'Live (${stats.live})'},
-      if (stats.pending > 0) {'id': 'pending', 'label': 'Upcoming (${stats.pending})'},
+      {'id': 'all', 'label': 'All (${counts.total})'},
+      {'id': 'won', 'label': 'Won (${counts.won})'},
+      {'id': 'lost', 'label': 'Lost (${counts.lost})'},
+      if (counts.live > 0) {'id': 'live', 'label': 'Live (${counts.live})'},
+      if (counts.pending > 0) {'id': 'pending', 'label': 'Upcoming (${counts.pending})'},
     ];
 
     return Column(
@@ -844,20 +889,42 @@ class _TrackerScreenState extends State<TrackerScreen> {
     );
   }
 
-  Widget _buildTrackedBetsList(
-    List<TrackedBet> bets,
-    Color surface,
-    Color borderColor,
-    Color textPrimary,
-    Color textSecondary,
-    Color primary,
-  ) {
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: bets.length,
-      itemBuilder: (context, index) {
-        final bet = bets[index];
+}
+
+/// 🎯 Tier 2 Leaf Selector Widget:
+/// Observes only this individual bet ID. Rebuilds ONLY when its score, status, or profit changes!
+class TrackedBetCardTile extends StatelessWidget {
+  final String betId;
+  final Color surface;
+  final Color borderColor;
+  final Color textPrimary;
+  final Color textSecondary;
+  final Color primary;
+
+  const TrackedBetCardTile({
+    super.key,
+    required this.betId,
+    required this.surface,
+    required this.borderColor,
+    required this.textPrimary,
+    required this.textSecondary,
+    required this.primary,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Selector<BettingTrackerService, TrackedBet?>(
+      selector: (_, tracker) => tracker.getBetById(betId),
+      shouldRebuild: (prev, next) {
+        if (prev == null || next == null) return true;
+        return prev.status != next.status ||
+               prev.homeScore != next.homeScore ||
+               prev.awayScore != next.awayScore ||
+               prev.profit != next.profit;
+      },
+      builder: (context, bet, _) {
+        if (bet == null) return const SizedBox.shrink();
+
         final isWon = bet.status == 'won';
         final isLost = bet.status == 'lost';
         final isLive = bet.status == 'live';
@@ -975,7 +1042,7 @@ class _TrackerScreenState extends State<TrackerScreen> {
               ],
               const SizedBox(height: 10),
 
-              // AI Pick & Outcome Chips - Responsive Wrap for Small Screens
+              // AI Pick & Outcome Chips
               Wrap(
                 spacing: 8,
                 runSpacing: 8,

@@ -82,10 +82,86 @@ class Match {
     this.seriesSummary,
   });
 
+  /// Returns true if this match has been postponed, cancelled, or suspended.
+  bool get isPostponed =>
+      status == MatchStatus.postponed ||
+      status == MatchStatus.cancelled ||
+      statusShort?.toUpperCase() == 'PT' ||
+      (statusShort?.toLowerCase().contains('postp') ?? false) ||
+      (statusShort?.toLowerCase().contains('ppd') ?? false) ||
+      (statusShort?.toLowerCase().contains('canc') ?? false) ||
+      (statusShort?.toLowerCase().contains('susp') ?? false);
+
+  /// True when a cached snapshot still marks this match as live, but kickoff
+  /// is old enough that the game must have ended by now.
+  ///
+  /// A football match is over within ~3 hours of kickoff (90' + half-time +
+  /// stoppage, or extra time + penalties). Anything older than that in the
+  /// on-disk cache is a leftover from a previous session and must never be
+  /// resurrected as LIVE on cold start.
+  bool get isStaleLive {
+    if (status != MatchStatus.live) return false;
+    return DateTime.now().difference(date.toLocal()) > const Duration(hours: 3);
+  }
+
+  /// Returns a copy demoted from live to finished, keeping the last known score.
+  /// Used to sanitize stale live entries loaded from the disk cache.
+  Match markedFinished() {
+    if (status != MatchStatus.live) return this;
+    return Match(
+      id: id,
+      homeTeam: homeTeam,
+      awayTeam: awayTeam,
+      homeLogo: homeLogo,
+      awayLogo: awayLogo,
+      league: league,
+      date: date,
+      status: MatchStatus.finished,
+      homeScore: homeScore,
+      awayScore: awayScore,
+      prediction: prediction,
+      homeRank: homeRank,
+      homePoints: homePoints,
+      homeForm: homeForm,
+      awayRank: awayRank,
+      awayPoints: awayPoints,
+      awayForm: awayForm,
+      h2hSummary: h2hSummary,
+      elapsed: null,
+      statusShort: 'FT',
+      homeOdds: homeOdds,
+      drawOdds: drawOdds,
+      awayOdds: awayOdds,
+      oddsRating: oddsRating,
+      matchUrl: matchUrl,
+      homeLineup: homeLineup,
+      awayLineup: awayLineup,
+      homeLineupData: homeLineupData,
+      awayLineupData: awayLineupData,
+      homeScorers: homeScorers,
+      awayScorers: awayScorers,
+      events: events,
+      referee: referee,
+      stats: stats,
+      venue: venue,
+      attendance: attendance,
+      seriesSummary: seriesSummary,
+    );
+  }
+
+  /// Canonical identifier key based on alphanumeric team names (case & punctuation insensitive).
+  /// Guarantees that matches match across ESPN event IDs, Cloudflare date slugs, and Render deltas.
+  String get normalizedTeamsKey {
+    final h = homeTeam.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
+    final a = awayTeam.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
+    return '$h-$a';
+  }
+
   /// Merges live telemetry deltas (scores, clock, status, events, scorers, stats, lineups)
   /// from the lightweight Render /live endpoint while preserving the static AI prediction,
   /// H2H, and odds loaded from Cloudflare KV.
   Match mergeLiveDelta(Match delta) {
+    final isDeltaPostponed = delta.isPostponed;
     return Match(
       id: id,
       homeTeam: homeTeam,
@@ -95,8 +171,8 @@ class Match {
       league: league.isNotEmpty ? league : delta.league,
       date: date,
       status: delta.status,
-      homeScore: delta.homeScore ?? homeScore,
-      awayScore: delta.awayScore ?? awayScore,
+      homeScore: isDeltaPostponed ? null : (delta.homeScore ?? homeScore),
+      awayScore: isDeltaPostponed ? null : (delta.awayScore ?? awayScore),
       prediction: (delta.prediction.analysis.isNotEmpty && delta.prediction.analysis != 'Match analysis in progress')
           ? delta.prediction
           : prediction,
@@ -107,7 +183,7 @@ class Match {
       awayPoints: awayPoints,
       awayForm: awayForm,
       h2hSummary: h2hSummary,
-      elapsed: delta.elapsed ?? elapsed,
+      elapsed: isDeltaPostponed ? null : (delta.elapsed ?? elapsed),
       statusShort: delta.statusShort ?? statusShort,
       homeOdds: homeOdds,
       drawOdds: drawOdds,
@@ -193,6 +269,29 @@ class Match {
       try { aLineupData = TeamLineupData.fromJson(Map<String, dynamic>.from(json['awayLineup'])); } catch (_) {}
     }
 
+    final rawStatus = json['status']?.toString();
+    final rawShort = (json['statusShort']?.toString() ?? '').toLowerCase();
+    MatchStatus parsedStatus;
+    if (rawStatus == 'postponed' ||
+        rawStatus == 'cancelled' ||
+        rawShort == 'pt' ||
+        rawShort.contains('postp') ||
+        rawShort.contains('ppd') ||
+        rawShort.contains('canc') ||
+        rawShort.contains('susp')) {
+      parsedStatus = MatchStatus.postponed;
+    } else {
+      parsedStatus = MatchStatus.values.firstWhere(
+        (e) => e.name == rawStatus,
+        orElse: () => MatchStatus.notStarted,
+      );
+    }
+
+    final isPostponedGame = parsedStatus == MatchStatus.postponed ||
+        parsedStatus == MatchStatus.cancelled;
+    final int? parsedHomeScore = isPostponedGame ? null : (json['homeScore'] as num?)?.toInt();
+    final int? parsedAwayScore = isPostponedGame ? null : (json['awayScore'] as num?)?.toInt();
+
     return Match(
       id: json['id'],
       homeTeam: homeName,
@@ -201,12 +300,9 @@ class Match {
       awayLogo: json['awayLogo'] ?? '',
       league: leagueName,
       date: DateTime.parse(json['date']),
-      status: MatchStatus.values.firstWhere(
-        (e) => e.name == json['status'],
-        orElse: () => MatchStatus.notStarted,
-      ),
-      homeScore: json['homeScore'],
-      awayScore: json['awayScore'],
+      status: parsedStatus,
+      homeScore: parsedHomeScore,
+      awayScore: parsedAwayScore,
       prediction: pred,
       homeRank: hRank,
       homePoints: hPts,
@@ -336,7 +432,7 @@ class TeamLineupData {
   };
 }
 
-enum MatchStatus { notStarted, live, finished }
+enum MatchStatus { notStarted, live, finished, postponed, cancelled }
 
 /// Represents a single previous match result for a team.
 class RecentMatch {
