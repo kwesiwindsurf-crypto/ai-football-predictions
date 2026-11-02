@@ -1,5 +1,2009 @@
 [
   {
+    "id": "Portland-Timbers-Houston-Dynamo-FC-2026-11-02",
+    "espnEventId": "761933",
+    "homeTeam": "Portland Timbers",
+    "awayTeam": "Houston Dynamo FC",
+    "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/9723.png",
+    "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/6077.png",
+    "league": "USA - MLS",
+    "date": "2026-11-02T02:45Z",
+    "status": "finished",
+    "statusShort": "FT",
+    "homeScore": 3,
+    "awayScore": 1,
+    "homeOdds": null,
+    "drawOdds": null,
+    "awayOdds": null,
+    "oddsRating": 8,
+    "homeRank": null,
+    "awayRank": null,
+    "homeForm": "WWWDL",
+    "awayForm": "LWDDD",
+    "homePoints": 43,
+    "awayPoints": 51,
+    "homeLineup": {
+      "avgRating": 0,
+      "formation": "4-1-4-1",
+      "startingXI": [
+        {
+          "number": "?",
+          "name": "James Pantemis",
+          "position": "G",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Joel Waterman",
+          "position": "CD-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Finn Surman",
+          "position": "CD-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "José Caicedo",
+          "position": "DM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Ian Smith",
+          "position": "LB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Ronald Hernández",
+          "position": "RB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "David Da Costa",
+          "position": "CM-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Eric Izoita",
+          "position": "CM-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Kristoffer Velde",
+          "position": "LM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Ariel Lassiter",
+          "position": "RM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Vincent Janssen",
+          "position": "F",
+          "rating": 0,
+          "stats": ""
+        }
+      ],
+      "bench": [
+        {
+          "number": "?",
+          "name": "Cole Bassett",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Hunter Sulte",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Joao Ortiz",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Alexander Aravena",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Omir Fernández",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Diego Chará",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Eric Miller",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Gage Guerra",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Sawyer Jura",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        }
+      ]
+    },
+    "awayLineup": {
+      "avgRating": 0,
+      "formation": "4-2-3-1",
+      "startingXI": [
+        {
+          "number": "?",
+          "name": "Jonathan Bond",
+          "position": "G",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Agustín Resch",
+          "position": "CD-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Lucas Halter",
+          "position": "CD-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Franco Negri",
+          "position": "LB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Lawrence Ennali",
+          "position": "RB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Agustín Bouzat",
+          "position": "AM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Artur",
+          "position": "LM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Diadie Samassekou",
+          "position": "RM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Lyle Foster",
+          "position": "F",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Mateusz Bogusz",
+          "position": "AM-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Ibrahim Aliyu",
+          "position": "AM-R",
+          "rating": 0,
+          "stats": ""
+        }
+      ],
+      "bench": [
+        {
+          "number": "?",
+          "name": "Duane Holmes",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Duncan McGuire",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Blake Gillingham",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Gilberto Rivera",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Antônio Carlos",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Logan Erb",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Felipe Andrade",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Matthew Arana",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Nicholas Markanich",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        }
+      ]
+    },
+    "h2hSummary": null,
+    "matchUrl": "https://www.espn.com/soccer/match/_/gameId/761933/houston-dynamo-fc-portland-timbers",
+    "stats": {
+      "possessionHome": 45.4,
+      "possessionAway": 54.6,
+      "shotsHome": 16,
+      "shotsAway": 8,
+      "shotsOnTargetHome": 6,
+      "shotsOnTargetAway": 1,
+      "cornersHome": 6,
+      "cornersAway": 6,
+      "foulsHome": 11,
+      "foulsAway": 12,
+      "yellowCardsHome": 0,
+      "yellowCardsAway": 0,
+      "redCardsHome": 0,
+      "redCardsAway": 0,
+      "savesHome": 0,
+      "savesAway": 0,
+      "offsidesHome": 0,
+      "offsidesAway": 0,
+      "accuratePassesHome": 0,
+      "accuratePassesAway": 0,
+      "totalPassesHome": 0,
+      "totalPassesAway": 0,
+      "passAccuracyHome": 0,
+      "passAccuracyAway": 0,
+      "tacklesHome": 0,
+      "tacklesAway": 0,
+      "interceptionsHome": 0,
+      "interceptionsAway": 0
+    },
+    "events": [
+      {
+        "type": "Yellow Card",
+        "clock": "18'",
+        "team": "home",
+        "player": "Ian Smith",
+        "playerIn": "Ian Smith",
+        "playerOut": null,
+        "scoringPlay": false,
+        "redCard": false,
+        "yellowCard": true,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Goal",
+        "clock": "25'",
+        "team": "home",
+        "player": "David Da Costa",
+        "playerIn": "David Da Costa",
+        "playerOut": null,
+        "scoringPlay": true,
+        "redCard": false,
+        "yellowCard": false,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Yellow Card",
+        "clock": "40'",
+        "team": "away",
+        "player": "Diadie Samassekou",
+        "playerIn": "Diadie Samassekou",
+        "playerOut": null,
+        "scoringPlay": false,
+        "redCard": false,
+        "yellowCard": true,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Yellow Card",
+        "clock": "61'",
+        "team": "away",
+        "player": "Agustín Resch",
+        "playerIn": "Agustín Resch",
+        "playerOut": null,
+        "scoringPlay": false,
+        "redCard": false,
+        "yellowCard": true,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Goal",
+        "clock": "65'",
+        "team": "home",
+        "player": "Kristoffer Velde",
+        "playerIn": "Kristoffer Velde",
+        "playerOut": null,
+        "scoringPlay": true,
+        "redCard": false,
+        "yellowCard": false,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Goal",
+        "clock": "71'",
+        "team": "away",
+        "player": "Agustín Bouzat",
+        "playerIn": "Agustín Bouzat",
+        "playerOut": null,
+        "scoringPlay": true,
+        "redCard": false,
+        "yellowCard": false,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Goal - Header",
+        "clock": "78'",
+        "team": "home",
+        "player": "Vincent Janssen",
+        "playerIn": "Vincent Janssen",
+        "playerOut": null,
+        "scoringPlay": true,
+        "redCard": false,
+        "yellowCard": false,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Yellow Card",
+        "clock": "90'+3'",
+        "team": "home",
+        "player": "Diego Chará",
+        "playerIn": "Diego Chará",
+        "playerOut": null,
+        "scoringPlay": false,
+        "redCard": false,
+        "yellowCard": true,
+        "penalty": false,
+        "ownGoal": false
+      }
+    ],
+    "venue": "Providence Park, Portland, Oregon",
+    "venueName": "Providence Park",
+    "venueCity": "Portland, Oregon",
+    "attendance": null,
+    "seriesSummary": null,
+    "referee": null,
+    "prediction": {
+      "homeWinProbability": 38,
+      "drawProbability": 17,
+      "awayWinProbability": 46,
+      "recommendation": "X2 (Houston Dynamo FC or Draw)",
+      "analysis": "High-Draw League: Away Compound Shield (X2 covers draw 17%).\nHomeForm: 7%, AwayForm: 20%, BigGame: false",
+      "stakingOptions": [
+        "Safe: X2 (Houston Dynamo FC or Draw)",
+        "Value: Houston Dynamo FC Draw No Bet (1.7)",
+        "Risky: Houston Dynamo FC to WIN by 2+ Goals (2.85)",
+        "BTTS: Both Teams To Score - Yes (1.78)",
+        "Alternative: Over 2.5 Total Goals (1.70)"
+      ]
+    }
+  },
+  {
+    "id": "LAFC-Minnesota-United-FC-2026-11-02",
+    "espnEventId": "761921",
+    "homeTeam": "LAFC",
+    "awayTeam": "Minnesota United FC",
+    "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/18966.png",
+    "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/17362.png",
+    "league": "USA - MLS",
+    "date": "2026-11-02T01:30Z",
+    "status": "finished",
+    "statusShort": "FT",
+    "homeScore": 1,
+    "awayScore": 3,
+    "homeOdds": null,
+    "drawOdds": null,
+    "awayOdds": null,
+    "oddsRating": -10,
+    "homeRank": null,
+    "awayRank": null,
+    "homeForm": "LDDWD",
+    "awayForm": "WWDWD",
+    "homePoints": 47,
+    "awayPoints": 41,
+    "homeLineup": {
+      "avgRating": 0,
+      "formation": "4-2-3-1",
+      "startingXI": [
+        {
+          "number": "?",
+          "name": "Hugo Lloris",
+          "position": "G",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Aaron Long",
+          "position": "CD-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Ryan Porteous",
+          "position": "CD-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Eddie Segura",
+          "position": "LB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Sergi Palencia",
+          "position": "RB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Son Heung-Min",
+          "position": "AM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Igor Jesus",
+          "position": "LM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Mathieu Choinière",
+          "position": "RM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Denis Bouanga",
+          "position": "F",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Leo Walta",
+          "position": "AM-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Armindo Sieb",
+          "position": "AM-R",
+          "rating": 0,
+          "stats": ""
+        }
+      ],
+      "bench": [
+        {
+          "number": "?",
+          "name": "Mark Delgado",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Ryan Hollingshead",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jacob Shaffelburg",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Ryan Raposo",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Sergio Vásquez",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Nkosi Tafari",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Thomas Hasal",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jeremy Ebobisse",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Tyler Boyd",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        }
+      ]
+    },
+    "awayLineup": {
+      "avgRating": 0,
+      "formation": "4-4-2",
+      "startingXI": [
+        {
+          "number": "?",
+          "name": "Drake Callender",
+          "position": "G",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Morris Duggan",
+          "position": "CD-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jefferson Díaz",
+          "position": "CD-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Anthony Markanich",
+          "position": "LB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Cherrion Valerius",
+          "position": "RB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Owen Gene",
+          "position": "CM-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Nectarios Triantis",
+          "position": "CM-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Mauricio Gonzalez",
+          "position": "LM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Tomás Chancalay",
+          "position": "RM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Kelvin Yeboah",
+          "position": "CF-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Joaquín Pereyra",
+          "position": "CF-R",
+          "rating": 0,
+          "stats": ""
+        }
+      ],
+      "bench": [
+        {
+          "number": "?",
+          "name": "Peter Stroud",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Alec Smir",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Kyle Duncan",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "D.J. Taylor",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Aziel Jackson",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Maurice Malone",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Michael Boxall",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Marcus Caldeira",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Bongokuhle Hlongwane",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        }
+      ]
+    },
+    "h2hSummary": null,
+    "matchUrl": "https://www.espn.com/soccer/match/_/gameId/761921/minnesota-united-fc-lafc",
+    "stats": {
+      "possessionHome": 49.8,
+      "possessionAway": 50.2,
+      "shotsHome": 22,
+      "shotsAway": 6,
+      "shotsOnTargetHome": 7,
+      "shotsOnTargetAway": 3,
+      "cornersHome": 8,
+      "cornersAway": 1,
+      "foulsHome": 15,
+      "foulsAway": 17,
+      "yellowCardsHome": 0,
+      "yellowCardsAway": 0,
+      "redCardsHome": 0,
+      "redCardsAway": 0,
+      "savesHome": 0,
+      "savesAway": 0,
+      "offsidesHome": 0,
+      "offsidesAway": 0,
+      "accuratePassesHome": 0,
+      "accuratePassesAway": 0,
+      "totalPassesHome": 0,
+      "totalPassesAway": 0,
+      "passAccuracyHome": 0,
+      "passAccuracyAway": 0,
+      "tacklesHome": 0,
+      "tacklesAway": 0,
+      "interceptionsHome": 0,
+      "interceptionsAway": 0
+    },
+    "events": [
+      {
+        "type": "Goal",
+        "clock": "29'",
+        "team": "away",
+        "player": "Joaquín Pereyra",
+        "playerIn": "Joaquín Pereyra",
+        "playerOut": null,
+        "scoringPlay": true,
+        "redCard": false,
+        "yellowCard": false,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Goal",
+        "clock": "34'",
+        "team": "away",
+        "player": "Cherrion Valerius",
+        "playerIn": "Cherrion Valerius",
+        "playerOut": null,
+        "scoringPlay": true,
+        "redCard": false,
+        "yellowCard": false,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Yellow Card",
+        "clock": "45'+1'",
+        "team": "home",
+        "player": "Igor Jesus",
+        "playerIn": "Igor Jesus",
+        "playerOut": null,
+        "scoringPlay": false,
+        "redCard": false,
+        "yellowCard": true,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Yellow Card",
+        "clock": "45'+5'",
+        "team": "away",
+        "player": "Joaquín Pereyra",
+        "playerIn": "Joaquín Pereyra",
+        "playerOut": null,
+        "scoringPlay": false,
+        "redCard": false,
+        "yellowCard": true,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Yellow Card",
+        "clock": "58'",
+        "team": "home",
+        "player": "Eddie Segura",
+        "playerIn": "Eddie Segura",
+        "playerOut": null,
+        "scoringPlay": false,
+        "redCard": false,
+        "yellowCard": true,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Yellow Card",
+        "clock": "60'",
+        "team": "away",
+        "player": "Jefferson Díaz",
+        "playerIn": "Jefferson Díaz",
+        "playerOut": null,
+        "scoringPlay": false,
+        "redCard": false,
+        "yellowCard": true,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Yellow Card",
+        "clock": "74'",
+        "team": "away",
+        "player": "Morris Duggan",
+        "playerIn": "Morris Duggan",
+        "playerOut": null,
+        "scoringPlay": false,
+        "redCard": false,
+        "yellowCard": true,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Goal",
+        "clock": "81'",
+        "team": "away",
+        "player": "Joaquín Pereyra",
+        "playerIn": "Joaquín Pereyra",
+        "playerOut": null,
+        "scoringPlay": true,
+        "redCard": false,
+        "yellowCard": false,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Yellow Card",
+        "clock": "84'",
+        "team": "home",
+        "player": "Tyler Boyd",
+        "playerIn": "Tyler Boyd",
+        "playerOut": null,
+        "scoringPlay": false,
+        "redCard": false,
+        "yellowCard": true,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Goal - Volley",
+        "clock": "89'",
+        "team": "home",
+        "player": "Sergio Vásquez",
+        "playerIn": "Sergio Vásquez",
+        "playerOut": null,
+        "scoringPlay": true,
+        "redCard": false,
+        "yellowCard": false,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Yellow Card",
+        "clock": "90'+3'",
+        "team": "away",
+        "player": "Nectarios Triantis",
+        "playerIn": "Nectarios Triantis",
+        "playerOut": null,
+        "scoringPlay": false,
+        "redCard": false,
+        "yellowCard": true,
+        "penalty": false,
+        "ownGoal": false
+      }
+    ],
+    "venue": "BMO Stadium, Los Angeles, California",
+    "venueName": "BMO Stadium",
+    "venueCity": "Los Angeles, California",
+    "attendance": null,
+    "seriesSummary": null,
+    "referee": null,
+    "prediction": {
+      "homeWinProbability": 43,
+      "drawProbability": 24,
+      "awayWinProbability": 33,
+      "recommendation": "1X (LAFC or Draw)",
+      "analysis": "High-Draw League: Home Compound Shield (1X covers draw 24%).\nHomeForm: 33%, AwayForm: 33%, BigGame: false",
+      "stakingOptions": [
+        "Safe: 1X (LAFC or Draw)",
+        "Value: LAFC Draw No Bet (1.7)",
+        "Risky: LAFC to WIN by 2+ Goals (2.85)",
+        "BTTS: Both Teams To Score - Yes (1.78)",
+        "Alternative: Under 2.5 Goals (1.80)"
+      ]
+    }
+  },
+  {
+    "id": "Cruz-Azul-León-2026-11-02",
+    "espnEventId": "401876911",
+    "homeTeam": "Cruz Azul",
+    "awayTeam": "León",
+    "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/218.png",
+    "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/228.png",
+    "league": "Mexico - Liga MX",
+    "date": "2026-11-02T01:10Z",
+    "status": "finished",
+    "statusShort": "FT",
+    "homeScore": 2,
+    "awayScore": 1,
+    "homeOdds": null,
+    "drawOdds": null,
+    "awayOdds": null,
+    "oddsRating": -15,
+    "homeRank": null,
+    "awayRank": null,
+    "homeForm": "WWWWD",
+    "awayForm": "LDWLD",
+    "homePoints": 29,
+    "awayPoints": 22,
+    "homeLineup": {
+      "avgRating": 0,
+      "formation": "5-4-1",
+      "startingXI": [
+        {
+          "number": "?",
+          "name": "Kevin Mier",
+          "position": "G",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Gonzalo Piovi",
+          "position": "CD",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jesús Orozco",
+          "position": "CD-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Amaury García",
+          "position": "CD-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Omar Campos",
+          "position": "LB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Rogelio González",
+          "position": "RB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Andres Montaño",
+          "position": "CM-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Érik Lira",
+          "position": "CM-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Carlos Rodríguez",
+          "position": "LM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Agustín Palavecino",
+          "position": "RM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Gabriel Fernandez",
+          "position": "F",
+          "rating": 0,
+          "stats": ""
+        }
+      ],
+      "bench": [
+        {
+          "number": "?",
+          "name": "Osinachi Ebere",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "José Paradela",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Nicolás Ibáñez",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Alan Mozo",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Andrés Gudiño",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Ángel Márquez",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jorge Rodarte",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Alán Montes",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Luka Romero",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Rodolfo Rotondi",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        }
+      ]
+    },
+    "awayLineup": {
+      "avgRating": 0,
+      "formation": "4-3-3",
+      "startingXI": [
+        {
+          "number": "?",
+          "name": "Oscar García",
+          "position": "G",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Juan Guevara",
+          "position": "CD-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jhohan Romaña",
+          "position": "CD-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Christopher Mora",
+          "position": "LB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Iván Moreno",
+          "position": "RB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "José Rodríguez",
+          "position": "CM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Daniel Arcila",
+          "position": "LM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Rodrigo Echeverría",
+          "position": "RM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "José Alvarado",
+          "position": "F",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Ismael Díaz",
+          "position": "LF",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Edgar Guerra",
+          "position": "RF",
+          "rating": 0,
+          "stats": ""
+        }
+      ],
+      "bench": [
+        {
+          "number": "?",
+          "name": "Fernando Beltrán",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Bryan Colula",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Isaac Alfredo Espinosa Salinas",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Irving Omar Martínez Gutiérrez",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Diber Cambindo",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Sebastian Vegas",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jordi Cortizo",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jesús Lara",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Paul Saracho",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Juan Domínguez",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        }
+      ]
+    },
+    "h2hSummary": null,
+    "matchUrl": "https://www.espn.com/soccer/match/_/gameId/401876911/leon-cruz-azul",
+    "stats": {
+      "possessionHome": 47.9,
+      "possessionAway": 52.1,
+      "shotsHome": 15,
+      "shotsAway": 16,
+      "shotsOnTargetHome": 5,
+      "shotsOnTargetAway": 4,
+      "cornersHome": 4,
+      "cornersAway": 6,
+      "foulsHome": 16,
+      "foulsAway": 11,
+      "yellowCardsHome": 0,
+      "yellowCardsAway": 0,
+      "redCardsHome": 0,
+      "redCardsAway": 0,
+      "savesHome": 0,
+      "savesAway": 0,
+      "offsidesHome": 0,
+      "offsidesAway": 0,
+      "accuratePassesHome": 0,
+      "accuratePassesAway": 0,
+      "totalPassesHome": 0,
+      "totalPassesAway": 0,
+      "passAccuracyHome": 0,
+      "passAccuracyAway": 0,
+      "tacklesHome": 0,
+      "tacklesAway": 0,
+      "interceptionsHome": 0,
+      "interceptionsAway": 0
+    },
+    "events": [
+      {
+        "type": "Yellow Card",
+        "clock": "33'",
+        "team": "home",
+        "player": "Gabriel Fernandez",
+        "playerIn": "Gabriel Fernandez",
+        "playerOut": null,
+        "scoringPlay": false,
+        "redCard": false,
+        "yellowCard": true,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Yellow Card",
+        "clock": "34'",
+        "team": "away",
+        "player": "Jhohan Romaña",
+        "playerIn": "Jhohan Romaña",
+        "playerOut": null,
+        "scoringPlay": false,
+        "redCard": false,
+        "yellowCard": true,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Yellow Card",
+        "clock": "45'+7'",
+        "team": "away",
+        "player": "Christopher Mora",
+        "playerIn": "Christopher Mora",
+        "playerOut": null,
+        "scoringPlay": false,
+        "redCard": false,
+        "yellowCard": true,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Yellow Card",
+        "clock": "55'",
+        "team": "away",
+        "player": "Edgar Guerra",
+        "playerIn": "Edgar Guerra",
+        "playerOut": null,
+        "scoringPlay": false,
+        "redCard": false,
+        "yellowCard": true,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Yellow Card",
+        "clock": "55'",
+        "team": "away",
+        "player": "José Rodríguez",
+        "playerIn": "José Rodríguez",
+        "playerOut": null,
+        "scoringPlay": false,
+        "redCard": false,
+        "yellowCard": true,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Penalty - Scored",
+        "clock": "56'",
+        "team": "home",
+        "player": "Andres Montaño",
+        "playerIn": "Andres Montaño",
+        "playerOut": null,
+        "scoringPlay": true,
+        "redCard": false,
+        "yellowCard": false,
+        "penalty": true,
+        "ownGoal": false
+      },
+      {
+        "type": "Yellow Card",
+        "clock": "60'",
+        "team": "home",
+        "player": "Jesús Orozco",
+        "playerIn": "Jesús Orozco",
+        "playerOut": null,
+        "scoringPlay": false,
+        "redCard": false,
+        "yellowCard": true,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Goal",
+        "clock": "72'",
+        "team": "home",
+        "player": "José Paradela",
+        "playerIn": "José Paradela",
+        "playerOut": null,
+        "scoringPlay": true,
+        "redCard": false,
+        "yellowCard": false,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Yellow Card",
+        "clock": "79'",
+        "team": "away",
+        "player": "Isaac Alfredo Espinosa Salinas",
+        "playerIn": "Isaac Alfredo Espinosa Salinas",
+        "playerOut": null,
+        "scoringPlay": false,
+        "redCard": false,
+        "yellowCard": true,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Yellow Card",
+        "clock": "85'",
+        "team": "home",
+        "player": "Ángel Márquez",
+        "playerIn": "Ángel Márquez",
+        "playerOut": null,
+        "scoringPlay": false,
+        "redCard": false,
+        "yellowCard": true,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Yellow Card",
+        "clock": "90'+3'",
+        "team": "home",
+        "player": "José Paradela",
+        "playerIn": "José Paradela",
+        "playerOut": null,
+        "scoringPlay": false,
+        "redCard": false,
+        "yellowCard": true,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Penalty - Scored",
+        "clock": "90'+10'",
+        "team": "away",
+        "player": "José Alvarado",
+        "playerIn": "José Alvarado",
+        "playerOut": null,
+        "scoringPlay": true,
+        "redCard": false,
+        "yellowCard": false,
+        "penalty": true,
+        "ownGoal": false
+      }
+    ],
+    "venue": "Estadio Banorte, Mexico City",
+    "venueName": "Estadio Banorte",
+    "venueCity": "Mexico City",
+    "attendance": null,
+    "seriesSummary": null,
+    "referee": null,
+    "prediction": {
+      "homeWinProbability": 47,
+      "drawProbability": 21,
+      "awayWinProbability": 32,
+      "recommendation": "1X (Cruz Azul or Draw)",
+      "analysis": "High-Draw League: Home Compound Shield (1X covers draw 21%).\nHomeForm: 60%, AwayForm: 47%, BigGame: false",
+      "stakingOptions": [
+        "Safe: 1X (Cruz Azul or Draw)",
+        "Value: Cruz Azul Draw No Bet (1.7)",
+        "Risky: Cruz Azul to WIN by 2+ Goals (2.85)",
+        "BTTS: Both Teams To Score - Yes (1.78)",
+        "Alternative: Over 2.5 Total Goals (1.70)"
+      ]
+    }
+  },
+  {
+    "id": "New-England-Revolution-Inter-Miami-CF-2026-11-02",
+    "espnEventId": "761932",
+    "homeTeam": "New England Revolution",
+    "awayTeam": "Inter Miami CF",
+    "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/189.png",
+    "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/20232.png",
+    "league": "USA - MLS",
+    "date": "2026-11-02T00:00Z",
+    "status": "finished",
+    "statusShort": "FT",
+    "homeScore": 1,
+    "awayScore": 2,
+    "homeOdds": null,
+    "drawOdds": null,
+    "awayOdds": null,
+    "oddsRating": 1,
+    "homeRank": null,
+    "awayRank": null,
+    "homeForm": "LWWWW",
+    "awayForm": "WDLWW",
+    "homePoints": 58,
+    "awayPoints": 59,
+    "homeLineup": {
+      "avgRating": 0,
+      "formation": "4-2-3-1",
+      "startingXI": [
+        {
+          "number": "?",
+          "name": "Matt Turner",
+          "position": "G",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Joshua Wynder",
+          "position": "CD-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Ethan Kohler",
+          "position": "CD-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "William Sands",
+          "position": "LB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Ilay Feingold",
+          "position": "RB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Carles Gil",
+          "position": "AM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Brooklyn Raines",
+          "position": "LM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Matt Polster",
+          "position": "RM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Dor Turgeman",
+          "position": "F",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Dániel Gazdag",
+          "position": "AM-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Peyton Miller",
+          "position": "AM-R",
+          "rating": 0,
+          "stats": ""
+        }
+      ],
+      "bench": [
+        {
+          "number": "?",
+          "name": "Tanner Beason",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Alhassan Yusuf",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Griffin Yow",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Diego Fagundez",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Luca Langoni",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Jackson Yueill",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Andrew Farrell",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Donovan Parisian",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Mamadou Fofana",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        }
+      ]
+    },
+    "awayLineup": {
+      "avgRating": 0,
+      "formation": "4-3-3",
+      "startingXI": [
+        {
+          "number": "?",
+          "name": "Dayne St. Clair",
+          "position": "G",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Micael",
+          "position": "CD-L",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Casemiro",
+          "position": "CD-R",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Gonzalo Luján",
+          "position": "LB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Ian Fray",
+          "position": "RB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Yannick Bright",
+          "position": "CM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Telasco Segovia",
+          "position": "LM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Rodrigo De Paul",
+          "position": "RM",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Germán Berterame",
+          "position": "F",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Riquelme",
+          "position": "LF",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Lionel Messi",
+          "position": "RF",
+          "rating": 0,
+          "stats": ""
+        }
+      ],
+      "bench": [
+        {
+          "number": "?",
+          "name": "Dániel Pintér",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "David Ayala",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Matías Galarza",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Facundo Mura",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Sergio Reguilón",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Santiago Morales",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Luis Suárez",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Maximiliano Falcón",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        },
+        {
+          "number": "?",
+          "name": "Rocco Ríos Novo",
+          "position": "SUB",
+          "rating": 0,
+          "stats": ""
+        }
+      ]
+    },
+    "h2hSummary": null,
+    "matchUrl": "https://www.espn.com/soccer/match/_/gameId/761932/inter-miami-cf-new-england-revolution",
+    "stats": {
+      "possessionHome": 54.9,
+      "possessionAway": 45.1,
+      "shotsHome": 13,
+      "shotsAway": 14,
+      "shotsOnTargetHome": 3,
+      "shotsOnTargetAway": 6,
+      "cornersHome": 7,
+      "cornersAway": 1,
+      "foulsHome": 6,
+      "foulsAway": 16,
+      "yellowCardsHome": 0,
+      "yellowCardsAway": 0,
+      "redCardsHome": 0,
+      "redCardsAway": 0,
+      "savesHome": 0,
+      "savesAway": 0,
+      "offsidesHome": 0,
+      "offsidesAway": 0,
+      "accuratePassesHome": 0,
+      "accuratePassesAway": 0,
+      "totalPassesHome": 0,
+      "totalPassesAway": 0,
+      "passAccuracyHome": 0,
+      "passAccuracyAway": 0,
+      "tacklesHome": 0,
+      "tacklesAway": 0,
+      "interceptionsHome": 0,
+      "interceptionsAway": 0
+    },
+    "events": [
+      {
+        "type": "Yellow Card",
+        "clock": "25'",
+        "team": "away",
+        "player": "Gonzalo Luján",
+        "playerIn": "Gonzalo Luján",
+        "playerOut": null,
+        "scoringPlay": false,
+        "redCard": false,
+        "yellowCard": true,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Goal",
+        "clock": "53'",
+        "team": "home",
+        "player": "Dániel Gazdag",
+        "playerIn": "Dániel Gazdag",
+        "playerOut": null,
+        "scoringPlay": true,
+        "redCard": false,
+        "yellowCard": false,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Goal - Header",
+        "clock": "69'",
+        "team": "away",
+        "player": "Germán Berterame",
+        "playerIn": "Germán Berterame",
+        "playerOut": null,
+        "scoringPlay": true,
+        "redCard": false,
+        "yellowCard": false,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Yellow Card",
+        "clock": "75'",
+        "team": "away",
+        "player": "Matías Galarza",
+        "playerIn": "Matías Galarza",
+        "playerOut": null,
+        "scoringPlay": false,
+        "redCard": false,
+        "yellowCard": true,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Goal",
+        "clock": "83'",
+        "team": "away",
+        "player": "Lionel Messi",
+        "playerIn": "Lionel Messi",
+        "playerOut": null,
+        "scoringPlay": true,
+        "redCard": false,
+        "yellowCard": false,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Yellow Card",
+        "clock": "85'",
+        "team": "away",
+        "player": "Telasco Segovia",
+        "playerIn": "Telasco Segovia",
+        "playerOut": null,
+        "scoringPlay": false,
+        "redCard": false,
+        "yellowCard": true,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Yellow Card",
+        "clock": "90'+6'",
+        "team": "home",
+        "player": "Luca Langoni",
+        "playerIn": "Luca Langoni",
+        "playerOut": null,
+        "scoringPlay": false,
+        "redCard": false,
+        "yellowCard": true,
+        "penalty": false,
+        "ownGoal": false
+      }
+    ],
+    "venue": "Gillette Stadium, Foxborough, Massachusetts",
+    "venueName": "Gillette Stadium",
+    "venueCity": "Foxborough, Massachusetts",
+    "attendance": 54112,
+    "seriesSummary": null,
+    "referee": null,
+    "prediction": {
+      "homeWinProbability": 41,
+      "drawProbability": 17,
+      "awayWinProbability": 42,
+      "recommendation": "Over 1.5 Goals",
+      "analysis": "Blockbuster Clash (USA - MLS): Evenly matched titans, goals market is the winning pick (Over 1.5).\nHomeForm: 33%, AwayForm: 60%, BigGame: true",
+      "stakingOptions": [
+        "Safe: Over 1.5 Goals",
+        "Value: Inter Miami CF Draw No Bet (1.7)",
+        "Goals: Over 1.5 Total Goals (1.30)",
+        "BTTS: Both Teams To Score - Yes (1.78)",
+        "Alternative: Under 2.5 Goals (1.80)"
+      ]
+    }
+  },
+  {
     "id": "Lanús-Gimnasia-(Mendoza)-2026-11-01",
     "espnEventId": "401841651",
     "homeTeam": "Lanús",
