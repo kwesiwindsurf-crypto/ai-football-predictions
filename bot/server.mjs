@@ -11,6 +11,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
 const CLOUDFLARE_SEED_URL = process.env.CLOUDFLARE_SEED_URL || 'https://ai-football-bot.xantechs00.workers.dev';
 const POLL_INTERVAL_MS = 30 * 1000; // Poll ESPN every 30 seconds in memory (0 quota!)
+// A record still flagged live this long after kickoff, and absent from ESPN's board, is over.
+const MAX_LIVE_DURATION_MS = 3 * 60 * 60 * 1000;
 
 // Load Firebase Service Account if available (for goal push notifications)
 let serviceAccount = null;
@@ -142,12 +144,13 @@ async function pollLiveScores() {
     }
 
     const now = new Date();
-    const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
 
-    // Fetch scoreboards concurrently
+    // No `dates=` param: ESPN picks the board from its own day boundary (US Eastern).
+    // Pinning dates=<UTC day> hid every match that kicks off after 00:00 UTC, which froze
+    // the entire Americas evening slate mid-match from midnight until roughly 05:00 UTC.
     const requests = ESPN_WATCHED_LEAGUES.map(async (slug) => {
-      const limitParam = slug === 'all' ? '&limit=300' : '';
-      const url = `https://site.api.espn.com/apis/site/v2/sports/soccer/${slug}/scoreboard?dates=${dateStr}${limitParam}`;
+      const query = slug === 'all' ? '?limit=300' : '';
+      const url = `https://site.api.espn.com/apis/site/v2/sports/soccer/${slug}/scoreboard${query}`;
       const json = await safeFetchJson(url);
       return json?.events || [];
     });
@@ -161,6 +164,7 @@ async function pollLiveScores() {
     }
 
     let hasLiveGame = false;
+    let staleLiveDemoted = 0;
     const liveSnapshot = new Map();
 
     for (const evt of allEvents) {
@@ -428,7 +432,21 @@ function extractTeamLogo(compObj) {
           m.status = 'finished';
           m.statusShort = 'FT';
         }
+      } else if (m.status === 'live') {
+        // Still flagged live but no longer on the board: close it out rather than
+        // letting a finished match wear a frozen LIVE badge until the next daily scrape.
+        const kickoff = new Date(m.date).getTime();
+        if (!isNaN(kickoff) && now.getTime() - kickoff > MAX_LIVE_DURATION_MS) {
+          m.status = 'finished';
+          m.statusShort = 'FT';
+          m.elapsed = null;
+          staleLiveDemoted++;
+        }
       }
+    }
+
+    if (staleLiveDemoted > 0) {
+      console.log(`🧹 Demoted ${staleLiveDemoted} stale LIVE record(s) no longer reported in play.`);
     }
 
     soccerData.matchesData.lastUpdated = now.toISOString();
@@ -634,8 +652,6 @@ const server = http.createServer(async (req, res) => {
       events: m.events || [],
       homeScorers: m.homeScorers || [],
       awayScorers: m.awayScorers || [],
-      homeLineup: m.homeLineup || null,
-      awayLineup: m.awayLineup || null,
       stats: m.stats || null,
       referee: m.referee || null,
       venue: m.venue || null,
@@ -645,7 +661,7 @@ const server = http.createServer(async (req, res) => {
     const livePayload = {
       status: 'ok',
       lastUpdated: soccerData.matchesData?.lastUpdated || new Date().toISOString(),
-      hasLiveGame: liveMatches.some(m => m.status === 'live'),
+      hasLiveGame: soccerData.matchesData?.hasLiveGame ?? false,
       count: liveMatches.length,
       matches: liveMatches
     };
