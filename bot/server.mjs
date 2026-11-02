@@ -20,6 +20,7 @@ const saPath = path.join(__dirname, 'service_account.json');
 if (process.env.FIREBASE_SERVICE_ACCOUNT) {
   try {
     serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+    console.log(`✅ Loaded Firebase service account from env (project: ${serviceAccount.project_id})`);
   } catch (e) {
     console.warn('⚠️ Could not parse FIREBASE_SERVICE_ACCOUNT env:', e.message);
   }
@@ -30,6 +31,8 @@ if (process.env.FIREBASE_SERVICE_ACCOUNT) {
   } catch (e) {
     console.warn('⚠️ Could not read local service_account.json:', e.message);
   }
+} else {
+  console.log('🔕 No Firebase credential found — goal push alerts are disabled.');
 }
 
 // ─── Watched ESPN League Slugs ────────────────────────────────────────────────
@@ -521,7 +524,7 @@ async function broadcastGoalAlerts(alerts, sa) {
 
     for (const alert of alerts) {
       console.log(`📢 Sending FCM Push Alert: ${alert.title}`);
-      await fetch(fcmEndpoint, {
+      const pushRes = await fetch(fcmEndpoint, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -548,6 +551,12 @@ async function broadcastGoalAlerts(alerts, sa) {
           },
         }),
       });
+      // A rejected send used to be indistinguishable from a delivered one.
+      if (pushRes.ok) {
+        console.log(`✅ FCM accepted the alert for match ${alert.matchId}`);
+      } else {
+        console.error(`❌ FCM rejected the alert: HTTP ${pushRes.status} ${(await pushRes.text()).slice(0, 300)}`);
+      }
     }
   } catch (err) {
     console.error('Failed to send goal alerts via Firebase v1:', err.message);
