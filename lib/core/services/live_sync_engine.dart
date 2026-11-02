@@ -21,6 +21,7 @@ class LiveSyncEngine with WidgetsBindingObserver {
   bool _isFetching = false;
   bool _isRunning = false;
   bool _isInitialized = false;
+  int _syncGeneration = 0;
   DateTime? _lastSyncTime;
 
   DateTime? get lastSyncTime => _lastSyncTime;
@@ -66,6 +67,11 @@ class LiveSyncEngine with WidgetsBindingObserver {
     _isRunning = false;
     _heartbeatTimer?.cancel();
     _heartbeatTimer = null;
+    // A backgrounded browser tab can freeze a request mid-flight for minutes, leaving the
+    // mutex held so the "instant sync" on resume silently no-ops. Retire this generation:
+    // the orphaned tick is dropped when it lands, and the next tick starts unblocked.
+    _syncGeneration++;
+    _isFetching = false;
     debugPrint('⏸️ [LiveSyncEngine] Paused (saving battery & Render bandwidth).');
   }
 
@@ -83,6 +89,7 @@ class LiveSyncEngine with WidgetsBindingObserver {
     // 🛡️ Mutex lock: Prevent overlapping requests if Render takes >25s
     if (_isFetching || !_isRunning) return;
     _isFetching = true;
+    final generation = _syncGeneration;
 
     try {
       // Ensure in-memory cache is warmed up from disk if cold
@@ -91,6 +98,9 @@ class LiveSyncEngine with WidgetsBindingObserver {
       }
 
       final freshMatches = await ApiService.instance.fetchLiveUpdates(forceSync: forceSync);
+      // Superseded by a pause/resume while this request was in flight: its result is late,
+      // and the newer tick owns the mutex now.
+      if (generation != _syncGeneration) return;
       if (freshMatches != null && freshMatches.isNotEmpty) {
         _lastSyncTime = DateTime.now();
         debugPrint('⚡ [LiveSyncEngine] Received ${freshMatches.length} updated matches at $_lastSyncTime');
@@ -112,9 +122,10 @@ class LiveSyncEngine with WidgetsBindingObserver {
         }
       }
     } catch (e) {
-      debugPrint('⚠️ [LiveSyncEngine] Tick error: $e');
+      if (generation == _syncGeneration) debugPrint('⚠️ [LiveSyncEngine] Tick error: $e');
     } finally {
-      _isFetching = false;
+      // Never release a mutex the current generation is holding on our behalf.
+      if (generation == _syncGeneration) _isFetching = false;
     }
   }
 
