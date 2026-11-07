@@ -26,8 +26,6 @@ class AppSettingsService extends ChangeNotifier {
   bool _hideFinishedMatches = false;
   int _minConfidenceFilter = 50; // 50, 60, 70, 80
   bool _showExpectedValue = true;
-  bool _showTacticalLineups = true;
-  bool _use2dPitch = true; // true = 2D, false = 3D ("if 2d tactiaclboard is unchecked make it 3d then")
   String _defaultHomeTab = 'Today';
 
   // Getters
@@ -97,9 +95,6 @@ class AppSettingsService extends ChangeNotifier {
   bool get hideFinishedMatches => _hideFinishedMatches;
   int get minConfidenceFilter => _minConfidenceFilter;
   bool get showExpectedValue => _showExpectedValue;
-  bool get showTacticalLineups => _showTacticalLineups;
-  bool get use2dPitch => _use2dPitch;
-  bool get is3dPitch => !_use2dPitch;
   String get defaultHomeTab => _defaultHomeTab;
 
   Color get accentColor {
@@ -146,8 +141,6 @@ class AppSettingsService extends ChangeNotifier {
     _hideFinishedMatches = prefs.getBool('app_hide_finished_matches') ?? false;
     _minConfidenceFilter = prefs.getInt('app_min_confidence_filter') ?? 50;
     _showExpectedValue = prefs.getBool('app_show_expected_value') ?? true;
-    _showTacticalLineups = prefs.getBool('app_show_tactical_lineups') ?? true;
-    _use2dPitch = prefs.getBool('app_use_2d_pitch') ?? true;
     _defaultHomeTab = prefs.getString('app_default_home_tab') ?? 'Today';
 
     notifyListeners();
@@ -263,20 +256,6 @@ class AppSettingsService extends ChangeNotifier {
     await prefs.setBool('app_show_expected_value', value);
   }
 
-  Future<void> setShowTacticalLineups(bool value) async {
-    _showTacticalLineups = value;
-    notifyListeners();
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('app_show_tactical_lineups', value);
-  }
-
-  Future<void> setUse2dPitch(bool value) async {
-    _use2dPitch = value;
-    notifyListeners();
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('app_use_2d_pitch', value);
-  }
-
   Future<void> setDefaultHomeTab(String value) async {
     _defaultHomeTab = value;
     notifyListeners();
@@ -308,8 +287,6 @@ class AppSettingsService extends ChangeNotifier {
     await prefs.remove('app_hide_finished_matches');
     await prefs.remove('app_min_confidence_filter');
     await prefs.remove('app_show_expected_value');
-    await prefs.remove('app_show_tactical_lineups');
-    await prefs.remove('app_use_2d_pitch');
     await prefs.remove('app_default_home_tab');
     await loadSettings();
   }

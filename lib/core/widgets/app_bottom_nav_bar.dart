@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../../features/matches/presentation/pages/home_screen.dart';
-import '../../features/leagues/presentation/pages/leagues_hub_screen.dart';
+import '../../features/insights/presentation/pages/insights_screen.dart';
 import '../../features/tracker/presentation/pages/tracker_screen.dart';
 import '../../features/settings/presentation/pages/settings_screen.dart';
 
@@ -23,7 +23,7 @@ class MainNavigationShellState extends State<MainNavigationShell> {
   // Keep all 4 tabs alive in memory so switching is 0ms with zero rebuilds
   final List<Widget> _pages = const [
     HomeScreen(),
-    LeaguesHubScreen(),
+    InsightsScreen(),
     TrackerScreen(),
     SettingsScreen(),
   ];
@@ -105,7 +105,7 @@ class AppBottomNavBar extends StatelessWidget {
             child: Row(
               children: [
                 _buildNavItem(context, 0, Icons.sports_soccer_rounded, 'Matches', primary, textSecondary),
-                _buildNavItem(context, 1, Icons.emoji_events_rounded, 'Leagues', primary, textSecondary),
+                _buildNavItem(context, 1, Icons.auto_awesome_rounded, 'AI Insights', primary, textSecondary),
                 _buildNavItem(context, 2, Icons.insights_rounded, 'Tracker', primary, textSecondary),
                 _buildNavItem(context, 3, Icons.tune_rounded, 'Settings', primary, textSecondary),
               ],

@@ -3,7 +3,7 @@ import '../../models/match_model.dart';
 import 'api_service.dart';
 import 'live_sync_engine.dart';
 
-/// Central reactive provider for leagues hub, standings, and live match counters.
+/// Reactive provider for the live match counters shown on the home screen's league groups.
 ///
 /// Features:
 /// 1. Fast O(1) lookup of live match counts per league.

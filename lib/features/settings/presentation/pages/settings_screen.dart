@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../../core/services/api_service.dart';
 import '../../../../core/services/app_settings_service.dart';
 import '../../../../core/services/analytics_service.dart';
+import '../../../../core/widgets/breathing_gradient.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../../models/match_model.dart' as model;
-import '../../../matches/presentation/widgets/dynamic_live_island.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -36,41 +34,30 @@ class _SettingsScreenState extends State<SettingsScreen> with AutomaticKeepAlive
         final textPrimary = AppTheme.textPrimaryOf(context);
         final textSecondary = AppTheme.textSecondaryOf(context);
 
-        return ValueListenableBuilder<List<model.Match>>(
-          valueListenable: ApiService.liveMatchesNotifier,
-          builder: (context, liveMatches, _) {
-            final hasLive = liveMatches.isNotEmpty;
-            return Scaffold(
+        return Scaffold(
               backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               appBar: PreferredSize(
-                preferredSize: Size.fromHeight(hasLive ? 104 : 64),
+                preferredSize: const Size.fromHeight(64),
                 child: Container(
                   color: AppTheme.surfaceOf(context),
-                  child: SafeArea(
-                    bottom: false,
-                    child: Column(
+                  child: Stack(
+                    children: [
+                      SafeArea(
+                        bottom: false,
+                        child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // Centered Dynamic Live Island (Matching FotMob / iOS Island)
-                        if (hasLive)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 4, bottom: 4),
-                            child: Center(
-                              child: DynamicLiveIsland(liveMatches: liveMatches),
-                            ),
-                          ),
                         // Header Title: SETTINGS & ENGINE
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
                           child: Row(
-                            children: const [
-                              Text(
+                            children: [
+                              BreathingText(
                                 'SETTINGS & ENGINE',
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontWeight: FontWeight.w900,
                                   fontSize: 18,
                                   letterSpacing: -0.3,
-                                  color: Colors.white,
                                 ),
                               ),
                             ],
@@ -79,8 +66,16 @@ class _SettingsScreenState extends State<SettingsScreen> with AutomaticKeepAlive
                       ],
                     ),
                   ),
-                ),
+                  const Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: BreathingUnderline(),
+                  ),
+                ],
               ),
+            ),
+          ),
           body: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             children: [
@@ -288,8 +283,6 @@ class _SettingsScreenState extends State<SettingsScreen> with AutomaticKeepAlive
               const SizedBox(height: 32),
             ],
           ),
-        );
-          },
         );
       },
     );
@@ -895,27 +888,29 @@ class _SettingsScreenState extends State<SettingsScreen> with AutomaticKeepAlive
   // --- PRO BANNER ---
 
   Widget _buildProBanner(Color primary) {
+    final isDark = AppTheme.isDark(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF09140F),
+        // Dark mode keeps the dark premium slab; light mode gets a clean
+        // mint tint so the banner doesn't read as a black block on white.
+        color: isDark ? const Color(0xFF09140F) : const Color(0xFFE9F7EF),
         borderRadius: BorderRadius.circular(36),
         border: Border.all(
-          color: const Color(0xFF00D06C).withValues(alpha: 0.35),
+          color: const Color(0xFF00D06C).withValues(alpha: isDark ? 0.35 : 0.3),
           width: 1.2,
         ),
       ),
       child: Row(
         children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: const Color(0xFF0B2E1D),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: const Center(
-              child: _CrownIcon(size: 22, color: Color(0xFF00D06C)),
+          BreathingTile(
+            size: 44,
+            radius: 16,
+            child: Center(
+              child: _CrownIcon(
+                size: 22,
+                color: Colors.white,
+              ),
             ),
           ),
           const SizedBox(width: 14),
@@ -923,21 +918,23 @@ class _SettingsScreenState extends State<SettingsScreen> with AutomaticKeepAlive
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
-              children: const [
+              children: [
                 Text(
                   'AI Scorecast PRO',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: isDark ? Colors.white : AppTheme.textPrimaryOf(context),
                     fontSize: 16.5,
                     fontWeight: FontWeight.w900,
                     letterSpacing: -0.2,
                   ),
                 ),
-                SizedBox(height: 3),
+                const SizedBox(height: 3),
                 Text(
                   'Tier 1 Neural Predictions Active',
                   style: TextStyle(
-                    color: Color(0xFF94A3B8),
+                    color: isDark
+                        ? const Color(0xFF94A3B8)
+                        : const Color(0xFF52796F),
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),

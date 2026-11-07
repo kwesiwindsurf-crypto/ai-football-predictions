@@ -5,10 +5,8 @@ import 'package:provider/provider.dart';
 import '../../../../core/services/api_service.dart';
 import '../../../../core/services/betting_tracker_service.dart';
 import '../../../../core/services/analytics_service.dart';
-import '../../../../core/services/matches_provider.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../../models/match_model.dart' as model;
-import '../../../matches/presentation/widgets/dynamic_live_island.dart';
+import '../../../../core/widgets/breathing_gradient.dart';
 
 class TrackerScreen extends StatefulWidget {
   const TrackerScreen({super.key});
@@ -62,28 +60,16 @@ class _TrackerScreenState extends State<TrackerScreen> with AutomaticKeepAliveCl
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(104),
+        preferredSize: const Size.fromHeight(84),
         child: Container(
           color: AppTheme.surfaceOf(context),
-          child: SafeArea(
-            bottom: false,
-            child: Column(
+          child: Stack(
+            children: [
+              SafeArea(
+                bottom: false,
+                child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Centered Dynamic Live Island (Matching FotMob / iOS Island)
-                Selector<MatchesProvider, List<model.Match>>(
-                  selector: (_, p) => p.liveMatches,
-                  shouldRebuild: (prev, next) => prev.length != next.length,
-                  builder: (context, liveMatches, _) {
-                    if (liveMatches.isEmpty) return const SizedBox.shrink();
-                    return Padding(
-                      padding: const EdgeInsets.only(top: 4, bottom: 4),
-                      child: Center(
-                        child: DynamicLiveIsland(liveMatches: liveMatches),
-                      ),
-                    );
-                  },
-                ),
                         // Title Row: BETTING & AI TRACKER + Subtitle on left, Circular refresh button on right
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
@@ -93,21 +79,20 @@ class _TrackerScreenState extends State<TrackerScreen> with AutomaticKeepAliveCl
                         children: [
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: const [
-                              Text(
+                            children: [
+                              BreathingText(
                                 'BETTING & AI TRACKER',
-                                style: TextStyle(
-                                  color: Colors.white,
+                                style: const TextStyle(
                                   fontWeight: FontWeight.w900,
                                   fontSize: 18,
                                   letterSpacing: -0.3,
                                 ),
                               ),
-                              SizedBox(height: 2),
+                              const SizedBox(height: 2),
                               Text(
                                 'Continuous 1-unit flat simulation',
                                 style: TextStyle(
-                                  color: Color(0xFF8B949E),
+                                  color: AppTheme.textSecondaryOf(context),
                                   fontSize: 12.5,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -119,14 +104,14 @@ class _TrackerScreenState extends State<TrackerScreen> with AutomaticKeepAliveCl
                             child: Container(
                               width: 36,
                               height: 36,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: const Color(0xFF161B22),
-                                border: Border.all(
-                                  color: const Color(0xFF272F3D),
-                                  width: 1,
-                                ),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: AppTheme.surfaceOf(context),
+                              border: Border.all(
+                                color: AppTheme.cardBorderOf(context),
+                                width: 1,
                               ),
+                            ),
                               child: _isRefreshing
                                   ? const Padding(
                                       padding: EdgeInsets.all(9),
@@ -135,10 +120,10 @@ class _TrackerScreenState extends State<TrackerScreen> with AutomaticKeepAliveCl
                                         color: AppTheme.primary,
                                       ),
                                     )
-                                  : const Icon(
+                                  : Icon(
                                       Icons.refresh_rounded,
                                       size: 18,
-                                      color: Colors.white70,
+                                      color: AppTheme.textSecondaryOf(context),
                                     ),
                             ),
                           ),
@@ -148,7 +133,15 @@ class _TrackerScreenState extends State<TrackerScreen> with AutomaticKeepAliveCl
                   ],
                 ),
               ),
-            ),
+              const Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: BreathingUnderline(),
+              ),
+            ],
+          ),
+          ),
           ),
           body: RefreshIndicator(
             color: primary,
@@ -442,28 +435,40 @@ class _TrackerScreenState extends State<TrackerScreen> with AutomaticKeepAliveCl
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: isDark
-              ? [
+        // Dark keeps its tinted gradient; light mode gets a clean white card
+        // with a neutral border — colour lives only in the label and chips.
+        gradient: isDark
+            ? LinearGradient(
+                colors: [
                   surface,
                   primary.withValues(alpha: 0.12),
-                ]
-              : [
-                  Colors.white,
-                  primary.withValues(alpha: 0.08),
                 ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              )
+            : null,
+        color: isDark ? null : Colors.white,
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: primary.withValues(alpha: 0.35)),
-        boxShadow: [
-          BoxShadow(
-            color: primary.withValues(alpha: 0.08),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        border: Border.all(
+          color: isDark
+              ? primary.withValues(alpha: 0.35)
+              : borderColor,
+        ),
+        boxShadow: isDark
+            ? [
+                BoxShadow(
+                  color: primary.withValues(alpha: 0.08),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : const [
+                BoxShadow(
+                  color: Color(0x0A101828),
+                  blurRadius: 3,
+                  offset: Offset(0, 1),
+                ),
+              ],
       ),
       child: Column(
         children: [

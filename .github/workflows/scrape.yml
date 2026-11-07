@@ -2,9 +2,11 @@ name: Scrape Football Matches
 
 on:
   schedule:
-    # Run once daily at 05:00 UTC (early morning before fixtures begin)
-    # Uses only 1 KV write/day and saves ~98% of monthly GitHub Actions runner minutes
-    - cron: '0 5 * * *'
+    # Run once daily at 23:59 UTC, just before midnight, so the scrape picks
+    # up the freshest DraftKings/ESPN prices for the next day's fixtures.
+    # Predictions are locked once a match kicks off (odds are erased then),
+    # so anything still to play is refreshed with the latest odds.
+    - cron: '59 23 * * *'
   push:
     branches:
       - main

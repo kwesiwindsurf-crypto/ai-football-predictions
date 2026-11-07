@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../models/match_model.dart' as model;
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/breathing_gradient.dart';
 import '../../../../core/widgets/shimmer_loading.dart';
 import '../../../match_details/presentation/pages/match_details_screen.dart';
 import '../../../../core/services/api_service.dart';
@@ -496,42 +497,44 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                       },
                     ),
 
-                    // Header Row with Brand & Actions (Image 2)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                      child: Row(
+                    // Header Row with Brand & Actions — clean white band,
+                    // only the accents breathe (tile + 3px underline).
+                    Container(
+                      color: AppTheme.isDark(context)
+                          ? null
+                          : AppTheme.surfaceOf(context),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Container(
-                            width: 32,
-                            height: 32,
-                            decoration: BoxDecoration(
-                              color: primary,
-                              borderRadius: BorderRadius.circular(10),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: primary.withValues(alpha: 0.3),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
+                          Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16.0, vertical: 8.0),
+                          child: Row(
+                        children: [
+                          BreathingTile(
+                            size: 32,
+                            radius: 10,
+                            child: Center(
+                              child: CrownIcon(size: 17, color: Colors.white),
                             ),
-                            child: const Icon(Icons.sports_soccer, color: Colors.black, size: 20),
                           ),
                           const SizedBox(width: 8),
-                          const Text(
+                          Text(
                             'AI SCORECAST',
                             style: TextStyle(
                               fontWeight: FontWeight.w900,
                               letterSpacing: -0.5,
                               fontSize: 16,
-                              color: Colors.white,
+                              color: AppTheme.textPrimaryOf(context),
                             ),
                           ),
                           const SizedBox(width: 6),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF1F242C),
+                              color: AppTheme.isDark(context)
+                                  ? const Color(0xFF1F242C)
+                                  : const Color(0xFFE8EEF4),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
@@ -554,7 +557,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                               height: 36,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: const Color(0xFF161B22),
+                                color: AppTheme.surfaceOf(context),
                                 border: Border.all(
                                   color: const Color(0xFF00D06C).withValues(alpha: 0.35),
                                   width: 1.2,
@@ -570,16 +573,16 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                             onTap: () {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  backgroundColor: const Color(0xFF161B22),
+                                  backgroundColor: AppTheme.surfaceOf(context),
                                   behavior: SnackBarBehavior.floating,
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                                   content: Row(
                                     children: [
                                       Icon(Icons.notifications_active_rounded, color: primary, size: 20),
                                       const SizedBox(width: 10),
-                                      const Text(
+                                      Text(
                                         'Live Goal & High AI Edge Alerts Active',
-                                        style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
+                                        style: TextStyle(color: AppTheme.textPrimaryOf(context), fontSize: 13, fontWeight: FontWeight.w600),
                                       ),
                                     ],
                                   ),
@@ -592,13 +595,13 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                               height: 36,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: const Color(0xFF161B22),
+                                color: AppTheme.surfaceOf(context),
                                 border: Border.all(color: borderColor),
                               ),
                               child: Stack(
                                 alignment: Alignment.center,
                                 children: [
-                                  const Icon(Icons.notifications_none_rounded, size: 18, color: Colors.white70),
+                                  Icon(Icons.notifications_none_rounded, size: 18, color: AppTheme.textSecondaryOf(context)),
                                   Positioned(
                                     top: 8,
                                     right: 8,
@@ -618,6 +621,10 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                         ],
                       ),
                     ),
+                    const BreathingUnderline(),
+                  ],
+                ),
+              ),
                   ],
                 ),
               ),
@@ -714,10 +721,10 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                   children: [
                     const Icon(Icons.cloud_off_rounded, color: Colors.redAccent, size: 48),
                     const SizedBox(height: 12),
-                    const Text(
+                    Text(
                       'Unable to load latest matches.\nPlease check your connection and tap retry.',
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white70, fontSize: 14),
+                      style: TextStyle(color: AppTheme.textSecondaryOf(context), fontSize: 14),
                     ),
                     const SizedBox(height: 16),
                     ElevatedButton.icon(
@@ -752,7 +759,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                 children: [
                   Icon(Icons.sports_soccer_rounded, size: 48, color: AppTheme.textSecondaryOf(context)),
                   const SizedBox(height: 12),
-                  const Text('No matches available at this time.', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                  Text('No matches available at this time.', style: TextStyle(color: AppTheme.textPrimaryOf(context), fontSize: 16, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 6),
                   Text('Pull down to refresh and sync with live worker data.', style: TextStyle(color: AppTheme.textSecondaryOf(context), fontSize: 13)),
                 ],
@@ -791,9 +798,9 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                         child: const Icon(Icons.sensors_off_rounded, size: 40, color: Colors.redAccent),
                       ),
                       const SizedBox(height: 16),
-                      const Text(
+                      Text(
                         'No Live Matches Right Now',
-                        style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                        style: TextStyle(color: AppTheme.textPrimaryOf(context), fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 6),
                       Text(
@@ -873,11 +880,11 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
     }
 
     if (filteredMatches.isEmpty) {
-      return const [
+      return [
         SliverToBoxAdapter(
           child: SizedBox(
             height: 400,
-            child: Center(child: Text('No matches on this date.', style: TextStyle(color: Colors.white70))),
+            child: Center(child: Text('No matches on this date.', style: TextStyle(color: AppTheme.textSecondaryOf(context)))),
           ),
         ),
       ];
@@ -956,7 +963,9 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.25),
+                      color: Colors.black.withValues(
+                        alpha: AppTheme.isDark(context) ? 0.25 : 0.06,
+                      ),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -976,7 +985,9 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF10141D),
+                          color: AppTheme.isDark(context)
+                              ? const Color(0xFF10141D)
+                              : const Color(0xFFEFF3F8),
                           border: Border(
                             bottom: BorderSide(
                               color: isExpanded ? AppTheme.cardBorderOf(context) : Colors.transparent,
@@ -994,10 +1005,10 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                                   Flexible(
                                     child: Text(
                                       league,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontSize: 13,
                                         fontWeight: FontWeight.w800,
-                                        color: Colors.white,
+                                        color: AppTheme.textPrimaryOf(context),
                                       ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
@@ -1048,7 +1059,9 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                                 vertical: 5,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.05),
+                                color: AppTheme.isDark(context)
+                                    ? Colors.white.withValues(alpha: 0.05)
+                                    : Colors.black.withValues(alpha: 0.04),
                                 borderRadius: BorderRadius.circular(AppTheme.radiusPill),
                                 border: Border.all(
                                   color: AppTheme.cardBorderOf(context).withValues(alpha: 0.7),
@@ -1063,7 +1076,9 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                                       height: 18,
                                       alignment: Alignment.center,
                                       decoration: BoxDecoration(
-                                        color: Colors.white.withValues(alpha: 0.08),
+                                        color: AppTheme.isDark(context)
+                                            ? Colors.white.withValues(alpha: 0.08)
+                                            : Colors.black.withValues(alpha: 0.06),
                                         shape: BoxShape.circle,
                                       ),
                                       child: Text(
@@ -1368,9 +1383,6 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
     final isLive = match.status == model.MatchStatus.live;
     final isPostponed = match.isPostponed;
     final isFinished = match.status == model.MatchStatus.finished && !isPostponed;
-    final bestConf = match.prediction.homeWinProbability >= match.prediction.awayWinProbability
-        ? match.prediction.homeWinProbability.round()
-        : match.prediction.awayWinProbability.round();
 
     return InkWell(
       onTap: () {
@@ -1413,7 +1425,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                                 fontWeight: FontWeight.bold,
                                 fontSize: 13,
                                 color: (isLive || isFinished) && (match.homeScore ?? 0) > (match.awayScore ?? 0)
-                                    ? Colors.white
+                                    ? AppTheme.textPrimaryOf(context)
                                     : AppTheme.textPrimaryOf(context),
                               ),
                               maxLines: 1,
@@ -1447,7 +1459,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                                 fontWeight: FontWeight.bold,
                                 fontSize: 13,
                                 color: (isLive || isFinished) && (match.awayScore ?? 0) > (match.homeScore ?? 0)
-                                    ? Colors.white
+                                    ? AppTheme.textPrimaryOf(context)
                                     : AppTheme.textPrimaryOf(context),
                               ),
                               maxLines: 1,
@@ -1542,33 +1554,36 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                           ),
                         ),
                       ] else if (isFinished) ...[
-                        const Text(
+                        Text(
                           'FT',
                           style: TextStyle(
-                            color: AppTheme.textSecondary,
+                            color: AppTheme.textSecondaryOf(context),
                             fontWeight: FontWeight.w900,
                             fontSize: 12,
                           ),
                         ),
                         const SizedBox(height: 2),
-                        const Text(
+                        Text(
                           'Ended',
-                          style: TextStyle(color: Colors.white30, fontSize: 9),
+                          style: TextStyle(
+                            color: AppTheme.textSecondaryOf(context).withValues(alpha: 0.5),
+                            fontSize: 9,
+                          ),
                         ),
                       ] else ...[
                         Text(
                           DateFormat('HH:mm').format(match.date.toLocal()),
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: TextStyle(
+                            color: AppTheme.textPrimaryOf(context),
                             fontFamily: 'monospace',
                             fontWeight: FontWeight.bold,
                             fontSize: 12,
                           ),
                         ),
                         const SizedBox(height: 2),
-                        const Text(
+                        Text(
                           'Pre-match',
-                          style: TextStyle(color: AppTheme.textSecondary, fontSize: 9),
+                          style: TextStyle(color: AppTheme.textSecondaryOf(context), fontSize: 9),
                         ),
                       ],
                     ],
@@ -1577,7 +1592,8 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
               ],
             ),
 
-            // Bottom AI pick strip
+            // Bottom strip (postponed notice only — AI picks live in
+            // match details → AI Insights & Odds)
             if (isPostponed)
               Container(
                 margin: const EdgeInsets.only(top: 10),
@@ -1610,72 +1626,6 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                       Icons.chevron_right_rounded,
                       size: 14,
                       color: Color(0xFFF59E0B),
-                    ),
-                  ],
-                ),
-              )
-            else
-              Container(
-                margin: const EdgeInsets.only(top: 10),
-                padding: const EdgeInsets.only(top: 8),
-                decoration: BoxDecoration(
-                  border: Border(
-                    top: BorderSide(
-                      color: AppTheme.cardBorderOf(context).withValues(alpha: 0.55),
-                      width: 1,
-                    ),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.auto_awesome_rounded,
-                      size: 12,
-                      color: AppTheme.primaryOf(context),
-                    ),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        match.prediction.recommendation,
-                        style: TextStyle(
-                          color: AppTheme.textPrimaryOf(context),
-                          fontWeight: FontWeight.w600,
-                          fontSize: 11.5,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    // Confidence ring
-                    SizedBox(
-                      width: 28,
-                      height: 28,
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          SizedBox(
-                            width: 28,
-                            height: 28,
-                            child: CircularProgressIndicator(
-                              value: (bestConf / 100).clamp(0.0, 1.0).toDouble(),
-                              strokeWidth: 2.6,
-                              strokeCap: StrokeCap.round,
-                              backgroundColor: AppTheme.cardBorderOf(context).withValues(alpha: 0.55),
-                              valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryOf(context)),
-                            ),
-                          ),
-                          Text(
-                            '$bestConf',
-                            style: TextStyle(
-                              color: AppTheme.primaryOf(context),
-                              fontFamily: 'monospace',
-                              fontWeight: FontWeight.w800,
-                              fontSize: 8.5,
-                            ),
-                          ),
-                        ],
-                      ),
                     ),
                   ],
                 ),
@@ -1810,15 +1760,17 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
       height: 28,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.08),
+        color: AppTheme.isDark(context)
+            ? Colors.white.withValues(alpha: 0.08)
+            : Colors.black.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
         code,
-        style: const TextStyle(
+        style: TextStyle(
           fontWeight: FontWeight.w900,
           fontSize: 12,
-          color: Colors.white,
+          color: AppTheme.textPrimaryOf(context),
           fontFamily: 'monospace',
         ),
       ),
@@ -1899,9 +1851,9 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
             constraints: BoxConstraints(
               maxHeight: MediaQuery.of(context).size.height * 0.88,
             ),
-            decoration: const BoxDecoration(
-              color: Color(0xFF0E1219),
-              borderRadius: BorderRadius.only(
+            decoration: BoxDecoration(
+              color: AppTheme.isDark(context) ? const Color(0xFF0E1219) : Colors.white,
+              borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(24),
                 topRight: Radius.circular(24),
               ),
@@ -1919,7 +1871,9 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                     width: 44,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF384355),
+                      color: AppTheme.isDark(context)
+                          ? const Color(0xFF384355)
+                          : Colors.black.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -1939,12 +1893,12 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
+                                Text(
                                   'Choose Leagues to Display',
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.w900,
-                                    color: Colors.white,
+                                    color: AppTheme.textPrimaryOf(context),
                                     letterSpacing: -0.3,
                                   ),
                                 ),
@@ -1967,10 +1921,10 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                             height: 34,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: const Color(0xFF1E2430),
-                              border: Border.all(color: const Color(0xFF2E384A), width: 1),
+                              color: AppTheme.surfaceOf(context),
+                              border: Border.all(color: AppTheme.cardBorderOf(context), width: 1),
                             ),
-                            child: const Icon(Icons.close_rounded, size: 18, color: Colors.white70),
+                            child: Icon(Icons.close_rounded, size: 18, color: AppTheme.textSecondaryOf(context)),
                           ),
                         ),
                       ],
@@ -1989,13 +1943,13 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                             height: 40,
                             padding: const EdgeInsets.symmetric(horizontal: 12),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF161C24),
+                              color: AppTheme.surfaceOf(context),
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: const Color(0xFF263040), width: 1),
+                              border: Border.all(color: AppTheme.cardBorderOf(context), width: 1),
                             ),
                             child: Row(
                               children: [
-                                const Icon(Icons.search_rounded, size: 18, color: Color(0xFF64748B)),
+                                Icon(Icons.search_rounded, size: 18, color: AppTheme.textSecondaryOf(context)),
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: TextField(
@@ -2005,10 +1959,10 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                                         searchQuery = val.trim();
                                       });
                                     },
-                                    style: const TextStyle(color: Colors.white, fontSize: 13),
-                                    decoration: const InputDecoration(
+                                    style: TextStyle(color: AppTheme.textPrimaryOf(context), fontSize: 13),
+                                    decoration: InputDecoration(
                                       hintText: 'Search leagues or nations...',
-                                      hintStyle: TextStyle(color: Color(0xFF64748B), fontSize: 13),
+                                      hintStyle: TextStyle(color: AppTheme.textSecondaryOf(context), fontSize: 13),
                                       border: InputBorder.none,
                                       isDense: true,
                                       contentPadding: EdgeInsets.zero,
@@ -2023,7 +1977,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                                         searchQuery = '';
                                       });
                                     },
-                                    child: const Icon(Icons.cancel_rounded, size: 16, color: Colors.white54),
+                                    child: Icon(Icons.cancel_rounded, size: 16, color: AppTheme.textSecondaryOf(context)),
                                   ),
                               ],
                             ),
@@ -2041,14 +1995,14 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                             padding: const EdgeInsets.symmetric(horizontal: 14),
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
-                              color: const Color(0xFF1F2633),
+                              color: AppTheme.surfaceOf(context),
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: const Color(0xFF2E384A), width: 1),
+                              border: Border.all(color: AppTheme.cardBorderOf(context), width: 1),
                             ),
-                            child: const Text(
+                            child: Text(
                               'Select All',
                               style: TextStyle(
-                                color: Colors.white,
+                                color: AppTheme.textPrimaryOf(context),
                                 fontSize: 12.5,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -2067,14 +2021,14 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                             padding: const EdgeInsets.symmetric(horizontal: 14),
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
-                              color: const Color(0xFF1F2633),
+                              color: AppTheme.surfaceOf(context),
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: const Color(0xFF2E384A), width: 1),
+                              border: Border.all(color: AppTheme.cardBorderOf(context), width: 1),
                             ),
-                            child: const Text(
+                            child: Text(
                               'Clear',
                               style: TextStyle(
-                                color: Colors.white,
+                                color: AppTheme.textPrimaryOf(context),
                                 fontSize: 12.5,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -2238,7 +2192,8 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.drag_indicator_rounded, color: Colors.white38, size: 20),
+                  Icon(Icons.drag_indicator_rounded,
+                      color: AppTheme.textSecondaryOf(context).withValues(alpha: 0.5), size: 20),
                   const SizedBox(width: 8),
                   _buildLeagueBadgeWidget(league),
                 ],
@@ -2264,10 +2219,10 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                 children: [
                   Text(
                     league,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14.5,
-                      color: Colors.white,
+                      color: AppTheme.textPrimaryOf(context),
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -2299,7 +2254,9 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                 color: isSelected ? const Color(0xFF00D06C) : Colors.transparent,
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: isSelected ? const Color(0xFF00D06C) : const Color(0xFF334155),
+                  color: isSelected
+                      ? const Color(0xFF00D06C)
+                      : AppTheme.cardBorderOf(context),
                   width: 1.5,
                 ),
               ),
@@ -2316,12 +2273,12 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
       key: ValueKey(league),
       margin: const EdgeInsets.only(bottom: 9),
       decoration: BoxDecoration(
-        color: const Color(0xFF10141D),
+        color: AppTheme.surfaceOf(context),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isSelected
               ? const Color(0xFF00D06C).withValues(alpha: 0.45)
-              : const Color(0xFF222B3A),
+              : AppTheme.cardBorderOf(context),
           width: 1.2,
         ),
       ),

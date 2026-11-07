@@ -24,12 +24,12 @@ class AppTheme {
   static double get radiusSm => AppSettingsService.instance.radiusSm;
   static const double radiusPill = 999.0;
 
-  // Light mode colors
-  static const Color lightBackground = Color(0xFFF6F8FA);
-  static const Color lightSurface = Colors.white;
-  static const Color lightCardBorder = Color(0xFFD0D7DE);
-  static const Color lightTextPrimary = Color(0xFF1F2328);
-  static const Color lightTextSecondary = Color(0xFF656D76);
+  // Light mode colours — the "10 proposed colours" palette
+  static const Color lightBackground = Color(0xFFF7F8FC);  // 1 · Canvas
+  static const Color lightSurface = Colors.white;          // 2 · Card
+  static const Color lightCardBorder = Color(0xFFE7EAF2);  // border token
+  static const Color lightTextPrimary = Color(0xFF101828); // 3 · Ink
+  static const Color lightTextSecondary = Color(0xFF64708A); // 4 · Ink-2
 
   // Dynamic context helpers
   static bool isDark(BuildContext context) =>

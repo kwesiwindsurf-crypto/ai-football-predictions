@@ -499,6 +499,11 @@ class BettingTrackerService extends ChangeNotifier {
     );
   }
 
+  /// Public verdict for a match's AI pick: 'won' | 'lost' | 'void' |
+  /// 'live' | 'pending'. Lets feed surfaces show a result badge without
+  /// duplicating the settlement rules.
+  String pickVerdict(Match match) => _evaluateMatchBet(match).status;
+
   TrackerStats getStats({String timeframe = 'all', String statusFilter = 'all'}) {
     // 🎯 Fast O(1) path for standard views: return pre-calculated cache without looping
     if (statusFilter == 'all') {

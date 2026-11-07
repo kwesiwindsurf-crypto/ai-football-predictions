@@ -18,3 +18,8 @@
 /bot/service_account.json
 /bot/.dev.vars
 /android/app/google-services.json
+
+# Keystores & sensitive build keys
+*.jks
+*.keystore
+/android/key.properties

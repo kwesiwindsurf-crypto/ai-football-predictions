@@ -29,10 +29,6 @@ class Match {
   // Scraped data
   final int? oddsRating;
   final String? matchUrl;
-  final List<String>? homeLineup;
-  final List<String>? awayLineup;
-  final TeamLineupData? homeLineupData;
-  final TeamLineupData? awayLineupData;
   final List<String>? homeScorers;
   final List<String>? awayScorers;
   final List<MatchEvent>? events;
@@ -68,10 +64,6 @@ class Match {
     this.awayOdds,
     this.oddsRating,
     this.matchUrl,
-    this.homeLineup,
-    this.awayLineup,
-    this.homeLineupData,
-    this.awayLineupData,
     this.homeScorers,
     this.awayScorers,
     this.events,
@@ -134,10 +126,6 @@ class Match {
       awayOdds: awayOdds,
       oddsRating: oddsRating,
       matchUrl: matchUrl,
-      homeLineup: homeLineup,
-      awayLineup: awayLineup,
-      homeLineupData: homeLineupData,
-      awayLineupData: awayLineupData,
       homeScorers: homeScorers,
       awayScorers: awayScorers,
       events: events,
@@ -157,7 +145,7 @@ class Match {
     return '$h-$a';
   }
 
-  /// Merges live telemetry deltas (scores, clock, status, events, scorers, stats, lineups)
+  /// Merges live telemetry deltas (scores, clock, status, events, scorers, stats)
   /// from the lightweight Render /live endpoint while preserving the static AI prediction,
   /// H2H, and odds loaded from Cloudflare KV.
   Match mergeLiveDelta(Match delta) {
@@ -190,10 +178,6 @@ class Match {
       awayOdds: awayOdds,
       oddsRating: oddsRating,
       matchUrl: matchUrl ?? delta.matchUrl,
-      homeLineup: delta.homeLineup ?? homeLineup,
-      awayLineup: delta.awayLineup ?? awayLineup,
-      homeLineupData: delta.homeLineupData ?? homeLineupData,
-      awayLineupData: delta.awayLineupData ?? awayLineupData,
       homeScorers: delta.homeScorers ?? homeScorers,
       awayScorers: delta.awayScorers ?? awayScorers,
       events: delta.events ?? events,
@@ -260,15 +244,6 @@ class Match {
       );
     }
 
-    TeamLineupData? hLineupData;
-    TeamLineupData? aLineupData;
-    if (json['homeLineup'] is Map && json['homeLineup']['startingXI'] != null) {
-      try { hLineupData = TeamLineupData.fromJson(Map<String, dynamic>.from(json['homeLineup'])); } catch (_) {}
-    }
-    if (json['awayLineup'] is Map && json['awayLineup']['startingXI'] != null) {
-      try { aLineupData = TeamLineupData.fromJson(Map<String, dynamic>.from(json['awayLineup'])); } catch (_) {}
-    }
-
     final rawStatus = json['status']?.toString();
     final rawShort = (json['statusShort']?.toString() ?? '').toLowerCase();
     MatchStatus parsedStatus;
@@ -318,10 +293,6 @@ class Match {
       awayOdds: aOdds,
       oddsRating: rating,
       matchUrl: json['matchUrl'],
-      homeLineup: _parseLineupList(json['homeLineup']),
-      awayLineup: _parseLineupList(json['awayLineup']),
-      homeLineupData: hLineupData,
-      awayLineupData: aLineupData,
       homeScorers: json['homeScorers'] is List ? List<String>.from(json['homeScorers']) : null,
       awayScorers: json['awayScorers'] is List ? List<String>.from(json['awayScorers']) : null,
       events: json['events'] is List
@@ -336,100 +307,6 @@ class Match {
       seriesSummary: json['seriesSummary']?.toString(),
     );
   }
-
-  static List<String>? _parseLineupList(dynamic raw) {
-    if (raw == null) return null;
-    if (raw is List) {
-      return raw.map((e) => e.toString()).toList();
-    }
-    if (raw is Map) {
-      if (raw['startingXI'] is List) {
-        return (raw['startingXI'] as List).map((e) {
-          if (e is Map) {
-            final name = e['name'] ?? 'Unknown';
-            final pos = e['position'] ?? '';
-            return pos.isNotEmpty ? '$name ($pos)' : name.toString();
-          }
-          return e.toString();
-        }).toList();
-      }
-      final list = raw['players'] ?? raw['roster'] ?? raw['lineup'];
-      if (list is List) {
-        return list.map((e) => e.toString()).toList();
-      }
-    }
-    return null;
-  }
-}
-
-class PlayerLineup {
-  final String number;
-  final String name;
-  final String position; // GK, DF, MF, ST
-  final int rating;
-  final String? stats;
-
-  const PlayerLineup({
-    required this.number,
-    required this.name,
-    required this.position,
-    required this.rating,
-    this.stats,
-  });
-
-  factory PlayerLineup.fromJson(Map<String, dynamic> json) {
-    return PlayerLineup(
-      number: json['number']?.toString() ?? '',
-      name: json['name'] ?? '',
-      position: json['position'] ?? 'MF',
-      rating: json['rating'] is int ? json['rating'] : int.tryParse(json['rating']?.toString() ?? '0') ?? 0,
-      stats: json['stats']?.toString(),
-    );
-  }
-
-  Map<String, dynamic> toJson() => {
-    'number': number,
-    'name': name,
-    'position': position,
-    'rating': rating,
-    'stats': stats,
-  };
-}
-
-class TeamLineupData {
-  final int? avgRating;
-  final String? formation;
-  final List<PlayerLineup> startingXI;
-  final List<PlayerLineup> bench;
-
-  const TeamLineupData({
-    this.avgRating,
-    this.formation,
-    required this.startingXI,
-    required this.bench,
-  });
-
-  factory TeamLineupData.fromJson(Map<String, dynamic> json) {
-    final rawXI = json['startingXI'];
-    final rawBench = json['bench'];
-    return TeamLineupData(
-      avgRating: json['avgRating'] is int ? json['avgRating'] : int.tryParse(json['avgRating']?.toString() ?? ''),
-      formation: json['formation']?.toString(),
-      startingXI: (rawXI is List)
-              ? rawXI.whereType<Map>().map((e) => PlayerLineup.fromJson(Map<String, dynamic>.from(e))).toList()
-              : [],
-      bench: (rawBench is List)
-              ? rawBench.whereType<Map>().map((e) => PlayerLineup.fromJson(Map<String, dynamic>.from(e))).toList()
-              : [],
-    );
-  }
-
-  Map<String, dynamic> toJson() => {
-    'avgRating': avgRating,
-    'formation': formation,
-    'startingXI': startingXI.map((e) => e.toJson()).toList(),
-    'bench': bench.map((e) => e.toJson()).toList(),
-  };
 }
 
 enum MatchStatus { notStarted, live, finished, postponed, cancelled }
@@ -880,6 +757,35 @@ class AIPrediction {
       oddsHp = (rawH / total) * 100;
       oddsDp = (rawD / total) * 100;
       oddsAp = (rawA / total) * 100;
+    } else {
+      // No market price: mirror the backend's season-rates proxy instead of a
+      // fixed 45/25/30 guess. Strength blends season points with last-5 form,
+      // and draws are likelier when the two sides are evenly matched.
+      double strength(int? pts, String? form) {
+        final p = (pts ?? 0).clamp(0, 90) / 90.0;
+        return (p * 0.7) + ((_parseForm(form) / 100.0) * 0.3);
+      }
+
+      double drawRateOf(String? form) {
+        if (form == null) return 1 / 3;
+        final chars =
+            form.toUpperCase().replaceAll(RegExp(r'[^WDL]'), '').split('');
+        if (chars.isEmpty) return 1 / 3;
+        return chars.where((c) => c == 'D').length / chars.length;
+      }
+
+      final hStr = (strength(homePts, homeForm) + 0.02) * 1.10;
+      final aStr = (strength(awayPts, awayForm) + 0.02) * 0.92;
+      final total = hStr + aStr;
+      final homeShare = total > 0 ? hStr / total : 0.5;
+      final hi = hStr > aStr ? hStr : aStr;
+      final gap = (hStr - aStr).abs() / (hi > 0.01 ? hi : 0.01);
+      final drawRate = (((drawRateOf(homeForm) + drawRateOf(awayForm)) / 2) *
+              (1 - (gap * 0.6)))
+          .clamp(0.14, 0.34);
+      oddsHp = homeShare * (1 - drawRate) * 100;
+      oddsDp = drawRate * 100;
+      oddsAp = (1 - homeShare) * (1 - drawRate) * 100;
     }
     
     final double hForm = _parseForm(homeForm);
@@ -990,10 +896,13 @@ class AIPrediction {
       strategyAnalysis = 'Not Big Teams & Tight: Goals Market (Over 1.5).';
     }
     
-    final dnbOdds = favOdds != null ? (favOdds * 0.82).clamp(1.30, 9.99) : 1.70;
+    // Only quote a price when the market gave us one — never invent 1.70.
+    final dnbOdds = favOdds != null ? (favOdds * 0.82).clamp(1.30, 9.99) : null;
     final stakingOptions = [
       primarySafe,
-      'Value: $fav Draw No Bet (${dnbOdds.toStringAsFixed(2)})',
+      dnbOdds != null
+          ? 'Value: $fav Draw No Bet (${dnbOdds.toStringAsFixed(2)})'
+          : 'Value: $fav Draw No Bet',
       (isElite && maxProb < 55) ? 'Goals: Over 1.5 Total Goals (1.30)' : 'Risky: $fav to WIN by 2+ Goals (2.85)',
       'BTTS: Both Teams To Score - Yes (1.78)',
       maxProb < 45 ? 'Alternative: Under 2.5 Goals (1.80)' : 'Alternative: Over 2.5 Total Goals (1.70)'

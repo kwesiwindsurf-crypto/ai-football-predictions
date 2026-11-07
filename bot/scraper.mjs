@@ -504,6 +504,106 @@ function parseFormStr(formStr) {
   return Math.max(0, percentage);
 }
 
+// ─── Odds substitute: season W-D-L rates + big-team standing ─────────────────
+// Used ONLY when the market publishes no 1X2 price. The component keeps the
+// same weight as real odds, but its shape comes from data we actually hold:
+// the team's season record (win/draw/loss rates) and whether it is a big club.
+function isBigTeam(team) {
+  const t = (team || '').toLowerCase().trim();
+  if (!t) return false;
+  return BIG_TEAMS.some(b => t.includes(b));
+}
+
+function countsFromRecord(recordStr) {
+  if (!recordStr || typeof recordStr !== 'string') return null;
+  const parts = recordStr.split('-');
+  if (parts.length !== 3) return null;
+  const w = parseInt(parts[0], 10) || 0;
+  const d = parseInt(parts[1], 10) || 0;
+  const l = parseInt(parts[2], 10) || 0;
+  const played = w + d + l;
+  if (played <= 0) return null;
+  return { w, d, l, played, source: 'record' };
+}
+
+function countsFromForm(formStr) {
+  if (!formStr || typeof formStr !== 'string') return null;
+  const clean = formStr.toUpperCase().replace(/[^WDL]/g, '');
+  if (!clean) return null;
+  return {
+    w: (clean.match(/W/g) || []).length,
+    d: (clean.match(/D/g) || []).length,
+    l: (clean.match(/L/g) || []).length,
+    played: clean.length,
+    source: 'form'
+  };
+}
+
+function teamRates(recordStr, formStr) {
+  // Season record first (stable), last-5 form as the fallback, null if neither.
+  const c = countsFromRecord(recordStr) || countsFromForm(formStr);
+  if (!c) return null;
+  return {
+    winRate: c.w / c.played,
+    drawRate: c.d / c.played,
+    lossRate: c.l / c.played,
+    played: c.played,
+    source: c.source
+  };
+}
+
+// Builds a 1X2 split (percentages) that mirrors what market odds would imply,
+// from win/draw/loss rates plus a big-team adjustment.
+function oddsProxyFromRates(homeRates, awayRates, homeTeam, awayTeam) {
+  const neutral = {
+    winRate: 1 / 3, drawRate: 1 / 3, lossRate: 1 / 3,
+    played: 0, source: 'neutral'
+  };
+  const hr = homeRates || neutral;
+  const ar = awayRates || neutral;
+
+  // Points per game normalised to 0..1 — win = 3, draw = 1, loss = 0, so a
+  // high loss rate directly drags a team's strength down. Big clubs then get
+  // a small 15% bump for the pedigree the market would price in.
+  const strengthOf = (r, team) =>
+    ((r.winRate * 3 + r.drawRate) / 3) * (isBigTeam(team) ? 1.15 : 1.0);
+
+  const hStr = strengthOf(hr, homeTeam) * 1.10; // home advantage
+  const aStr = strengthOf(ar, awayTeam) * 0.92;
+  const total = hStr + aStr || 1;
+  const homeShare = hStr / total;
+
+  // Draws are likelier when the two sides are evenly matched.
+  const gap = Math.abs(hStr - aStr) / Math.max(hStr, aStr, 0.01);
+  let drawRate = ((hr.drawRate + ar.drawRate) / 2) * (1 - gap * 0.6);
+  drawRate = Math.min(0.34, Math.max(0.14, drawRate));
+
+  const pH = homeShare * (1 - drawRate);
+  const pA = (1 - homeShare) * (1 - drawRate);
+  const sum = pH + drawRate + pA || 1;
+
+  let hPct = (pH / sum) * 100;
+  let dPct = (drawRate / sum) * 100;
+  let aPct = (pA / sum) * 100;
+
+  // When there is no season record we fall back to last-5 form — but the
+  // form block below already carries that exact signal at 40%. Damp the
+  // proxy toward neutral so the same five games aren't counted twice.
+  if (hr.source !== 'record' || ar.source !== 'record') {
+    const damp = 0.5;
+    hPct = hPct * (1 - damp) + (100 / 3) * damp;
+    dPct = dPct * (1 - damp) + (100 / 3) * damp;
+    aPct = aPct * (1 - damp) + (100 / 3) * damp;
+  }
+
+  return {
+    h: hPct,
+    d: dPct,
+    a: aPct,
+    source: `${hr.source}+${ar.source}`
+  };
+}
+
 function parseH2HStr(summaryData, homeTeam, awayTeam) {
   if (!summaryData || !summaryData.seasonseries || summaryData.seasonseries.length === 0) return null;
   
@@ -546,11 +646,14 @@ function parseH2HStr(summaryData, homeTeam, awayTeam) {
 }
 
 // ─── Prediction engine ────────────────────────────────────────────────────────
-function makePrediction(home, away, hOdds, dOdds, aOdds, league, homeFormStr, awayFormStr, summaryData) {
+function makePrediction(home, away, hOdds, dOdds, aOdds, league, homeFormStr, awayFormStr, summaryData, homeRecord, awayRecord) {
   const hasOdds = hOdds > 0 && aOdds > 0;
   
   // 1. Odds (40% or 50%)
+  // Real market price when published. Otherwise a proxy built from the
+  // season W-D-L rates and big-team standing — never a fixed 45/25/30 guess.
   let oddsHp = 45, oddsDp = 25, oddsAp = 30;
+  let oddsSource = 'market';
   if (hasOdds) {
     const rawH = 1 / hOdds;
     const rawD = dOdds ? 1 / dOdds : (1 - rawH - (1 / aOdds) > 0 ? 1 - rawH - (1 / aOdds) : 0.25);
@@ -559,6 +662,16 @@ function makePrediction(home, away, hOdds, dOdds, aOdds, league, homeFormStr, aw
     oddsHp = (rawH / total) * 100;
     oddsDp = (rawD / total) * 100;
     oddsAp = (rawA / total) * 100;
+  } else {
+    const proxy = oddsProxyFromRates(
+      teamRates(homeRecord, homeFormStr),
+      teamRates(awayRecord, awayFormStr),
+      home, away
+    );
+    oddsHp = proxy.h;
+    oddsDp = proxy.d;
+    oddsAp = proxy.a;
+    oddsSource = `season-rates (${proxy.source})`;
   }
   
   // 2. Form (30% or 40%)
@@ -945,10 +1058,12 @@ function determineLeagueStrategy(league, home, away, fHp, fDp, fAp, isBig, hOdds
     league, home, away, fHp, fDp, fAp, isBig, hOdds, aOdds
   );
   
-  const dnbOdds = favOdds ? Math.max(1.30, parseFloat((favOdds * 0.82).toFixed(2))) : 1.70;
+  // Only quote a price when the market actually gave us one — never invent
+  // a 1.70 fallback. The app renders "—" when the price is absent.
+  const dnbOdds = favOdds ? Math.max(1.30, parseFloat((favOdds * 0.82).toFixed(2))) : null;
   const stakingOptions = [
     primarySafe,
-    `Value: ${fav} Draw No Bet (${dnbOdds})`,
+    dnbOdds ? `Value: ${fav} Draw No Bet (${dnbOdds})` : `Value: ${fav} Draw No Bet`,
     (isBig && maxProb < 55) ? `Goals: Over 1.5 Total Goals (1.30)` : `Risky: ${fav} to WIN by 2+ Goals (2.85)`,
     `BTTS: Both Teams To Score - Yes (1.78)`,
     maxProb < 45 ? `Alternative: Under 2.5 Goals (1.80)` : `Alternative: Over 2.5 Total Goals (1.70)`
@@ -963,7 +1078,8 @@ function determineLeagueStrategy(league, home, away, fHp, fDp, fAp, isBig, hOdds
     oddsRating: aiRating,
     h2hSummary: hasH2H ? h2h.summaryStr : null,
     recommendation,
-    analysis: `${strategyAnalysis}\nHomeForm: ${hForm}%, AwayForm: ${aForm}%, BigGame: ${isBig}`,
+    analysis: `${strategyAnalysis}\nHomeForm: ${hForm}%, AwayForm: ${aForm}%, BigGame: ${isBig}\nOddsSource: ${oddsSource}`,
+    oddsSource,
     stakingOptions
   };
 }
@@ -991,7 +1107,7 @@ async function fetchEspnLeagueFixtures(slug, dateStr) {
   }
 }
 
-// ─── Fetch ESPN summary for detailed lineups ───────────────────────────────────
+// ─── Fetch ESPN summary for headlines / H2H enrichment ─────────────────────────
 async function fetchEspnSummary(leagueSlug, eventId) {
   const url = `https://site.api.espn.com/apis/site/v2/sports/soccer/${leagueSlug}/summary?event=${eventId}`;
   const res = await safeFetch(url, 1);
@@ -1075,6 +1191,10 @@ function parseEspnEvent(ev, leagueLabel, leagueSlug) {
   // Form & Records (Points Calculation)
   const homeForm = homeComp.form || '';
   const awayForm = awayComp.form || '';
+  // Raw season record ("W-D-L") — used as the odds substitute when the
+  // market publishes no 1X2 price.
+  const homeRecord = homeComp.records?.[0]?.summary || null;
+  const awayRecord = awayComp.records?.[0]?.summary || null;
   
   const parsePoints = (records) => {
     if (!records || !records[0] || !records[0].summary) return 0;
@@ -1091,22 +1211,7 @@ function parseEspnEvent(ev, leagueLabel, leagueSlug) {
   const awayPoints = parsePoints(awayComp.records);
 
   // AI Prediction & Rating logic
-  const ai = makePrediction(homeTeam, awayTeam, hOdds, dOdds, aOdds, leagueLabel, homeForm, awayForm, ev.summaryData);
-
-  // Parse Lineups
-  let homeLineup = [];
-  let awayLineup = [];
-  if (ev.summaryData && ev.summaryData.rosters) {
-    const homeRoster = ev.summaryData.rosters.find(r => r.homeAway === 'home');
-    const awayRoster = ev.summaryData.rosters.find(r => r.homeAway === 'away');
-    
-    if (homeRoster && homeRoster.roster) {
-      homeLineup = homeRoster.roster.map(p => `${p.athlete?.displayName || 'Unknown'} (${p.position?.name || 'Unknown'})`);
-    }
-    if (awayRoster && awayRoster.roster) {
-      awayLineup = awayRoster.roster.map(p => `${p.athlete?.displayName || 'Unknown'} (${p.position?.name || 'Unknown'})`);
-    }
-  }
+  const ai = makePrediction(homeTeam, awayTeam, hOdds, dOdds, aOdds, leagueLabel, homeForm, awayForm, ev.summaryData, homeRecord, awayRecord);
 
   // Extract match website link from ESPN links or build canonical URL
   const matchUrl = ev.links?.find(l => l.rel?.includes('summary') || l.rel?.includes('desktop'))?.href 
@@ -1243,10 +1348,10 @@ function parseEspnEvent(ev, leagueLabel, leagueSlug) {
     awayRank: null,
     homeForm,
     awayForm,
+    homeRecord,
+    awayRecord,
     homePoints,
     awayPoints,
-    homeLineup: homeLineup.length ? homeLineup : null,
-    awayLineup: awayLineup.length ? awayLineup : null,
     h2hSummary: ai.h2hSummary,
     matchUrl,
     stats,
@@ -1426,14 +1531,13 @@ async function sendTelegramMessage(text) {
   }
 }
 
-async function postDailyDigestToTelegram(matches) {
+async function postDailyDigestToTelegram(matches, digestDate = new Date().toISOString().slice(0, 10)) {
   if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
     console.log('Skipping Telegram: Missing TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID');
     return [];
   }
   
-  const todayStr = new Date().toISOString().slice(0, 10);
-  const todaysMatches = matches.filter(m => m.date.startsWith(todayStr) && m.prediction && m.status !== 'postponed' && !m.statusShort?.toLowerCase().includes('postp'));
+  const todaysMatches = matches.filter(m => m.date.startsWith(digestDate) && m.prediction && m.status !== 'postponed' && !m.statusShort?.toLowerCase().includes('postp'));
   
   if (todaysMatches.length === 0) {
     console.log('No matches today to post to Telegram.');
@@ -1459,7 +1563,7 @@ async function postDailyDigestToTelegram(matches) {
   // Pick ONLY the top 2 best picks
   const topPicks = candidatePool.slice(0, 2);
 
-  const dateFormatted = new Date().toLocaleDateString('en-US', {
+  const dateFormatted = new Date(`${digestDate}T12:00:00Z`).toLocaleDateString('en-US', {
     weekday: 'long',
     month: 'short',
     day: 'numeric'
@@ -1564,7 +1668,10 @@ async function checkAndPostMatchResults(activePicks, matches, todayResults = [])
 
   for (const pick of activePicks) {
     const match = matches.find(m => m.id === pick.id);
-    if (!match || match.status !== 'FT') {
+    // `status` is 'finished' — 'FT' lives in statusShort. Checking only for
+    // 'FT' meant picks never resolved and results were never posted.
+    const isFinished = match && (match.status === 'finished' || match.statusShort === 'FT');
+    if (!isFinished) {
       remainingPicks.push(pick);
       continue;
     }
@@ -1705,14 +1812,24 @@ async function main() {
   const dates = [...new Set(matches.map(m => m.date.substring(0, 10)))].sort();
   console.log('Dates included:', dates.join(', '));
 
-  // 2. Fetch Lineups for Yesterday's, Today's and Live Matches
-  console.log('\nFetching lineups for matches happening yesterday, today or live...');
+  // 2. Enrich yesterday's, today's and live matches (headlines & H2H history)
+  console.log('\nEnriching matches happening yesterday, today or live...');
   const today = new Date();
   const todayStr = today.toISOString().slice(0, 10);
+  // A late-night run (the 23:59 UTC schedule) previews the NEXT day's
+  // fixtures — posting "today" then would only announce finished games.
+  const digestDate = today.getUTCHours() >= 18
+    ? new Date(today.getTime() + 86400000).toISOString().slice(0, 10)
+    : todayStr;
   const yesterday = new Date(today);
   yesterday.setDate(today.getDate() - 1);
   const yesterdayStr = yesterday.toISOString().slice(0, 10);
-  const matchesToEnrich = matches.filter(m => m.date.startsWith(todayStr) || m.date.startsWith(yesterdayStr) || m.status === 'live');
+  // Enrich the fixtures the digest will preview as well as today's/live ones.
+  const matchesToEnrich = matches.filter(m =>
+    m.date.startsWith(todayStr) ||
+    m.date.startsWith(yesterdayStr) ||
+    m.date.startsWith(digestDate) ||
+    m.status === 'live');
   
   // Process in small batches to avoid spamming the API
   const batchSize = 10;
@@ -1721,32 +1838,6 @@ async function main() {
     await Promise.all(batch.map(async (m) => {
       const summary = await fetchEspnSummary(m.espnLeagueSlug, m.espnEventId);
       if (!summary) return;
-
-      // -- Parse Lineups (only if rosters are available) ----------------------
-      if (summary.rosters && summary.rosters.length >= 2) {
-        const parseLineup = (rosterObj) => {
-          if (!rosterObj || !rosterObj.roster) return null;
-          const startingXI = [];
-          const bench = [];
-          rosterObj.roster.forEach(p => {
-            const player = {
-              number: p.athlete?.jersey || '?',
-              name: p.athlete?.displayName || 'Unknown',
-              position: p.position?.abbreviation || 'N/A',
-              rating: 0,
-              stats: ''
-            };
-            if (p.starter) startingXI.push(player);
-            else bench.push(player);
-          });
-          return { avgRating: 0, formation: rosterObj.formation || null, startingXI, bench };
-        };
-        const r1 = summary.rosters[0];
-        const r2 = summary.rosters[1];
-        const r1IsHome = r1.homeAway === 'home';
-        m.homeLineup = parseLineup(r1IsHome ? r1 : r2);
-        m.awayLineup = parseLineup(r1IsHome ? r2 : r1);
-      }
 
       // -- Parse Real H2H from ESPN seasonseries --------------------------------
       // ESPN structure: seasonseries[0].events[] each with competitions[0].competitors[]
@@ -1794,15 +1885,30 @@ async function main() {
       }
 
       // Re-calculate prediction now that we have H2H data
-      m.prediction = makePrediction(m.homeTeam, m.awayTeam, m.homeOdds, m.drawOdds, m.awayOdds, m.league, m.homeForm, m.awayForm, m.h2hSummary);
+      m.prediction = makePrediction(m.homeTeam, m.awayTeam, m.homeOdds, m.drawOdds, m.awayOdds, m.league, m.homeForm, m.awayForm, m.h2hSummary, m.homeRecord, m.awayRecord);
     }));
   }
   
   // Clean up internal slug before upload
   matches.forEach(m => delete m.espnLeagueSlug);
 
-  // -- Preserve Previous Predictions --
-  // Freeze predictions for ALL existing matches so the first prediction is locked in forever
+  // -- Refresh vs. Lock Predictions --
+  // A prediction is LOCKED once its match has kicked off: ESPN erases the
+  // odds at kickoff, so recomputing then would use incomplete data. Picks
+  // already posted to Telegram are locked too. Anything that has not
+  // started is refreshed with the latest odds on every run.
+  const postedPickIds = new Set();
+  if (currentKvData) {
+    if (Array.isArray(currentKvData.activeTelegramPicks)) {
+      for (const p of currentKvData.activeTelegramPicks) {
+        if (p && p.id) postedPickIds.add(p.id);
+      }
+    } else if (currentKvData.activeTelegramPick && currentKvData.activeTelegramPick.id) {
+      postedPickIds.add(currentKvData.activeTelegramPick.id);
+    }
+  }
+  const nowMs = Date.now();
+
   for (const m of matches) {
     let existing = existingMatchesMap.get(m.id);
     if (!existing) {
@@ -1813,19 +1919,25 @@ async function main() {
         existing = candidate;
       }
     }
-    if (existing && existing.prediction) {
-      const analysisText = existing.prediction.analysis || '';
-      const hasCompetitionMismatch = analysisText.includes('Cup') && !m.league.toLowerCase().includes('cup');
-      if (!hasCompetitionMismatch) {
-        m.prediction = existing.prediction;
-      }
-      if (existing.homeOdds !== undefined) m.homeOdds = existing.homeOdds;
-      if (existing.drawOdds !== undefined) m.drawOdds = existing.drawOdds;
-      if (existing.awayOdds !== undefined) m.awayOdds = existing.awayOdds;
+    if (!existing || !existing.prediction) continue;
+
+    const analysisText = existing.prediction.analysis || '';
+    const hasCompetitionMismatch = analysisText.includes('Cup') && !m.league.toLowerCase().includes('cup');
+
+    const kickedOff = m.status !== 'notStarted' || new Date(m.date).getTime() <= nowMs;
+    const oddsErased = m.homeOdds == null && existing.homeOdds != null;
+    const isPosted = postedPickIds.has(m.id);
+
+    if ((kickedOff || oddsErased || isPosted) && !hasCompetitionMismatch) {
+      // Locked: keep the stored prediction and the pre-kickoff prices exactly.
+      m.prediction = existing.prediction;
+      if (existing.homeOdds != null) m.homeOdds = existing.homeOdds;
+      if (existing.drawOdds != null) m.drawOdds = existing.drawOdds;
+      if (existing.awayOdds != null) m.awayOdds = existing.awayOdds;
       if (existing.oddsRating !== undefined) m.oddsRating = existing.oddsRating;
       if (existing.h2hSummary !== undefined && existing.h2hSummary !== null) m.h2hSummary = existing.h2hSummary;
-      if (!m.matchUrl && existing.matchUrl) m.matchUrl = existing.matchUrl;
     }
+    if (!m.matchUrl && existing.matchUrl) m.matchUrl = existing.matchUrl;
   }
 
   // 3. Telegram Broadcast & Result Monitoring
@@ -1859,27 +1971,9 @@ async function main() {
     todayResults = updatedTodayResults;
   }
 
-  // B. Post Daily Digest of all games once per day (or if forced)
-  if (lastTelegramPostDate !== todayStr || FORCE_TELEGRAM) {
-    console.log(`\nNew day detected! Attempting to post Top 2 Banker Picks to Telegram...`);
-    const newActivePicks = await postDailyDigestToTelegram(matches);
-    if (newActivePicks && newActivePicks.length > 0) {
-      const existingIds = new Set(activeTelegramPicks.map(p => p.id));
-      for (const p of newActivePicks) {
-        if (!existingIds.has(p.id)) {
-          activeTelegramPicks.push(p);
-        }
-      }
-      lastTelegramPostDate = todayStr; // Update flag ONLY on successful post
-      todayResults = []; // Reset results for new day
-      lastDashboardDate = null;
-    }
-  } else {
-    console.log(`\nTelegram: Already posted today's digest (${todayStr}). Active picks being monitored: ${activeTelegramPicks.length}`);
-  }
-
-  // C. Post Daily Dashboard when all today's matches have concluded
-  // Condition: we have results for today, no remaining active picks for today, and dashboard hasn't been posted yet today
+  // B. Post Daily Dashboard when all today's matches have concluded.
+  // Runs BEFORE the digest: the digest resets todayResults for the new day,
+  // and with a 23:59 run today's results are only ready right now.
   const remainingTodayPicks = activeTelegramPicks.filter(p => p.date && p.date.startsWith(todayStr));
   const shouldPostDashboard = (todayResults.length > 0 && remainingTodayPicks.length === 0 && lastDashboardDate !== todayStr) || (FORCE_DASHBOARD && todayResults.length > 0);
 
@@ -1889,6 +1983,25 @@ async function main() {
     if (dashboardSent) {
       lastDashboardDate = todayStr;
     }
+  }
+
+  // C. Post Daily Digest of all games once per day (or if forced)
+  if (lastTelegramPostDate !== digestDate || FORCE_TELEGRAM) {
+    console.log(`\nNew day detected! Attempting to post Top 2 Banker Picks to Telegram...`);
+    const newActivePicks = await postDailyDigestToTelegram(matches, digestDate);
+    if (newActivePicks && newActivePicks.length > 0) {
+      const existingIds = new Set(activeTelegramPicks.map(p => p.id));
+      for (const p of newActivePicks) {
+        if (!existingIds.has(p.id)) {
+          activeTelegramPicks.push(p);
+        }
+      }
+      lastTelegramPostDate = digestDate; // Update flag ONLY on successful post
+      todayResults = []; // Reset results for new day
+      lastDashboardDate = null;
+    }
+  } else {
+    console.log(`\nTelegram: Already posted today's digest (${digestDate}). Active picks being monitored: ${activeTelegramPicks.length}`);
   }
 
   // Prune any picks older than 48 hours to avoid indefinite buildup

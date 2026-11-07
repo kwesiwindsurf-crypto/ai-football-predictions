@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../../../core/services/api_service.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/breathing_gradient.dart';
 import '../../../../models/match_model.dart' as model;
 import '../../../match_details/presentation/pages/match_details_screen.dart';
 
@@ -106,7 +107,11 @@ class _DynamicLiveIslandState extends State<DynamicLiveIsland>
     }
 
     return Center(
-      child: GestureDetector(
+      child: BreathingHalo(
+        inset: 0,
+        strokeWidth: 2.5,
+        borderRadius: BorderRadius.circular(999),
+        child: GestureDetector(
         onTap: () {
           Navigator.push(
             context,
@@ -215,6 +220,7 @@ class _DynamicLiveIslandState extends State<DynamicLiveIsland>
               ],
             ],
           ),
+        ),
         ),
       ),
     );

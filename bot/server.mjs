@@ -190,6 +190,11 @@ async function pollLiveScores() {
         /postp|ppd|canc|susp/i.test(shortDetail) ||
         /postponed|cancel|suspend/i.test(detail);
 
+      // Render owns live telemetry only. Skipping `pre` events means upcoming
+      // matches are left completely untouched — their scraped odds and locked
+      // predictions can never be overwritten by the 30s poller.
+      if (state === 'pre' && !isPostponed) continue;
+
       if (state === 'in' && !isPostponed) {
         hasLiveGame = true;
       }

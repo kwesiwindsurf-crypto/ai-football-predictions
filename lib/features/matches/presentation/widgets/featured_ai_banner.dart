@@ -29,22 +29,28 @@ class FeaturedAiBanner extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            const Color(0xFF064E3B).withValues(alpha: 0.35),
-            AppTheme.surfaceOf(context),
-            const Color(0xFF4C1D95).withValues(alpha: 0.25),
-          ],
+          colors: AppTheme.isDark(context)
+              ? [
+                  const Color(0xFF064E3B).withValues(alpha: 0.35),
+                  AppTheme.surfaceOf(context),
+                  const Color(0xFF4C1D95).withValues(alpha: 0.25),
+                ]
+              : [
+                  const Color(0xFF064E3B).withValues(alpha: 0.14),
+                  Colors.white,
+                  const Color(0xFF4C1D95).withValues(alpha: 0.10),
+                ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(AppTheme.radiusMd),
         border: Border.all(
-          color: primary.withValues(alpha: 0.35),
+          color: primary.withValues(alpha: AppTheme.isDark(context) ? 0.35 : 0.55),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.25),
+            color: Colors.black.withValues(alpha: AppTheme.isDark(context) ? 0.25 : 0.06),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -76,10 +82,10 @@ class FeaturedAiBanner extends StatelessWidget {
               children: [
                 Text(
                   'AI Model Consensus: $winProb% Value Win',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: AppTheme.textPrimaryOf(context),
                     letterSpacing: -0.2,
                   ),
                   maxLines: 1,

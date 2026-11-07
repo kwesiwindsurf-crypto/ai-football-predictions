@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/match_model.dart';
-import '../../models/standings_model.dart';
 
 class ApiService {
   static final ApiService instance = ApiService._internal();
@@ -14,11 +13,18 @@ class ApiService {
   // 1. Edge CDN for instant 0ms cold-start master fixture & AI prediction load
   static const String _cloudflareUrl = 'https://ai-football-bot.xantechs00.workers.dev';
 
-  // 2. 24/7 Live Engine for lightweight score, clock, event & lineup deltas (< 20 KB)
+  // 2. 24/7 Live Engine for lightweight score, clock & event deltas (< 20 KB)
   static const String _renderLiveUrl = 'https://ai-football-predictions.onrender.com';
 
   static const String _cacheKey = 'cached_master_matches_json_v2';
   static const String _cacheTimestampKey = 'cached_master_timestamp';
+  static const String _overridesKey = 'cached_live_overrides_v1';
+
+  /// Live telemetry decays. A stored LIVE snapshot from just before the app was
+  /// backgrounded must never be replayed much later — the match may have ended
+  /// while no tick ran, and the stale entry would resurrect it as LIVE with a
+  /// frozen score. Finished (FT) snapshots keep their age: they are facts.
+  static const Duration _liveOverrideMaxAge = Duration(minutes: 20);
 
   // Global notifier for live matches updated from the worker
   static final ValueNotifier<List<Match>> liveMatchesNotifier = ValueNotifier<List<Match>>([]);
@@ -29,8 +35,6 @@ class ApiService {
   // In-memory cache of the latest fresh matches received from network or disk
   static List<Match>? _inMemoryCache;
   static List<Match>? get inMemoryCache => _inMemoryCache;
-  static List<LeagueStandings>? _inMemoryStandings;
-  static List<LeagueStandings>? get inMemoryStandings => _inMemoryStandings;
 
   /// Pre-warms the cache from persistent local storage on disk (SharedPreferences).
   /// Called in main() before runApp() so that HomeScreen starts with data in 0ms!
@@ -47,7 +51,19 @@ class ApiService {
         // A snapshot saved in a previous session can still say "live" for
         // matches that finished hours ago. Demote those before anything reads
         // the cache so the LIVE badge, island and list agree from frame one.
-        final parsed = service._parseMatchesFromData(data);
+        var parsed = service._parseMatchesFromData(data);
+
+        // Replay the last known live telemetry so the first frame after a cold start
+        // shows the real score instead of whatever the daily KV snapshot said.
+        final overridesStr = prefs.getString(_overridesKey);
+        if (overridesStr != null && overridesStr.isNotEmpty) {
+          try {
+            parsed = _mergeLiveOverrides(parsed, overridesStr);
+          } catch (e) {
+            debugPrint('⚠️ Live override replay note: $e');
+          }
+        }
+
         final staleLive = parsed.where((m) => m.isStaleLive).toList();
         final matches = staleLive.isEmpty
             ? parsed
@@ -55,15 +71,11 @@ class ApiService {
         if (staleLive.isNotEmpty) {
           debugPrint('🧹 Demoted ${staleLive.length} stale LIVE matches from disk cache.');
         }
-        final standings = service._parseStandingsFromData(data);
         if (matches.isNotEmpty) {
           _inMemoryCache = matches;
           final live = matches.where((m) => m.status == MatchStatus.live).toList();
           liveMatchesNotifier.value = live;
           allMatchesNotifier.value = matches;
-        }
-        if (standings.isNotEmpty) {
-          _inMemoryStandings = standings;
         }
         if (_inMemoryCache != null && _inMemoryCache!.isNotEmpty) {
           debugPrint('⚡ Pre-warmed ${_inMemoryCache!.length} matches from local disk cache.');
@@ -83,14 +95,6 @@ class ApiService {
     return await preWarmCache();
   }
 
-  Future<List<LeagueStandings>?> getCachedStandings() async {
-    if (_inMemoryStandings != null && _inMemoryStandings!.isNotEmpty) {
-      return _inMemoryStandings;
-    }
-    await preWarmCache();
-    return _inMemoryStandings;
-  }
-
   Future<void> _saveOptimizedCache(Map<String, dynamic> data) async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -102,71 +106,96 @@ class ApiService {
     }
   }
 
-  Future<void> _patchDiskCache(List<dynamic> rawLiveMatches) async {
+  /// Persists only the telemetry needed to repaint a scoreboard on cold start, keyed by
+  /// match id. The previous implementation re-read, re-encoded and re-wrote the entire
+  /// 1.3MB master bundle on every 25s tick; this keeps that write to roughly 10KB.
+  Future<void> _saveLiveOverrides(List<dynamic> rawLiveMatches) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final cachedStr = prefs.getString(_cacheKey);
-      if (cachedStr == null || cachedStr.isEmpty) return;
+      final byId = <String, Map<String, dynamic>>{};
 
-      final Map<String, dynamic> cachedData = json.decode(cachedStr);
-      final dynamic rawMatches = (cachedData['matchesData'] != null && cachedData['matchesData'] is Map)
-          ? cachedData['matchesData']['matches']
-          : cachedData['matches'];
+      final existing = prefs.getString(_overridesKey);
+      final nowUtc = DateTime.now().toUtc();
+      if (existing != null && existing.isNotEmpty) {
+        for (final item in (json.decode(existing) as List)) {
+          if (item is Map && item['id'] != null) {
+            final entry = Map<String, dynamic>.from(item);
+            final status = entry['status']?.toString();
+            final isFinished = status == 'finished';
+            final savedAt = DateTime.tryParse(entry['savedAt']?.toString() ?? '');
 
-      if (rawMatches is! List) return;
-
-      final Map<String, Map<String, dynamic>> updateJsonMap = {};
-      for (var item in rawLiveMatches) {
-        if (item is Map) {
-          if (item['id'] != null) {
-            updateJsonMap[item['id'].toString()] = Map<String, dynamic>.from(item);
-          }
-          final home = item['homeTeam']?.toString() ?? '';
-          final away = item['awayTeam']?.toString() ?? '';
-          if (home.isNotEmpty && away.isNotEmpty) {
-            final legacyKey = '$home-$away'.replaceAll(RegExp(r'\s+'), '-');
-            updateJsonMap.putIfAbsent(legacyKey, () => Map<String, dynamic>.from(item));
-          }
-        }
-      }
-
-      bool changed = false;
-      for (int i = 0; i < rawMatches.length; i++) {
-        final existingItem = rawMatches[i];
-        if (existingItem is Map) {
-          final id = existingItem['id']?.toString() ?? '';
-          final home = existingItem['homeTeam']?.toString() ?? '';
-          final away = existingItem['awayTeam']?.toString() ?? '';
-          final legacyKey = '$home-$away'.replaceAll(RegExp(r'\s+'), '-');
-
-          final delta = updateJsonMap[id] ?? updateJsonMap[legacyKey];
-          if (delta != null) {
-            if (existingItem['homeScore'] != delta['homeScore'] ||
-                existingItem['awayScore'] != delta['awayScore'] ||
-                existingItem['status'] != delta['status'] ||
-                existingItem['statusShort'] != delta['statusShort']) {
-              existingItem['homeScore'] = delta['homeScore'];
-              existingItem['awayScore'] = delta['awayScore'];
-              existingItem['status'] = delta['status'];
-              existingItem['statusShort'] = delta['statusShort'];
-              if (delta['elapsed'] != null) existingItem['elapsed'] = delta['elapsed'];
-              if (delta['events'] != null) existingItem['events'] = delta['events'];
-              if (delta['homeScorers'] != null) existingItem['homeScorers'] = delta['homeScorers'];
-              if (delta['awayScorers'] != null) existingItem['awayScorers'] = delta['awayScorers'];
-              if (delta['stats'] != null) existingItem['stats'] = delta['stats'];
-              changed = true;
+            // Finished snapshots are durable facts — keep them indefinitely.
+            if (isFinished) {
+              byId[entry['id'].toString()] = entry;
+              continue;
             }
+            // Legacy entries predating the savedAt stamp have unknown age: a
+            // LIVE snapshot of unknown age would resurrect a frozen clock.
+            if (!isFinished && savedAt == null) continue;
+            if (!isFinished &&
+                savedAt != null &&
+                nowUtc.difference(savedAt.toUtc()) > _liveOverrideMaxAge) {
+              continue;
+            }
+            byId[entry['id'].toString()] = entry;
           }
         }
       }
 
-      if (changed) {
-        await prefs.setString(_cacheKey, json.encode(cachedData));
-        debugPrint('💾 Persisted ${rawLiveMatches.length} live/FT score updates to local disk cache.');
+      for (final item in rawLiveMatches) {
+        if (item is! Map || item['id'] == null) continue;
+        byId[item['id'].toString()] = <String, dynamic>{
+          'id': item['id'],
+          'date': item['date'],
+          'status': item['status'],
+          'statusShort': item['statusShort'],
+          'homeScore': item['homeScore'],
+          'awayScore': item['awayScore'],
+          'elapsed': item['elapsed'],
+          'savedAt': nowUtc.toIso8601String(),
+        };
       }
+
+      // A match cannot still be in play six hours after kickoff, so anything older than
+      // that would only ever be resurrected as a frozen clock by isStaleLive's guard.
+      final cutoff = DateTime.now().toUtc().subtract(const Duration(hours: 6));
+      byId.removeWhere((_, entry) {
+        final kickoff = DateTime.tryParse(entry['date']?.toString() ?? '');
+        return kickoff == null || kickoff.toUtc().isBefore(cutoff);
+      });
+
+      await prefs.setString(_overridesKey, json.encode(byId.values.toList()));
     } catch (e) {
-      debugPrint('⚠️ Disk cache patch note: $e');
+      debugPrint('⚠️ Live override save note: $e');
     }
+  }
+
+  /// Replays the stored telemetry onto a freshly parsed match list, preserving every
+  /// static field (prediction, odds, ranks, form) that the override entry does not carry.
+  static List<Match> _mergeLiveOverrides(List<Match> base, String overridesJson) {
+    final nowUtc = DateTime.now().toUtc();
+    final deltas = <Match>[];
+    for (final item in (json.decode(overridesJson) as List)) {
+      if (item is! Map) continue;
+      // Same decay policy as _saveLiveOverrides: finished snapshots are facts
+      // and always replay, but a LIVE snapshot only replays while it is fresh.
+      if (item['status']?.toString() != 'finished') {
+        final savedAt = DateTime.tryParse(item['savedAt']?.toString() ?? '');
+        if (savedAt == null) continue; // legacy entry of unknown age
+        if (nowUtc.difference(savedAt.toUtc()) > _liveOverrideMaxAge) continue;
+      }
+      try {
+        deltas.add(Match.fromJson(Map<String, dynamic>.from(item)));
+      } catch (_) {}
+    }
+    if (deltas.isEmpty) return base;
+
+    final byId = {for (final d in deltas) d.id: d};
+    final byTeams = {for (final d in deltas) d.normalizedTeamsKey: d};
+    return base.map((m) {
+      final delta = byId[m.id] ?? byTeams[m.normalizedTeamsKey];
+      return delta == null ? m : m.mergeLiveDelta(delta);
+    }).toList();
   }
 
   // In-flight request deduplication & cache timestamp
@@ -236,7 +265,7 @@ class ApiService {
             liveMatchesNotifier.value = live;
             allMatchesNotifier.value = _inMemoryCache;
             debugPrint('⚡ Render Live Sync: updated ${liveUpdatedList.length} active/FT matches (${live.length} LIVE)');
-            unawaited(_patchDiskCache(rawMatches));
+            unawaited(_saveLiveOverrides(rawMatches));
             return _inMemoryCache;
           }
         }
@@ -346,37 +375,6 @@ class ApiService {
     }
   }
 
-  Future<List<LeagueStandings>> fetchStandings() async {
-    try {
-      return await _fetchStandingsFromUrl(_cloudflareUrl).timeout(const Duration(seconds: 10));
-    } catch (cfError) {
-      debugPrint('⚠️ Cloudflare standings note: $cfError');
-      try {
-        return await _fetchStandingsFromUrl(_renderLiveUrl).timeout(const Duration(seconds: 10));
-      } catch (renderError) {
-        debugPrint('⚠️ Render standings note: $renderError');
-        final cached = await getCachedStandings();
-        if (cached != null && cached.isNotEmpty) return cached;
-        return [];
-      }
-    }
-  }
-
-  Future<List<LeagueStandings>> _fetchStandingsFromUrl(String url) async {
-    final response = await http.get(Uri.parse(url));
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> data = json.decode(response.body);
-      _saveOptimizedCache(data);
-      final standings = _parseStandingsFromData(data);
-      if (standings.isNotEmpty) {
-        _inMemoryStandings = standings;
-      }
-      return standings;
-    } else {
-      throw Exception('HTTP ${response.statusCode}');
-    }
-  }
-
   List<Match> _parseMatchesFromData(Map<String, dynamic> data) {
     dynamic rawMatches;
     if (data['matchesData'] != null && data['matchesData'] is Map) {
@@ -412,27 +410,6 @@ class ApiService {
     final live = matches.where((m) => m.status == MatchStatus.live).toList();
     liveMatchesNotifier.value = live;
     return matches;
-  }
-
-  List<LeagueStandings> _parseStandingsFromData(Map<String, dynamic> data) {
-    dynamic rawLeagues;
-    if (data['standingsData'] != null && data['standingsData'] is Map) {
-      rawLeagues = data['standingsData']['standingsByLeague'];
-    } else {
-      rawLeagues = data['standingsByLeague'];
-    }
-
-    final List<dynamic> leaguesJson = (rawLeagues is List) ? rawLeagues : [];
-
-    final List<LeagueStandings> standings = [];
-    for (var item in leaguesJson) {
-      if (item is Map) {
-        try {
-          standings.add(LeagueStandings.fromJson(Map<String, dynamic>.from(item)));
-        } catch (_) {}
-      }
-    }
-    return standings;
   }
 }
 
