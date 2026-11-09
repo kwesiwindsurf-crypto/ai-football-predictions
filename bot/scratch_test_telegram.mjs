@@ -1,5 +1,5 @@
 // Test script for Telegram Message Formatting & Dashboard
-const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8999449179:AAGX1qsjFa9SyHNSWIpffapaRDB5mvIfSEA';
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || '-1001738283594';
 
 async function sendTelegramMessage(text) {

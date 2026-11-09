@@ -1,5 +1,6 @@
-$token = "8999449179:AAGX1qsjFa9SyHNSWIpffapaRDB5mvIfSEA"
-$chatId = "-1001738283594"
+$token = $env:TELEGRAM_BOT_TOKEN
+$chatId = $env:TELEGRAM_CHAT_ID
+if (-not $token -or -not $chatId) { throw "Set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID env vars first" }
 $url = "https://api.telegram.org/bot$token/sendMessage"
 
 $message = @"

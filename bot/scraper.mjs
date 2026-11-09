@@ -7,8 +7,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const CF_ACCOUNT_ID = process.env.CF_ACCOUNT_ID;
 const CF_API_TOKEN  = process.env.CF_API_TOKEN;
 const CF_KV_NS_ID   = process.env.CF_KV_NAMESPACE_ID;
-const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8999449179:AAGX1qsjFa9SyHNSWIpffapaRDB5mvIfSEA';
-const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || '-1001738283594';
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 const KV_KEY        = 'latest_soccer_data';
 
 // ─── Keywords used to filter out women's / youth / irrelevant matches ─────────
