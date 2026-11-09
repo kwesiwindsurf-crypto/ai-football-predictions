@@ -17,6 +17,7 @@
 /bot/node_modules/
 /bot/service_account.json
 /bot/.dev.vars
+/bot/secret.txt
 /android/app/google-services.json
 
 # Keystores & sensitive build keys

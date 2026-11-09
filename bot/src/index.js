@@ -1,10 +1,11 @@
-// Cloudflare Worker: 24/7 Live Score Poller & Edge Cache
-// Runs every 1 minute via Cron Trigger (* * * * *)
+// Cloudflare Worker: Edge Cache + nightly scrape dispatcher
+// - Serves the cached match payload to the Flutter app (<15ms)
+// - At 23:59 UTC it dispatches the full scrape on GitHub Actions. Cloudflare
+//   cron fires on time; GitHub's own scheduler has been landing hours late.
+// - Manual `?refresh=1` still runs the in-worker live poll below.
 // - Fetches ESPN open scoreboards for ALL tracked leagues globally (70+ leagues)
-// - Detects when a GOAL is scored or match state changes
 // - Authenticates securely with Google Firebase v1 API using Web Crypto RSA-SHA256 (0 dependencies)
 // - Sends instant FCM Push Notifications to topic 'live_scores'
-// - Caches live data in KV for instant Flutter app retrieval (<15ms)
 
 // Every league the app tracks — synced 1:1 with scraper.mjs ESPN_LEAGUES list.
 // All fetched concurrently via Promise.all, so adding more leagues costs ~0ms.
@@ -89,6 +90,44 @@ const WATCHED_LEAGUES = [
   'afc.asian',        // AFC Asian Cup
 ];
 
+// ─── Nightly scrape dispatch ──────────────────────────────────────────────────
+// The GitHub Actions scheduler is best-effort: the 23:59 UTC job has been
+// starting ~04:30 UTC. This cron fires from Cloudflare on the minute and asks
+// GitHub to start the same workflow immediately (workflow_dispatch).
+const GITHUB_REPO = 'kwesiwindsurf-crypto/ai-football-predictions';
+const GITHUB_WORKFLOW = 'scrape.yml';
+const NIGHTLY_CRON = '59 23 * * *';
+
+async function dispatchNightlyScrape(env) {
+  if (!env.GITHUB_TOKEN) {
+    console.error('Nightly scrape: GITHUB_TOKEN secret is not configured');
+    return false;
+  }
+  const url = `https://api.github.com/repos/${GITHUB_REPO}/actions/workflows/${GITHUB_WORKFLOW}/dispatches`;
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${env.GITHUB_TOKEN}`,
+        'Accept': 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28',
+        'Content-Type': 'application/json',
+        'User-Agent': 'ai-football-bot-cron',
+      },
+      body: JSON.stringify({ ref: 'main' }),
+    });
+    if (!res.ok) {
+      console.error(`Nightly scrape dispatch failed: ${res.status} ${await res.text()}`);
+      return false;
+    }
+    console.log('Nightly scrape dispatched to GitHub Actions');
+    return true;
+  } catch (err) {
+    console.error(`Nightly scrape dispatch error: ${err.message}`);
+    return false;
+  }
+}
+
 export default {
   // 1. Flutter App reads data from here (Edge CDN, <15ms)
   async fetch(request, env, ctx) {
@@ -139,8 +178,17 @@ export default {
     }
   },
 
-  // 2. Scheduled Cron Trigger — Runs every 1 minute
+  // 2. Scheduled Cron Trigger
   async scheduled(event, env, ctx) {
+    // 23:59 UTC: ask GitHub to run the full scrape right now. This path never
+    // touches KV, so it cannot burn the write quota.
+    if (event.cron === NIGHTLY_CRON) {
+      const task = dispatchNightlyScrape(env);
+      if (ctx && typeof ctx.waitUntil === 'function') ctx.waitUntil(task);
+      else await task;
+      return;
+    }
+
     const now = new Date();
     const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
 
