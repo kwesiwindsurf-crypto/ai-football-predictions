@@ -14,7 +14,3 @@ crons = ["59 23 * * *"]
 [[kv_namespaces]]
 binding = "SCORES_KV"
 id = "ca798cfd487c4155ad736cdc19bc6e51"
-
-# Ensure environment variables are loaded securely
-[vars]
-SPORTS_API_URL = "https://v3.football.api-sports.io/fixtures?live=all"

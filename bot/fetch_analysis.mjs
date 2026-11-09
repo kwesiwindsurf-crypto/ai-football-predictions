@@ -1,7 +1,7 @@
 /**
  * fetch_analysis.mjs
  *
- * Fetches finished matches for today + yesterday from API-Sports (with ESPN fallback).
+ * Fetches finished matches for today + yesterday from ESPN.
  * Exports to matches_analysis.csv with computed columns:
  *   result (H/D/A), total_goals, over_0_5, over_1_5, over_2_5, over_3_5, btts
  */
@@ -12,8 +12,6 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const OUT_FILE = path.join(__dirname, 'matches_analysis.csv');
-
-const SPORTS_API_KEY = process.env.SPORTS_API_KEY || '3d923c01afee89b7b9ae92761979ef56';
 
 function isoDateStr(d) {
   return d.toISOString().slice(0, 10);
@@ -38,38 +36,6 @@ async function safeFetch(url, retries = 2, headers = {}) {
     }
   }
   return null;
-}
-
-// ─── API-Sports fetcher ───────────────────────────────────────────────────────
-
-async function fetchApiSportsDay(dateIso) {
-  if (!SPORTS_API_KEY) return [];
-  try {
-    const url = `https://v3.football.api-sports.io/fixtures?date=${dateIso}`;
-    const res = await safeFetch(url, 2, { 'x-apisports-key': SPORTS_API_KEY });
-    if (!res) return [];
-    const data = await res.json();
-    const fixtures = data.response || [];
-    return fixtures.map(f => {
-      const sShort = f.fixture?.status?.short || '';
-      const isFinished = ['FT', 'AET', 'PEN'].includes(sShort);
-      const kickoff = f.fixture?.date ? new Date(f.fixture.date).toISOString().slice(11, 16) : '';
-      return {
-        date: dateIso,
-        kickoff,
-        league: `${f.league?.country ? f.league.country + ' - ' : ''}${f.league?.name || 'Soccer'}`,
-        homeName: f.teams?.home?.name || '',
-        awayName: f.teams?.away?.name || '',
-        homeScore: f.goals?.home ?? '',
-        awayScore: f.goals?.away ?? '',
-        status: isFinished ? 'FT' : sShort,
-        source: 'api-sports',
-      };
-    });
-  } catch (e) {
-    console.warn(`  API-Sports error for ${dateIso}: ${e.message}`);
-    return [];
-  }
 }
 
 // ─── ESPN fetcher ─────────────────────────────────────────────────────────────
@@ -144,11 +110,7 @@ async function main() {
     const espn = espnDateStr(d);
     process.stdout.write(`  ${iso} ... `);
 
-    let rows = await fetchApiSportsDay(iso);
-    if (rows.length === 0) {
-      rows = await fetchEspnDay(espn);
-      if (rows.length > 0) process.stdout.write(`(ESPN fallback) `);
-    }
+    const rows = await fetchEspnDay(espn);
     console.log(`${rows.length} total, ${rows.filter(r => r.status === 'FT').length} finished`);
     allRows.push(...rows);
   }

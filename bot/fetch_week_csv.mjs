@@ -2,11 +2,10 @@
  * fetch_week_csv.mjs
  *
  * Downloads match data for the past 3 days + next 4 days (7-day window)
- * from API-Sports and ESPN, then writes them to matches_week.csv.
+ * from ESPN, then writes them to matches_week.csv.
  *
  * Usage:
  *   node fetch_week_csv.mjs
- *   SPORTS_API_KEY=your_key node fetch_week_csv.mjs
  *
  * Output: matches_week.csv  (in the same directory)
  *
@@ -25,8 +24,6 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const OUT_FILE = path.join(__dirname, 'matches_week.csv');
-
-const SPORTS_API_KEY = process.env.SPORTS_API_KEY || '3d923c01afee89b7b9ae92761979ef56';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -79,39 +76,6 @@ function csvCell(val) {
 
 function rowToCsv(fields) {
   return fields.map(csvCell).join(',');
-}
-
-// ─── API-Sports fetcher ───────────────────────────────────────────────────────
-
-async function fetchApiSportsDay(dateIso) {
-  if (!SPORTS_API_KEY) return [];
-  try {
-    const url = `https://v3.football.api-sports.io/fixtures?date=${dateIso}`;
-    const res = await safeFetch(url, 2, { 'x-apisports-key': SPORTS_API_KEY });
-    if (!res) return [];
-    const data = await res.json();
-    const fixtures = data.response || [];
-    return fixtures.map(f => {
-      const sShort = f.fixture?.status?.short || '';
-      const isFinished = ['FT', 'AET', 'PEN'].includes(sShort);
-      const isLive = ['1H', '2H', 'HT', 'ET', 'BT', 'P', 'LIVE'].includes(sShort);
-      const kickoff = f.fixture?.date ? new Date(f.fixture.date).toISOString().slice(11, 16) : '';
-      return {
-        date: dateIso,
-        kickoff,
-        league: `${f.league?.country ? f.league.country + ' - ' : ''}${f.league?.name || 'Soccer'}`,
-        homeName: f.teams?.home?.name || '',
-        awayName: f.teams?.away?.name || '',
-        homeScore: f.goals?.home ?? '',
-        awayScore: f.goals?.away ?? '',
-        status: isFinished ? 'FT' : (isLive ? 'LIVE' : (sShort || 'pre')),
-        source: 'api-sports',
-      };
-    });
-  } catch (e) {
-    console.warn(`  API-Sports error for ${dateIso}: ${e.message}`);
-    return [];
-  }
 }
 
 // ─── ESPN fetcher ─────────────────────────────────────────────────────────────
@@ -183,14 +147,7 @@ async function main() {
     const espn = espnDateStr(d);
     process.stdout.write(`  ${iso} ... `);
 
-    // Try API-Sports first (more complete)
-    let rows = await fetchApiSportsDay(iso);
-    if (rows.length === 0) {
-      // Fallback to ESPN
-      rows = await fetchEspnDay(espn);
-      if (rows.length > 0) process.stdout.write(`(ESPN fallback) `);
-    }
-
+    const rows = await fetchEspnDay(espn);
     console.log(`${rows.length} matches`);
     allRows.push(...rows);
   }
