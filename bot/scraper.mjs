@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+// TEMP: manual Telegram verification run — reverted right after the test.
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const CF_ACCOUNT_ID = process.env.CF_ACCOUNT_ID;
