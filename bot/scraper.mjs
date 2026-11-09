@@ -2,6 +2,9 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+// Nightly pipeline: scrape ESPN → build predictions → push to Render + Cloudflare KV
+// → post the Telegram digest. Runs at 23:59 UTC from GitHub Actions (dispatched
+// by the Cloudflare Worker cron). A prediction locks once its match kicks off.
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const CF_ACCOUNT_ID = process.env.CF_ACCOUNT_ID;
