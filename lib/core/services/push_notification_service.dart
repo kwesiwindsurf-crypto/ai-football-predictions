@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'app_settings_service.dart';
+import 'notification_service.dart';
 
 /// Top-level background message handler required by FCM
 @pragma('vm:entry-point')
@@ -62,31 +64,44 @@ class PushNotificationService {
       );
       await _localNotifications.initialize(initSettings);
 
-      // 4. Auto-subscribe to the general live_scores topic
-      await messaging.subscribeToTopic('live_scores');
-      debugPrint('Successfully subscribed to FCM topic: live_scores');
+      // 4. Unsubscribe from global live_scores topic so devices never receive
+      // background/closed-app goal push alerts. Alerts run in-app when active.
+      try {
+        await messaging.unsubscribeFromTopic('live_scores');
+        debugPrint('Unsubscribed from background FCM topic: live_scores');
+      } catch (e) {
+        debugPrint('Note unsubscribing from live_scores: $e');
+      }
 
-      // 5. Handle foreground notifications (heads-up popup when app is open)
+      // 5. Only surface foreground FCM messages if master alerts are on,
+      // a live match is active, and it is not a redundant global goal push.
       FirebaseMessaging.onMessage.listen((RemoteMessage message) {
         debugPrint('Foreground message received: ${message.notification?.title}');
         final notification = message.notification;
-        if (notification != null) {
-          _localNotifications.show(
-            notification.hashCode,
-            notification.title ?? '⚽ Match Alert',
-            notification.body ?? '',
-            NotificationDetails(
-              android: AndroidNotificationDetails(
-                androidChannel.id,
-                androidChannel.name,
-                channelDescription: androidChannel.description,
-                importance: Importance.max,
-                priority: Priority.high,
-                icon: '@mipmap/launcher_icon',
-              ),
+        if (notification == null) return;
+
+        final title = notification.title ?? '⚽ Match Alert';
+        final isGoalPush = message.from == '/topics/live_scores' ||
+            title.toUpperCase().contains('GOAL');
+        if (isGoalPush) return;
+        if (!AppSettingsService.instance.masterAlerts) return;
+        if (!NotificationService.instance.canShowActiveAlert) return;
+
+        _localNotifications.show(
+          notification.hashCode,
+          title,
+          notification.body ?? '',
+          NotificationDetails(
+            android: AndroidNotificationDetails(
+              androidChannel.id,
+              androidChannel.name,
+              channelDescription: androidChannel.description,
+              importance: Importance.max,
+              priority: Priority.high,
+              icon: '@mipmap/launcher_icon',
             ),
-          );
-        }
+          ),
+        );
       });
 
       _initialized = true;
@@ -95,13 +110,9 @@ class PushNotificationService {
     }
   }
 
-  /// Subscribe to a specific match topic (e.g., 'match_12345')
+  /// Background per-match goal pushes are disabled (alerts are in-app only).
   Future<void> subscribeToMatch(String matchId) async {
-    try {
-      await FirebaseMessaging.instance.subscribeToTopic('match_$matchId');
-    } catch (e) {
-      debugPrint('Error subscribing to match $matchId: $e');
-    }
+    await unsubscribeFromMatch(matchId);
   }
 
   /// Unsubscribe from a match

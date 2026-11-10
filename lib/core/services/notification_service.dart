@@ -1,6 +1,9 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'api_service.dart';
 import 'app_settings_service.dart';
+import 'matches_provider.dart';
 
 class NotificationService {
   static final NotificationService instance = NotificationService._internal();
@@ -92,42 +95,26 @@ class NotificationService {
         ),
       );
 
-  /// Fires a local notification if masterAlerts & alertKickoff are enabled.
-  Future<void> showKickoffAlert({
-    required int id,
-    required String homeTeam,
-    required String awayTeam,
-    required String kickoffTime,
-  }) async {
-    final settings = AppSettingsService.instance;
-    if (!settings.masterAlerts || !settings.alertKickoff) return;
-
-    try {
-      await _notificationsPlugin.show(
-        id,
-        '⚽ Match Kickoff Soon',
-        '$homeTeam vs $awayTeam starts at $kickoffTime!',
-        _notificationDetails,
-      );
-    } catch (e) {
-      debugPrint('Error showing kickoff alert: $e');
+  /// Notifications are only permitted while the app is open in the foreground
+  /// and at least one match is currently LIVE.
+  bool get canShowActiveAlert {
+    if (WidgetsBinding.instance.lifecycleState != AppLifecycleState.resumed) {
+      return false;
     }
+    return MatchesProvider.instance.hasLiveMatches ||
+        ApiService.liveMatchesNotifier.value.isNotEmpty;
   }
 
-  /// Fires a local notification when a goal is scored.
-  Future<void> showGoalAlert({
+  Future<void> _showIfAllowed({
     required int id,
-    required String homeTeam,
-    required String awayTeam,
-    required int homeScore,
-    required int awayScore,
-    String? scoringTeam,
+    required String title,
+    required String body,
+    required bool categoryEnabled,
+    required String debugLabel,
   }) async {
     final settings = AppSettingsService.instance;
-    if (!settings.masterAlerts || !settings.alertGoals) return;
-
-    final title = scoringTeam != null ? '⚽ GOAL! $scoringTeam' : '⚽ Goal Alert!';
-    final body = '$homeTeam $homeScore - $awayScore $awayTeam';
+    if (!settings.masterAlerts || !categoryEnabled) return;
+    if (!canShowActiveAlert) return;
 
     try {
       await _notificationsPlugin.show(
@@ -137,8 +124,45 @@ class NotificationService {
         _notificationDetails,
       );
     } catch (e) {
-      debugPrint('Error showing goal alert: $e');
+      debugPrint('Error showing $debugLabel: $e');
     }
+  }
+
+  /// Fires a local notification if masterAlerts & alertKickoff are enabled.
+  Future<void> showKickoffAlert({
+    required int id,
+    required String homeTeam,
+    required String awayTeam,
+    required String kickoffTime,
+  }) {
+    return _showIfAllowed(
+      id: id,
+      title: '⚽ Match Kickoff Soon',
+      body: '$homeTeam vs $awayTeam starts at $kickoffTime!',
+      categoryEnabled: AppSettingsService.instance.alertKickoff,
+      debugLabel: 'kickoff alert',
+    );
+  }
+
+  /// Fires a local notification when a goal is scored in an active live match.
+  Future<void> showGoalAlert({
+    required int id,
+    required String homeTeam,
+    required String awayTeam,
+    required int homeScore,
+    required int awayScore,
+    String? scoringTeam,
+  }) {
+    final title = scoringTeam != null ? '⚽ GOAL! $scoringTeam' : '⚽ Goal Alert!';
+    final body = '$homeTeam $homeScore - $awayScore $awayTeam';
+
+    return _showIfAllowed(
+      id: id,
+      title: title,
+      body: body,
+      categoryEnabled: AppSettingsService.instance.alertGoals,
+      debugLabel: 'goal alert',
+    );
   }
 
   /// Fires a local notification for high confidence AI predictions.
@@ -148,20 +172,14 @@ class NotificationService {
     required String awayTeam,
     required String prediction,
     required double confidence,
-  }) async {
-    final settings = AppSettingsService.instance;
-    if (!settings.masterAlerts || !settings.alertAiHighConfidence) return;
-
-    try {
-      await _notificationsPlugin.show(
-        id,
-        '🔥 High Confidence AI Pick (${confidence.toStringAsFixed(0)}%)',
-        '$homeTeam vs $awayTeam: $prediction',
-        _notificationDetails,
-      );
-    } catch (e) {
-      debugPrint('Error showing high confidence alert: $e');
-    }
+  }) {
+    return _showIfAllowed(
+      id: id,
+      title: '🔥 High Confidence AI Pick (${confidence.toStringAsFixed(0)}%)',
+      body: '$homeTeam vs $awayTeam: $prediction',
+      categoryEnabled: AppSettingsService.instance.alertAiHighConfidence,
+      debugLabel: 'high confidence alert',
+    );
   }
 
   /// Fires a local notification for value bet opportunities.
@@ -170,19 +188,13 @@ class NotificationService {
     required String homeTeam,
     required String awayTeam,
     required String detail,
-  }) async {
-    final settings = AppSettingsService.instance;
-    if (!settings.masterAlerts || !settings.alertValueBets) return;
-
-    try {
-      await _notificationsPlugin.show(
-        id,
-        '💎 Value Bet Opportunity',
-        '$homeTeam vs $awayTeam — $detail',
-        _notificationDetails,
-      );
-    } catch (e) {
-      debugPrint('Error showing value bet alert: $e');
-    }
+  }) {
+    return _showIfAllowed(
+      id: id,
+      title: '💎 Value Bet Opportunity',
+      body: '$homeTeam vs $awayTeam — $detail',
+      categoryEnabled: AppSettingsService.instance.alertValueBets,
+      debugLabel: 'value bet alert',
+    );
   }
 }

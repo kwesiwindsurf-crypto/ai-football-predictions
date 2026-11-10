@@ -14,10 +14,16 @@ const POLL_INTERVAL_MS = 30 * 1000; // Poll ESPN every 30 seconds in memory (0 q
 // A record still flagged live this long after kickoff, and absent from ESPN's board, is over.
 const MAX_LIVE_DURATION_MS = 3 * 60 * 60 * 1000;
 
-// Load Firebase Service Account if available (for goal push notifications)
+// Background FCM goal push alerts are opt-in only so closed/backgrounded devices
+// are not alerted remotely; the app handles live goal alerts in-app when active.
+const ENABLE_BACKGROUND_GOAL_PUSH = process.env.ENABLE_BACKGROUND_GOAL_PUSH === 'true';
+
+// Load Firebase Service Account if available (only used when ENABLE_BACKGROUND_GOAL_PUSH=true)
 let serviceAccount = null;
 const saPath = path.join(__dirname, 'service_account.json');
-if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+if (!ENABLE_BACKGROUND_GOAL_PUSH) {
+  console.log('🔕 Background FCM goal pushes disabled (alerts handled in-app while live).');
+} else if (process.env.FIREBASE_SERVICE_ACCOUNT) {
   try {
     serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
     console.log(`✅ Loaded Firebase service account from env (project: ${serviceAccount.project_id})`);
@@ -392,7 +398,7 @@ function extractTeamLogo(compObj) {
       });
     }
 
-    if (goalAlerts.length > 0 && serviceAccount) {
+    if (ENABLE_BACKGROUND_GOAL_PUSH && goalAlerts.length > 0 && serviceAccount) {
       broadcastGoalAlerts(goalAlerts, serviceAccount).catch(err =>
         console.error('Push notification error:', err.message)
       );

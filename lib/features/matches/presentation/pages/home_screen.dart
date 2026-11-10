@@ -29,7 +29,8 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMixin {
+class _HomeScreenState extends State<HomeScreen>
+    with AutomaticKeepAliveClientMixin, WidgetsBindingObserver {
   @override
   bool get wantKeepAlive => true;
 
@@ -74,6 +75,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
       _updateSelectedDate(_matches!);
     }
     _scrollController.addListener(_onScrollChanged);
+    WidgetsBinding.instance.addObserver(this);
     _loadData();
     _loadPreferences();
     LiveSyncEngine.instance.addSyncListener(_onLiveTick);
@@ -127,7 +129,19 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Drop cached score baselines on background so reopening the app later does
+    // not emit catch-up alerts for goals scored while outside the app.
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden ||
+        state == AppLifecycleState.detached) {
+      _previousScores.clear();
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     LiveSyncEngine.instance.removeSyncListener(_onLiveTick);
     MatchesProvider.instance.removeListener(_onProviderChanged);
     _scrollSaveTimer?.cancel();
@@ -363,41 +377,41 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
   }
 
   void _checkNotifications(List<model.Match> freshMatches) {
+    final bool canNotifyNow = NotificationService.instance.canShowActiveAlert;
     for (final match in freshMatches) {
       final key = match.id;
       final homeScore = match.homeScore ?? 0;
       final awayScore = match.awayScore ?? 0;
       final currentScoreStr = '$homeScore-$awayScore';
 
-      // Goal notification check for live/finished matches
-      if (_previousScores.containsKey(key)) {
+      // Goal notification check: only when actively in the app and this match is LIVE.
+      if (canNotifyNow &&
+          match.status == model.MatchStatus.live &&
+          _previousScores.containsKey(key)) {
         final prevScoreStr = _previousScores[key];
         if (prevScoreStr != currentScoreStr) {
           final prevParts = prevScoreStr!.split('-');
           final prevHome = int.tryParse(prevParts[0]) ?? 0;
           final prevAway = int.tryParse(prevParts[1]) ?? 0;
 
-          String? scoringTeam;
-          if (homeScore > prevHome) {
-            scoringTeam = match.homeTeam;
-          } else if (awayScore > prevAway) {
-            scoringTeam = match.awayTeam;
+          if (homeScore > prevHome || awayScore > prevAway) {
+            final scoringTeam =
+                homeScore > prevHome ? match.homeTeam : match.awayTeam;
+            NotificationService.instance.showGoalAlert(
+              id: key.hashCode,
+              homeTeam: match.homeTeam,
+              awayTeam: match.awayTeam,
+              homeScore: homeScore,
+              awayScore: awayScore,
+              scoringTeam: scoringTeam,
+            );
           }
-
-          NotificationService.instance.showGoalAlert(
-            id: key.hashCode,
-            homeTeam: match.homeTeam,
-            awayTeam: match.awayTeam,
-            homeScore: homeScore,
-            awayScore: awayScore,
-            scoringTeam: scoringTeam,
-          );
         }
       }
       _previousScores[key] = currentScoreStr;
 
-      // High confidence AI pick notification check (>70%)
-      if (!_notifiedPredictions.contains(key)) {
+      // High confidence AI pick notification check (>70%), gated by active live session
+      if (canNotifyNow && !_notifiedPredictions.contains(key)) {
         final double homeWin = match.prediction.homeWinProbability;
         final double awayWin = match.prediction.awayWinProbability;
         final bool hasMarketOdds =
@@ -575,6 +589,15 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                           // Notification Bell Button with live green badge
                           GestureDetector(
                             onTap: () {
+                              final alertsOn =
+                                  AppSettingsService.instance.masterAlerts;
+                              final hasLive =
+                                  MatchesProvider.instance.hasLiveMatches;
+                              final statusLabel = !alertsOn
+                                  ? 'Alerts Paused in Settings'
+                                  : (hasLive
+                                      ? 'In-App Live Alerts Active'
+                                      : 'Quiet Until a Live Match Is Active');
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   backgroundColor: AppTheme.surfaceOf(context),
@@ -584,9 +607,11 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                                     children: [
                                       Icon(Icons.notifications_active_rounded, color: primary, size: 20),
                                       const SizedBox(width: 10),
-                                      Text(
-                                        'Live Goal & High AI Edge Alerts Active',
-                                        style: TextStyle(color: AppTheme.textPrimaryOf(context), fontSize: 13, fontWeight: FontWeight.w600),
+                                      Expanded(
+                                        child: Text(
+                                          statusLabel,
+                                          style: TextStyle(color: AppTheme.textPrimaryOf(context), fontSize: 13, fontWeight: FontWeight.w600),
+                                        ),
                                       ),
                                     ],
                                   ),

@@ -328,8 +328,8 @@ export default {
       }
     }
 
-    // Send FCM Push notifications for any detected goals
-    if (goalAlerts.length > 0 && env.FIREBASE_SERVICE_ACCOUNT && ctx?.waitUntil) {
+    // Background FCM goal pushes are disabled by default (opt-in via env); live alerts happen in-app when active.
+    if (env.ENABLE_BACKGROUND_GOAL_PUSH === 'true' && goalAlerts.length > 0 && env.FIREBASE_SERVICE_ACCOUNT && ctx?.waitUntil) {
       ctx.waitUntil(broadcastGoalAlerts(goalAlerts, env.FIREBASE_SERVICE_ACCOUNT));
     }
 
