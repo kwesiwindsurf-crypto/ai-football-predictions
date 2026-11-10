@@ -22,14 +22,23 @@ function probs(r) {
 function isWomensMatch(league, home, away) {
   const str = `${league} ${home} ${away}`.toLowerCase();
   return str.includes('women') || 
+         str.includes('woman') ||
          str.includes('(w)') || 
          str.includes(' nwsl') || 
          str.match(/^nwsl/) ||
-         str.includes('liga f') ||
+         /\bliga\s+f\b/.test(str) ||
+         /\bpremi[eè]re\s+ligue\b/.test(str) ||
+         str.includes('usl super league') ||
          str.includes('femenina') ||
+         str.includes('femenil') ||
          str.includes('feminina') ||
+         str.includes('femminile') ||
+         str.includes('feminine') ||
+         str.includes('féminine') ||
+         str.includes('femmes') ||
          str.includes('frauen') ||
-         str.includes('dames');
+         str.includes('dames') ||
+         str.includes('ladies');
 }
 
 function isObscureMatch(league, home, away) {

@@ -2152,7 +2152,26 @@
 
         const rawMatches = Array.from(matchMap.values());
 
-        allMatches = rawMatches.map(m => {
+        // Older runs let women's / youth competitions through. Hide them here so
+        // the scorecard, vault and history stay men's-only without touching the
+        // archived JSON.
+        const EXCLUDED_LEAGUE_WORDS = [
+          'women', 'woman', 'femenina', 'femenil', 'feminine', 'femminile',
+          'féminine', 'feminin', 'frauen', 'dames', 'femmes', 'ladies',
+          'nwsl', 'wsl', 'usl super league', 'd1 arkema', 'arkema',
+          'u17', 'u19', 'u20', 'u21', 'u23', 'youth', 'reserve', 'ncaa', 'college'
+        ];
+        const EXCLUDED_LEAGUE_PATTERNS = [
+          /\bliga\s+f\b/, /\bpremi[eè]re\s+ligue\b/, /\bwe\s+league\b/, /\bw\s+league\b/
+        ];
+        const isExcludedLeagueName = (name) => {
+          const s = String(name || '').toLowerCase();
+          return EXCLUDED_LEAGUE_WORDS.some(w => s.includes(w)) ||
+                 EXCLUDED_LEAGUE_PATTERNS.some(re => re.test(s));
+        };
+        const cleanMatches = rawMatches.filter(m => !isExcludedLeagueName(m.league));
+
+        allMatches = cleanMatches.map(m => {
           const rec = m.prediction?.recommendation || '';
           const evalRes = (m.status === 'finished' || m.statusShort === 'FT')
             ? evaluatePrediction(rec, m.homeScore, m.awayScore, m.homeTeam, m.awayTeam)

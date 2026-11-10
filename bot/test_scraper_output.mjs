@@ -11,10 +11,23 @@ const KV_KEY        = 'latest_soccer_data';
 
 // ─── Keywords used to filter out women's / youth / irrelevant matches ─────────
 const EXCLUDED_LEAGUE_KEYWORDS = [
-  'women', 'woman', 'femenino', 'feminine', 'frauen', 'dames',
-  'femmes', 'nwsl', 'wsl', 'nwsl', 'u17', 'u19', 'u20', 'u21', 'u23',
+  'women', 'woman', 'femenino', 'femenina', 'femenil', 'feminine', 'feminina',
+  'femminile', 'féminine', 'feminin', 'frauen', 'dames', 'femmes', 'ladies',
+  'nwsl', 'wsl', 'nwsl', 'u17', 'u19', 'u20', 'u21', 'u23',
   'youth', 'reserve', 'friendlies', 'international friendly',
-  'ncaa', 'college'
+  'ncaa', 'college',
+  // Women's competitions whose ESPN label carries no "women"/"fem" marker
+  'usl super league', 'd1 arkema', 'arkema'
+];
+
+// Full-league patterns for women's competitions whose names would produce
+// false positives with a plain substring check (e.g. "liga f" must not
+// exclude Argentina's Torneo Federal A).
+const EXCLUDED_LEAGUE_PATTERNS = [
+  /\bliga\s+f\b/,              // Spain - Liga F (women)
+  /\bpremi[eè]re\s+ligue\b/,   // France - Première Ligue (D1 Féminine)
+  /\bwe\s+league\b/,           // Japan - WE League (women)
+  /\bw\s+league\b/
 ];
 
 // ─── ESPN league slugs to fetch fixtures for (covers major leagues + cups) ────
@@ -99,7 +112,8 @@ async function safeFetch(url, retries = 2) {
 // ─── Filter out women's/youth/irrelevant leagues ──────────────────────────────
 function isExcludedLeague(leagueName) {
   const lower = (leagueName || '').toLowerCase();
-  return EXCLUDED_LEAGUE_KEYWORDS.some(kw => lower.includes(kw));
+  if (EXCLUDED_LEAGUE_KEYWORDS.some(kw => lower.includes(kw))) return true;
+  return EXCLUDED_LEAGUE_PATTERNS.some(re => re.test(lower));
 }
 
 // ─── Convert American moneyline odds → decimal odds ───────────────────────────
