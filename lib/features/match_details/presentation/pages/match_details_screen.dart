@@ -1877,24 +1877,15 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
       sub = 'CONF ${p.confidence.round()}% · EDGE ${_edgeLabel(edge)} · KELLY ${stake.toStringAsFixed(1)}%';
     }
 
-    final pick = p.recommendation.isNotEmpty
-        ? p.recommendation
-        : '${_shortTeamName(m.awayTeam)} to WIN';
-    final pickName = _verdictPick(p.stakingOptions, pick);
+    final pickName = p.recommendation.trim().isNotEmpty
+        ? p.recommendation.trim()
+        : _verdictPick(
+            p.stakingOptions,
+            '${_shortTeamName(isHomeFav ? m.homeTeam : m.awayTeam)} to WIN',
+          );
 
-    // The odds beside the pick must belong to *that* pick. Prefer the
-    // price carried in the safe-tier label, then the matching 1X2 market.
-    double? pickOdds;
-    for (final raw in p.stakingOptions) {
-      final idx = raw.indexOf(':');
-      if (idx > 0 && raw.substring(0, idx).trim().toLowerCase() == 'safe') {
-        final match = RegExp(r'\((\d+(?:\.\d+)?)\)\s*$')
-            .firstMatch(raw.substring(idx + 1).trim());
-        if (match != null) pickOdds = double.tryParse(match.group(1)!);
-        break;
-      }
-    }
-    pickOdds ??= _oddsForPick(m, pickName);
+    // Resolve the market price that actually belongs to [pickName].
+    final double? pickOdds = _oddsForPick(m, pickName);
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -2000,7 +1991,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                  'Added $pickName @ ${pickOdds!.toStringAsFixed(2)} to slip'),
+                                  'Added $pickName @ ${pickOdds.toStringAsFixed(2)} to slip'),
                               duration: const Duration(seconds: 1),
                             ),
                           );
@@ -2060,14 +2051,33 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
 
   /// Resolves the market price that actually belongs to [pickLabel].
   /// Returns null when the pick is on a market we don't have a price for
-  /// (e.g. Over 1.5 goals) — the UI then shows "—" instead of inventing one.
+  /// (e.g. Over 1.5 goals or Double Chance) — the UI then shows "—" instead of inventing one.
   double? _oddsForPick(model.Match m, String pickLabel) {
-    final label = pickLabel.toLowerCase();
-    if (label.contains('draw') || label.trim() == 'x') return m.drawOdds;
+    final label = pickLabel.toLowerCase().trim();
+    if (label.startsWith('1x') ||
+        label.startsWith('x2') ||
+        RegExp(r'^12(?![\d.])').hasMatch(label) ||
+        label.contains('double chance') ||
+        label.contains('over ') ||
+        label.contains('under ') ||
+        label.contains('btts')) {
+      return null;
+    }
+    if (label == 'draw' || label == 'x' || label.contains('draw (x)')) {
+      return m.drawOdds;
+    }
     final homeKey = _shortTeamName(m.homeTeam).toLowerCase();
     final awayKey = _shortTeamName(m.awayTeam).toLowerCase();
-    if (label.contains(homeKey)) return m.homeOdds;
-    if (label.contains(awayKey)) return m.awayOdds;
+    if (label.contains('(1)') ||
+        label.contains(m.homeTeam.toLowerCase()) ||
+        (homeKey.isNotEmpty && label.contains(homeKey))) {
+      return m.homeOdds;
+    }
+    if (label.contains('(2)') ||
+        label.contains(m.awayTeam.toLowerCase()) ||
+        (awayKey.isNotEmpty && label.contains(awayKey))) {
+      return m.awayOdds;
+    }
     return null;
   }
   String _stripOdds(String s) {

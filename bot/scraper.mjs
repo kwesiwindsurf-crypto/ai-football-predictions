@@ -877,14 +877,20 @@ function determineLeagueStrategy(league, home, away, fHp, fDp, fAp, isBig, hOdds
     lStr.includes('bolivia') || lStr.includes('paraguay') || lStr.includes('uruguay');
 
   // 8. High-Draw Parity Traps (Draws occur in 35-50% of matches!)
-  const isHighDraw = lStr.includes('mls') || lStr.includes('serie b') ||
-    lStr.includes('liga mx') || lStr.includes('championship') ||
+  const isHighDraw = lStr.includes('mls') ||
+    lStr.includes('liga mx') ||
     lStr.includes('ekstraklasa') || lStr.includes('first league - czech');
+
+  // 8b. Lower / Second-Tier Leagues (High upset & draw rate — prefer Double Chance or Over 1.5 Goals)
+  const isLowerLeague = lStr.includes('championship') || lStr.includes('league one') ||
+    lStr.includes('league two') || lStr.includes('national league') ||
+    lStr.includes('segunda') || lStr.includes('serie b') ||
+    lStr.includes('2. bundesliga') || lStr.includes('ligue 2') ||
+    lStr.includes('keuken') || lStr.includes('eerste divisie');
 
   // 9. Home Fortresses (Home wins/draws in 75-88% of matches)
   const isHomeFortress = lStr.includes('süper lig') || lStr.includes('super lig') ||
-    lStr.includes('league one') || lStr.includes('league two') ||
-    lStr.includes('2. bundesliga') || lStr.includes('pro league - saudi') ||
+    lStr.includes('pro league - saudi') ||
     lStr.includes('saudi') || lStr.includes('primeira liga') ||
     lStr.includes('serie a');
 
@@ -990,6 +996,31 @@ function determineLeagueStrategy(league, home, away, fHp, fDp, fAp, isBig, hOdds
     }
   }
 
+  // ── 3b. LOWER / SECOND-TIER LEAGUES (High parity — Double Chance or Over 1.5 Goals) ──
+  else if (isLowerLeague) {
+    if ((fHp >= 74 || (hasOdds && hOdds <= 1.35)) && !isAwayFav) {
+      recommendation = `${home} to Win (1)`;
+      primarySafe = `Safe: 1X (${home} or Draw)`;
+      strategyAnalysis = `Lower League Heavy Mismatch: Dominant Host (${fHp}% Win).`;
+    } else if ((fAp >= 70 || (hasOdds && aOdds <= 1.38)) && !isHomeFav) {
+      recommendation = `${away} to Win (2)`;
+      primarySafe = `Safe: X2 (${away} or Draw)`;
+      strategyAnalysis = `Lower League Heavy Mismatch: Dominant Visitor (${fAp}% Win).`;
+    } else if (isAwayFav && probX2 >= 64 && !isOddsClose) {
+      recommendation = `X2 (${away} or Draw)`;
+      primarySafe = `Safe: X2 (${away} or Draw)`;
+      strategyAnalysis = `Lower League Strategy: Away Double Chance Shield (X2 ${probX2}%).`;
+    } else if (isHomeFav && prob1X >= 64 && !isOddsClose) {
+      recommendation = `1X (${home} or Draw)`;
+      primarySafe = `Safe: 1X (${home} or Draw)`;
+      strategyAnalysis = `Lower League Strategy: Home Double Chance Shield (1X ${prob1X}%).`;
+    } else {
+      recommendation = `Over 1.5 Goals`;
+      primarySafe = `Safe: Over 1.5 Goals`;
+      strategyAnalysis = `Lower League Goals Market: Tight matchup, reliable Over 1.5 hit rate.`;
+    }
+  }
+
   // ── 4. DEFENSIVE LEAGUES ──
   else if (isDefensive) {
     if (fHp >= 65 && !isAwayFav) {
@@ -1040,10 +1071,10 @@ function determineLeagueStrategy(league, home, away, fHp, fDp, fAp, isBig, hOdds
     }
   }
 
-  // ── 6. HOME FORTRESS LEAGUES (Turkey, Saudi, 2. Bundesliga, etc.) ──
+  // ── 6. HOME FORTRESS LEAGUES (Turkey, Saudi, Portugal, Serie A) ──
   // CRITICAL: Never blindly give 1X to underdogs when an Away giant visits (e.g. Al Nassr)
   else if (isHomeFortress) {
-    if (fHp >= 55 && !isAwayFav) {
+    if (fHp >= 62 && !isAwayFav) {
       recommendation = `${home} to Win (1)`;
       primarySafe = `Safe: 1X (${home} or Draw)`;
       strategyAnalysis = `Home Fortress League: Dominant Host (${fHp}% Win).`;
@@ -1116,8 +1147,13 @@ function determineLeagueStrategy(league, home, away, fHp, fDp, fAp, isBig, hOdds
 
   // ── ANTI-CONTRADICTION FINAL SANITY GUARD ──
   // Mathematically impossible for a 1/1X pick to stand if Away has overwhelming odds/probability advantage, and vice versa!
-  if (isAwayFav && (recommendation.includes(home) || recommendation.startsWith('1'))) {
-    if (fAp >= 58 || (hasOdds && aOdds <= 1.50)) {
+  const picksHomeSide = recommendation.startsWith('1X') || recommendation.includes('to Win (1)');
+  const picksAwaySide = recommendation.startsWith('X2') || recommendation.includes('to Win (2)');
+  if (isAwayFav && picksHomeSide) {
+    const allowDirectAway = isLowerLeague
+      ? (fAp >= 70 || (hasOdds && aOdds <= 1.38))
+      : (fAp >= 60 || (hasOdds && aOdds <= 1.48));
+    if (allowDirectAway) {
       recommendation = `${away} to Win (2)`;
       primarySafe = `Safe: X2 (${away} or Draw)`;
       strategyAnalysis = `Corrected Alignment: Away Giant Favoritism (${away} ${fAp}% vs ${home} ${fHp}%).`;
@@ -1126,8 +1162,11 @@ function determineLeagueStrategy(league, home, away, fHp, fDp, fAp, isBig, hOdds
       primarySafe = `Safe: X2 (${away} or Draw)`;
       strategyAnalysis = `Corrected Alignment: Away Compound Edge (X2 ${probX2}%).`;
     }
-  } else if (isHomeFav && (recommendation.includes(away) || recommendation.startsWith('2'))) {
-    if (fHp >= 58 || (hasOdds && hOdds <= 1.50)) {
+  } else if (isHomeFav && picksAwaySide) {
+    const allowDirectHome = isLowerLeague
+      ? (fHp >= 74 || (hasOdds && hOdds <= 1.35))
+      : (fHp >= 62 || (hasOdds && hOdds <= 1.48));
+    if (allowDirectHome) {
       recommendation = `${home} to Win (1)`;
       primarySafe = `Safe: 1X (${home} or Draw)`;
       strategyAnalysis = `Corrected Alignment: Home Favorite Favoritism (${home} ${fHp}% vs ${away} ${fAp}%).`;

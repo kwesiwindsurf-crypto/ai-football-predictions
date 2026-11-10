@@ -19,10 +19,10 @@ class FeaturedAiBanner extends StatelessWidget {
 
     final match = featuredMatch!;
     final primary = AppTheme.primaryOf(context);
-    final isHomeFav = match.prediction.homeWinProbability >= match.prediction.awayWinProbability;
-    final favTeam = isHomeFav ? match.homeTeam : match.awayTeam;
-    final winProb = (isHomeFav ? match.prediction.homeWinProbability : match.prediction.awayWinProbability).round();
     final recommendation = match.prediction.recommendation;
+    final recLower = recommendation.toLowerCase();
+    final isDirectWin = recLower.contains('to win (1)') || recLower.contains('to win (2)');
+    final conf = match.prediction.confidence.round();
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -81,7 +81,9 @@ class FeaturedAiBanner extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'AI Model Consensus: $winProb% Value Win',
+                  isDirectWin
+                      ? 'AI Model Consensus: $conf% Value Win'
+                      : 'AI Model Top Pick: $conf% Confidence',
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
@@ -93,7 +95,7 @@ class FeaturedAiBanner extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '$favTeam • $recommendation',
+                  '${match.homeTeam} vs ${match.awayTeam} • $recommendation',
                   style: TextStyle(
                     fontSize: 10,
                     color: AppTheme.textSecondaryOf(context),

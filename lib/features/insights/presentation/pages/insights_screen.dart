@@ -778,10 +778,35 @@ class _InsightsScreenState extends State<InsightsScreen> with TickerProviderStat
     return featured.isEmpty ? null : featured.first;
   }
 
-  /// (pick label, odds, tier) from staking payload — priority Safe→Value→Goals→Risky;
-  /// odds only when the payload carries one. Falls back to recommendation.
+  /// (pick label, odds, tier) anchored to `prediction.recommendation` as the
+  /// single source of truth; falls back to stakingOptions only if empty.
   (String, double?, String) _spotlightPick(model.Match m) {
     final p = m.prediction;
+    final rec = p.recommendation.trim();
+    if (rec.isNotEmpty) {
+      final recLower = rec.toLowerCase();
+      final isCompoundOrGoals = recLower.startsWith('1x') ||
+          recLower.startsWith('x2') ||
+          RegExp(r'^12(?![\d.])').hasMatch(recLower) ||
+          recLower.contains('double chance') ||
+          recLower.contains('over ') ||
+          recLower.contains('under ');
+      double? odds;
+      if (!isCompoundOrGoals) {
+        if (recLower.contains('(1)') || recLower.contains(m.homeTeam.toLowerCase())) {
+          odds = m.homeOdds;
+        } else if (recLower.contains('(2)') || recLower.contains(m.awayTeam.toLowerCase())) {
+          odds = m.awayOdds;
+        } else if (recLower == 'draw' || recLower.contains('(x)')) {
+          odds = m.drawOdds;
+        }
+      }
+      final tier = recLower.contains('over ') || recLower.contains('under ')
+          ? 'goals'
+          : 'ai';
+      return (rec, odds, tier);
+    }
+
     String? label;
     double? odds;
     String tier = 'ai';
@@ -800,8 +825,7 @@ class _InsightsScreenState extends State<InsightsScreen> with TickerProviderStat
       }
       if (label != null) break;
     }
-    label ??= p.recommendation;
-    return (label, odds, tier);
+    return (label ?? '', odds, tier);
   }
 
   Widget _buildSpotlightCard(BuildContext context) {
@@ -835,7 +859,8 @@ class _InsightsScreenState extends State<InsightsScreen> with TickerProviderStat
     // Day suffix on the league line, relative to today.
     final now = DateTime.now();
     final today0 = DateTime(now.year, now.month, now.day);
-    final matchDay0 = DateTime(m.date.year, m.date.month, m.date.day);
+    final localMatchDate = m.date.toLocal();
+    final matchDay0 = DateTime(localMatchDate.year, localMatchDate.month, localMatchDate.day);
     final dayDiff = matchDay0.difference(today0).inDays;
     final dayLabel = switch (dayDiff) {
       0 => 'TODAY',

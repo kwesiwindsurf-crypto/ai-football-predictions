@@ -214,7 +214,8 @@ class BettingTrackerService extends ChangeNotifier {
         final seenKeys = <String>{};
         _bets = [];
         for (final b in rawLoaded) {
-          final dayKey = '${b.normalizedTeamsKey}-${b.date.year}-${b.date.month}-${b.date.day}';
+          final local = b.date.toLocal();
+          final dayKey = '${b.normalizedTeamsKey}-${local.year}-${local.month}-${local.day}';
           if (seenKeys.add(dayKey)) {
             _bets.add(b);
           }
@@ -265,20 +266,26 @@ class BettingTrackerService extends ChangeNotifier {
         continue;
       }
 
-      final matchDayKey = '${match.normalizedTeamsKey}-${match.date.year}-${match.date.month}-${match.date.day}';
-      final existingIndex = _bets.indexWhere((b) =>
-          b.id == match.id ||
-          b.normalizedTeamsKey == match.normalizedTeamsKey ||
-          '${b.normalizedTeamsKey}-${b.date.year}-${b.date.month}-${b.date.day}' == matchDayKey);
+      final localMatchDate = match.date.toLocal();
+      final matchDayKey =
+          '${match.normalizedTeamsKey}-${localMatchDate.year}-${localMatchDate.month}-${localMatchDate.day}';
+      final existingIndex = _bets.indexWhere((b) {
+        final localBetDate = b.date.toLocal();
+        final betDayKey =
+            '${b.normalizedTeamsKey}-${localBetDate.year}-${localBetDate.month}-${localBetDate.day}';
+        return b.id == match.id || betDayKey == matchDayKey;
+      });
       final eval = _evaluateMatchBet(match);
 
       if (existingIndex >= 0) {
-        // Update existing if score, status, or prediction pick changed
+        // Update existing if score, status, pick, odds, or date changed
         final existing = _bets[existingIndex];
         if (existing.status != eval.status ||
             existing.homeScore != eval.homeScore ||
             existing.awayScore != eval.awayScore ||
             existing.pick != eval.pick ||
+            existing.odds != eval.odds ||
+            existing.date != eval.date ||
             existing.id != eval.id) {
           _bets[existingIndex] = eval;
           changed = true;
@@ -310,7 +317,7 @@ class BettingTrackerService extends ChangeNotifier {
     _betsById.clear();
     for (final b in _bets) {
       _betsById[b.id] = b;
-      _betsById[b.normalizedTeamsKey] = b;
+      _betsById.putIfAbsent(b.normalizedTeamsKey, () => b);
     }
     _cachedStats = _computeStats(timeframe: 'all');
     _cachedTodayStats = _computeStats(timeframe: 'today');
@@ -324,7 +331,8 @@ class BettingTrackerService extends ChangeNotifier {
     return _bets.where((b) {
       // Timeframe filter
       if (timeframe == 'today') {
-        if (b.date.year != now.year || b.date.month != now.month || b.date.day != now.day) {
+        final local = b.date.toLocal();
+        if (local.year != now.year || local.month != now.month || local.day != now.day) {
           return false;
         }
       }
@@ -343,16 +351,34 @@ class BettingTrackerService extends ChangeNotifier {
     final rec = match.prediction.recommendation;
     final homeName = match.homeTeam.toLowerCase();
     final awayName = match.awayTeam.toLowerCase();
-    final recLower = rec.toLowerCase();
+    final recLower = rec.toLowerCase().trim();
 
-    // Determine odds for the AI pick
+    // Determine odds strictly for the actual pick
     double odds = 1.85;
-    if (recLower.contains(homeName) && match.homeOdds != null) {
-      odds = match.homeOdds!;
-    } else if (recLower.contains(awayName) && match.awayOdds != null) {
-      odds = match.awayOdds!;
-    } else if (recLower.contains('draw') && match.drawOdds != null) {
-      odds = match.drawOdds!;
+    final isDoubleChanceOrGoals = recLower.startsWith('1x') ||
+        recLower.startsWith('x2') ||
+        RegExp(r'^12(?![\d.])').hasMatch(recLower) ||
+        recLower.contains('double chance') ||
+        recLower.contains('over ') ||
+        recLower.contains('under ');
+    if (!isDoubleChanceOrGoals) {
+      if ((recLower.contains('(1)') || recLower.contains(homeName)) && match.homeOdds != null) {
+        odds = match.homeOdds!;
+      } else if ((recLower.contains('(2)') || recLower.contains(awayName)) && match.awayOdds != null) {
+        odds = match.awayOdds!;
+      } else if ((recLower == 'draw' || recLower.contains('(x)')) && match.drawOdds != null) {
+        odds = match.drawOdds!;
+      }
+    } else if (recLower.startsWith('1x') && match.homeOdds != null && match.drawOdds != null) {
+      final implied = (1.0 / match.homeOdds!) + (1.0 / match.drawOdds!);
+      if (implied > 0) {
+        odds = double.parse((1.0 / implied).clamp(1.05, 5.0).toStringAsFixed(2));
+      }
+    } else if (recLower.startsWith('x2') && match.awayOdds != null && match.drawOdds != null) {
+      final implied = (1.0 / match.awayOdds!) + (1.0 / match.drawOdds!);
+      if (implied > 0) {
+        odds = double.parse((1.0 / implied).clamp(1.05, 5.0).toStringAsFixed(2));
+      }
     }
 
     // Postponed / Cancelled / Suspended matches -> VOID (stake refunded, 0 profit)
@@ -429,8 +455,14 @@ class BettingTrackerService extends ChangeNotifier {
     final evalUnder35 = recLower.contains('under 3.5');
     final evalOver35 = recLower.contains('over 3.5');
 
-    // 1. Double chance or compound recommendation (e.g. "Draw (X) or Under 2.5 Goals")
-    if (recLower.contains('or')) {
+    // 1. Explicit Double Chance prefixes (1X, X2, 12) and compound "or" recommendations
+    if (recLower.startsWith('1x')) {
+      won = hScore >= aScore;
+    } else if (recLower.startsWith('x2')) {
+      won = aScore >= hScore;
+    } else if (RegExp(r'^12(?![\d.])').hasMatch(recLower) && !recLower.contains('over')) {
+      won = hScore != aScore;
+    } else if (RegExp(r'\bor\b').hasMatch(recLower)) {
       bool opt1 = false;
       bool opt2 = false;
 
@@ -518,7 +550,8 @@ class BettingTrackerService extends ChangeNotifier {
     // 1. Timeframe filtering
     final allInTimeframe = _bets.where((b) {
       if (timeframe == 'today') {
-        return b.date.year == now.year && b.date.month == now.month && b.date.day == now.day;
+        final local = b.date.toLocal();
+        return local.year == now.year && local.month == now.month && local.day == now.day;
       }
       return true; // 'all'
     }).toList();

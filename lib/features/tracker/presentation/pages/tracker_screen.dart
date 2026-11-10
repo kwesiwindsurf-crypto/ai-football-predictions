@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../../../core/services/api_service.dart';
 import '../../../../core/services/betting_tracker_service.dart';
 import '../../../../core/services/analytics_service.dart';
+import '../../../../core/services/matches_provider.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/breathing_gradient.dart';
 
@@ -33,11 +34,14 @@ class _TrackerScreenState extends State<TrackerScreen> with AutomaticKeepAliveCl
     _refreshData();
   }
 
-  Future<void> _refreshData() async {
+  Future<void> _refreshData({bool force = false}) async {
     setState(() => _isRefreshing = true);
     try {
-      final matches = await _apiService.fetchMatches();
-      await _tracker.syncMatches(matches);
+      final matches = await _apiService.fetchMatches(forceRefresh: force);
+      await _apiService.fetchLiveUpdates(forceSync: true);
+      final canonical = ApiService.inMemoryCache ?? matches;
+      MatchesProvider.instance.setInitialMatches(canonical);
+      await _tracker.syncMatches(canonical);
     } catch (_) {
       // API error handled gracefully, local tracker history is always available
     } finally {
@@ -100,7 +104,7 @@ class _TrackerScreenState extends State<TrackerScreen> with AutomaticKeepAliveCl
                             ],
                           ),
                           GestureDetector(
-                            onTap: _isRefreshing ? null : _refreshData,
+                            onTap: _isRefreshing ? null : () => _refreshData(force: true),
                             child: Container(
                               width: 36,
                               height: 36,
@@ -145,7 +149,7 @@ class _TrackerScreenState extends State<TrackerScreen> with AutomaticKeepAliveCl
           ),
           body: RefreshIndicator(
             color: primary,
-            onRefresh: _refreshData,
+            onRefresh: () => _refreshData(force: true),
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -925,6 +929,8 @@ class TrackedBetCardTile extends StatelessWidget {
         return prev.status != next.status ||
                prev.homeScore != next.homeScore ||
                prev.awayScore != next.awayScore ||
+               prev.pick != next.pick ||
+               prev.odds != next.odds ||
                prev.profit != next.profit;
       },
       builder: (context, bet, _) {

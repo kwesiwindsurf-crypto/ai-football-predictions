@@ -161,7 +161,7 @@ class Match {
       status: delta.status,
       homeScore: isDeltaPostponed ? null : (delta.homeScore ?? homeScore),
       awayScore: isDeltaPostponed ? null : (delta.awayScore ?? awayScore),
-      prediction: (delta.prediction.analysis.isNotEmpty && delta.prediction.analysis != 'Match analysis in progress')
+      prediction: delta.prediction.isServerPrediction
           ? delta.prediction
           : prediction,
       homeRank: homeRank,
@@ -345,6 +345,7 @@ class AIPrediction {
   final String recommendation;
   final String analysis;
   final List<String> stakingOptions;
+  final bool isServerPrediction;
 
   AIPrediction({
     required this.homeWinProbability,
@@ -353,6 +354,7 @@ class AIPrediction {
     required this.recommendation,
     required this.analysis,
     required this.stakingOptions,
+    this.isServerPrediction = true,
   });
 
   double get confidence {
@@ -373,6 +375,7 @@ class AIPrediction {
       recommendation: json['recommendation']?.toString() ?? '',
       analysis: json['analysis']?.toString() ?? '',
       stakingOptions: staking,
+      isServerPrediction: true,
     );
   }
 
@@ -854,34 +857,69 @@ class AIPrediction {
     
     final isElite = _isEliteGame(homeTeam, awayTeam);
     final isMajor = _isMajorGame(homeTeam, awayTeam);
-    
+    final lStr = league.toLowerCase();
+    final isLowerLeague = lStr.contains('championship') ||
+        lStr.contains('league one') ||
+        lStr.contains('league two') ||
+        lStr.contains('national league') ||
+        lStr.contains('segunda') ||
+        lStr.contains('serie b') ||
+        lStr.contains('2. bundesliga') ||
+        lStr.contains('ligue 2') ||
+        lStr.contains('keuken') ||
+        lStr.contains('eerste divisie');
+
     final maxProb = [fHp, fDp, fAp].reduce((a, b) => a > b ? a : b);
     final isHomeFav = fHp > fAp || ((fHp - fAp).abs() <= 3.0 && hForm >= aForm);
     final fav = isHomeFav ? homeTeam : awayTeam;
     final favOdds = isHomeFav ? realHomeOdds : realAwayOdds;
-
+    final prob1X = fHp + fDp;
+    final probX2 = fAp + fDp;
 
     String rec = '';
     String strategyAnalysis = '';
     String primarySafe = '';
-    
-    if (maxProb >= 60) {
-      if (fHp >= 60) {
+
+    if (isLowerLeague) {
+      if (fHp >= 74 || (realHomeOdds != null && realHomeOdds <= 1.35)) {
+        rec = '$homeTeam to Win (1)';
+        primarySafe = 'Safe: 1X ($homeTeam or Draw)';
+        strategyAnalysis = 'Lower League Heavy Mismatch: Direct Win.';
+      } else if (fAp >= 70 || (realAwayOdds != null && realAwayOdds <= 1.38)) {
+        rec = '$awayTeam to Win (2)';
+        primarySafe = 'Safe: X2 ($awayTeam or Draw)';
+        strategyAnalysis = 'Lower League Heavy Mismatch: Direct Win.';
+      } else if (isHomeFav && prob1X >= 64) {
+        rec = '1X ($homeTeam or Draw)';
+        primarySafe = 'Safe: 1X ($homeTeam or Draw)';
+        strategyAnalysis = 'Lower League Strategy: Home Double Chance Shield.';
+      } else if (!isHomeFav && probX2 >= 64) {
+        rec = 'X2 ($awayTeam or Draw)';
+        primarySafe = 'Safe: X2 ($awayTeam or Draw)';
+        strategyAnalysis = 'Lower League Strategy: Away Double Chance Shield.';
+      } else {
+        rec = 'Over 1.5 Goals';
+        primarySafe = 'Safe: Over 1.5 Goals';
+        strategyAnalysis = 'Lower League Goals Market: Tight matchup (Over 1.5).';
+      }
+    } else if (maxProb >= 62) {
+      if (fHp >= 62) {
         rec = '$homeTeam to Win (1)';
         primarySafe = 'Safe: 1X ($homeTeam or Draw)';
       } else {
         rec = '$awayTeam to Win (2)';
         primarySafe = 'Safe: X2 ($awayTeam or Draw)';
       }
-      strategyAnalysis = 'Clear Favorite (Prob >= 60%): Direct Win.';
+      strategyAnalysis = 'Clear Favorite (Prob >= 62%): Direct Win.';
     } else if (isElite) {
-      rec = '$homeTeam or $awayTeam to Win (12) or Over 0.5 Goals';
-      primarySafe = 'Safe: Over 0.5 Goals';
-      strategyAnalysis = 'Elite Big Game: Often produces a winner (No Draw) or at least 1 goal.';
-    } else if (maxProb >= 55) {
-      rec = '$fav or Draw (Double Chance)';
-      primarySafe = 'Safe: ${isHomeFav ? '1X' : 'X2'} ($fav or Draw)';
-      strategyAnalysis = 'Moderate Favorite (Prob 55-59%): Double Chance.';
+      rec = 'Over 1.5 Goals';
+      primarySafe = 'Safe: Over 1.5 Goals';
+      strategyAnalysis = 'Elite Big Game: High-likelihood goals market (Over 1.5).';
+    } else if ((isHomeFav && prob1X >= 64) || (!isHomeFav && probX2 >= 64) || maxProb >= 55) {
+      final dcCode = isHomeFav ? '1X' : 'X2';
+      rec = '$dcCode ($fav or Draw)';
+      primarySafe = 'Safe: $dcCode ($fav or Draw)';
+      strategyAnalysis = 'Moderate Favorite: Double Chance Shield.';
     } else if (isMajor) {
       rec = 'Over 1.5 Goals';
       primarySafe = 'Safe: Over 1.5 Goals';
@@ -891,7 +929,7 @@ class AIPrediction {
       primarySafe = 'Safe: Over 1.5 Goals';
       strategyAnalysis = 'Not Big Teams & Tight: Goals Market (Over 1.5).';
     }
-    
+
     // Only quote a price when the market gave us one — never invent 1.70.
     final dnbOdds = favOdds != null ? (favOdds * 0.82).clamp(1.30, 9.99) : null;
     final stakingOptions = [
@@ -911,6 +949,7 @@ class AIPrediction {
       recommendation: rec,
       analysis: '$strategyAnalysis\nHomeForm: ${hForm.round()}%, AwayForm: ${aForm.round()}%, BigGame: ${isElite || isMajor}',
       stakingOptions: stakingOptions,
+      isServerPrediction: false,
     );
   }
 }
