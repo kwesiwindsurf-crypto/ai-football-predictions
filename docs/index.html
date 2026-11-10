@@ -2270,8 +2270,11 @@
         ? allMatches.filter(m => toLocalDateStr(m.date) === targetIso)
         : allMatches;
 
-      // Filter candidates: For Today/Tomorrow/All, prioritize upcoming or live games
+      // Filter candidates: For Today/Tomorrow/All, prioritize upcoming or live games.
+      // Odds-less fixtures are not publishable picks — the fallback model is a
+      // modelling aid, not a betting signal.
       let candidatePool = datePool.filter(m => {
+        if (!(m.homeOdds > 0 && m.awayOdds > 0)) return false;
         if (currentDateFilter === 'yesterday') return true;
         const isFT = m.status === 'finished' || m.statusShort === 'FT';
         return !isFT;
@@ -2279,7 +2282,7 @@
 
       // If all matches for the day have completed, show how the day's top picks performed!
       if (candidatePool.length === 0 && datePool.length > 0) {
-        candidatePool = datePool;
+        candidatePool = datePool.filter(m => m.homeOdds > 0 && m.awayOdds > 0);
       }
 
       // Sort candidate matches by highest win probability and confidence rating

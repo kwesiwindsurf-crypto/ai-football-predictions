@@ -398,7 +398,9 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
       if (!_notifiedPredictions.contains(key)) {
         final double homeWin = match.prediction.homeWinProbability;
         final double awayWin = match.prediction.awayWinProbability;
-        if (homeWin >= 70.0 || awayWin >= 70.0) {
+        final bool hasMarketOdds =
+            (match.homeOdds ?? 0) > 0 && (match.awayOdds ?? 0) > 0;
+        if (hasMarketOdds && (homeWin >= 70.0 || awayWin >= 70.0)) {
           _notifiedPredictions.add(key);
           final bestPick = homeWin >= 70.0
               ? '${match.homeTeam} Win'

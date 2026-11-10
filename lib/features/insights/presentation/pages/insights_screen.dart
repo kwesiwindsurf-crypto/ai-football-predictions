@@ -126,6 +126,10 @@ class _InsightsScreenState extends State<InsightsScreen> with TickerProviderStat
         .where((m) =>
             !m.isPostponed &&
             m.status != model.MatchStatus.cancelled &&
+            // No market odds → no publishable pick. The fallback model is a
+            // modelling aid, not a betting signal.
+            (m.homeOdds ?? 0) > 0 &&
+            (m.awayOdds ?? 0) > 0 &&
             m.date.isAfter(dayStart) &&
             m.date.isBefore(dayEnd))
         .toList();

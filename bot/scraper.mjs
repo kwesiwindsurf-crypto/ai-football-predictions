@@ -517,6 +517,13 @@ function isBigTeam(team) {
   return BIG_TEAMS.some(b => t.includes(b));
 }
 
+// A fixture is only publishable as a pick when the market actually priced it.
+// The season-rates proxy is a modelling aid, not a betting signal — showing it
+// produced "Anaitasuna to Win" at 71% against a La Liga side.
+function hasMarketOdds(m) {
+  return (m.homeOdds || 0) > 0 && (m.awayOdds || 0) > 0;
+}
+
 function countsFromRecord(recordStr) {
   if (!recordStr || typeof recordStr !== 'string') return null;
   const parts = recordStr.split('-');
@@ -1534,13 +1541,55 @@ async function sendTelegramMessage(text) {
   }
 }
 
+// ─── Telegram message formatting helpers ─────────────────────────────────────
+// The digest reads as a bet-slip ticket: monospace so columns line up on phones.
+function shortLeague(league) {
+  return (league || 'Featured').replace(/^English\s+/i, '').replace(/\s+-\s+/g, ' · ').trim();
+}
+
+function confidenceBar(pct) {
+  const filled = Math.max(0, Math.min(10, Math.round((pct || 0) / 10)));
+  return '█'.repeat(filled) + '░'.repeat(10 - filled);
+}
+
+// "Safe: X2 (Milton Keynes Dons or Draw)" → "X2"; "Safe: Over 1.5 Goals" → "Over 1.5"
+function shortSafeOption(m) {
+  const raw = (m.prediction?.stakingOptions && m.prediction.stakingOptions[0]) || '';
+  const text = raw.replace(/^Safe:\s*/i, '').trim();
+  const doubleChance = text.match(/^(1X|X2|12)\b/);
+  if (doubleChance) return doubleChance[1];
+  const goals = text.match(/\b(Over|Under)\s+(\d+\.\d+)/i);
+  if (goals) return `${goals[1][0].toUpperCase()}${goals[1].slice(1).toLowerCase()} ${goals[2]}`;
+  return text.replace(/\([^)]*\)/g, '').trim().slice(0, 16) || 'High Confidence';
+}
+
+// "Milton Keynes Dons to Win (2)" → "Milton Keynes Dons to win"
+function shortPick(m) {
+  return (m.prediction?.recommendation || 'Direct Win')
+    .replace(/\s*\([12]\)$/, '')
+    .replace(/\bto Win\b/i, 'to win');
+}
+
+function ticketDateTag(digestDate) {
+  const WEEKDAYS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+  const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+  const d = new Date(`${digestDate}T12:00:00Z`);
+  return `${WEEKDAYS[d.getUTCDay()]} ${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]}`;
+}
+
+function utcHHMM(iso) {
+  const d = new Date(iso);
+  const pad = n => String(n).padStart(2, '0');
+  return `${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`;
+}
+
 async function postDailyDigestToTelegram(matches, digestDate = new Date().toISOString().slice(0, 10)) {
   if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
     console.log('Skipping Telegram: Missing TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID');
     return [];
   }
   
-  const todaysMatches = matches.filter(m => m.date.startsWith(digestDate) && m.prediction && m.status !== 'postponed' && !m.statusShort?.toLowerCase().includes('postp'));
+  const todaysMatches = matches.filter(m => m.date.startsWith(digestDate) && m.prediction && hasMarketOdds(m) && m.status !== 'postponed' && !m.statusShort?.toLowerCase().includes('postp'));
   
   if (todaysMatches.length === 0) {
     console.log('No matches today to post to Telegram.');
@@ -1566,40 +1615,33 @@ async function postDailyDigestToTelegram(matches, digestDate = new Date().toISOS
   // Pick ONLY the top 2 best picks
   const topPicks = candidatePool.slice(0, 2);
 
-  const dateFormatted = new Date(`${digestDate}T12:00:00Z`).toLocaleDateString('en-US', {
-    weekday: 'long',
-    month: 'short',
-    day: 'numeric'
+  const dateTag = ticketDateTag(digestDate);
+  const rule = '━━━━━━━━━━━━━━━━━━━━';
+
+  // Monospace block so the columns line up on a phone. Links can't live inside
+  // a code block, so the dashboard URL is appended after it.
+  let msg = '```\n';
+  msg += `🎟 ${dateTag} · ${topPicks.length} PICK${topPicks.length === 1 ? '' : 'S'}\n`;
+  msg += `${rule}\n`;
+
+  topPicks.forEach(m => {
+    const time = utcHHMM(m.date);
+    const prob = Math.max(
+      m.prediction?.homeWinProbability || 0,
+      m.prediction?.awayWinProbability || 0,
+      m.prediction?.drawProbability || 0
+    );
+
+    msg += `${(m.homeTeam || '').toUpperCase()}  v  ${(m.awayTeam || '').toUpperCase()}\n` +
+           `🏆 ${shortLeague(m.league)} · ⏰ ${time}\n` +
+           `🎯 PICK  ${shortPick(m)}\n` +
+           `📊 CONF  ${confidenceBar(prob)}  ${prob}%\n` +
+           `🛡️ SAFE  ${shortSafeOption(m)}\n` +
+           `${rule}\n`;
   });
 
-  let msg = `🎯 *AI SCORECAST: TOP 2 BANKER PICKS* 🎯\n` +
-            `📅 *${dateFormatted}*\n\n` +
-            `Here are today's 2 highest-probability AI banker picks selected to kill off the game:\n\n`;
-
-  topPicks.forEach((m, idx) => {
-    const time = new Date(m.date).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) + ' UTC';
-    const rec = m.prediction?.recommendation || 'Direct Win';
-    const prob = Math.max(m.prediction?.homeWinProbability || 0, m.prediction?.awayWinProbability || 0, m.prediction?.drawProbability || 0);
-    const safeOption = (m.prediction?.stakingOptions && m.prediction?.stakingOptions.length > 0)
-      ? m.prediction.stakingOptions[0]
-      : 'High Confidence';
-    const label = idx === 0 ? '⭐ *PICK #1 — LOCK OF THE DAY*' : '⭐ *PICK #2 — HIGH CONFIDENCE*';
-
-    msg += `${label}\n` +
-           `⚽ *${m.homeTeam} vs ${m.awayTeam}*\n` +
-           `🏆 ${m.league || 'Featured Competition'}\n` +
-           `⏰ Kickoff: ${time}\n` +
-           `💡 *Pick:* ${rec}\n` +
-           `🔥 *Probability:* ${prob}%\n` +
-           `🛡️ *Safe Staking:* ${safeOption}\n\n`;
-  });
-
-  msg += `────────────────────\n` +
-         `📊 *Looking for all other matches?*\n` +
-         `We only post our 2 best lock picks here on Telegram.\n\n` +
-         `For live scores, head-to-head stats, and predictions for *all 300+ matches*, visit our web dashboard:\n\n` +
-         `👉 [Open Live Prediction Dashboard](https://kwesiwindsurf-crypto.github.io/ai-football-predictions/)\n` +
-         `📲 _All matches and live scorecards updated in real time!_`;
+  msg += '```\n';
+  msg += '📲 All matches → https://kwesiwindsurf-crypto.github.io/ai-football-predictions/';
 
   const ok = await sendTelegramMessage(msg);
   if (ok) {
