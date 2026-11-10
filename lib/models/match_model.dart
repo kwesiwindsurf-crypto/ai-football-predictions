@@ -811,25 +811,21 @@ class AIPrediction {
     double h2hHp = 0.0, h2hDp = 0.0, h2hAp = 0.0;
     
     if (h2hSummary != null && h2hSummary.isNotEmpty) {
-      final cleanH2H = h2hSummary.replaceAll(RegExp(r'\s*\([\d\-,\s]+\)'), '');
-      final wonMatches = RegExp(r'([A-Za-z0-9\s\.\-]+?)\s+won\s+(\d+)', caseSensitive: false).allMatches(cleanH2H);
-      for (final m in wonMatches) {
-        final tName = (m.group(1) ?? '').trim().toLowerCase();
-        final count = int.tryParse(m.group(2) ?? '0') ?? 0;
-        final hClean = homeTeam.toLowerCase();
-        final aClean = awayTeam.toLowerCase();
-        if (tName.contains(hClean) || hClean.contains(tName)) {
-          hWins += count;
-        } else if (tName.contains(aClean) || aClean.contains(tName)) {
-          aWins += count;
-        }
+      // Literal club name: a character class drops accents and mis-credits the fragment.
+      int winsFor(String team) {
+        final hit = RegExp('${RegExp.escape(team)}\\s+won\\s+(\\d+)', caseSensitive: false).firstMatch(h2hSummary);
+        return hit == null ? 0 : int.tryParse(hit.group(1) ?? '0') ?? 0;
       }
-      final drawMatch = RegExp(r'(\d+)\s+Draw', caseSensitive: false).firstMatch(cleanH2H);
+
+      hWins = winsFor(homeTeam);
+      aWins = winsFor(awayTeam);
+      final drawMatch = RegExp(r'(\d+)\s+Draws?\b', caseSensitive: false).firstMatch(h2hSummary);
       if (drawMatch != null) {
         draws = int.tryParse(drawMatch.group(1) ?? '0') ?? 0;
       }
-      
-      final total = hWins + aWins + draws;
+
+      final totalMatch = RegExp(r'of last (\d+) meetings?', caseSensitive: false).firstMatch(h2hSummary);
+      final total = totalMatch == null ? hWins + aWins + draws : (int.tryParse(totalMatch.group(1) ?? '0') ?? 0);
       if (total > 0) {
         hasH2H = true;
         h2hHp = (hWins / total) * 100;

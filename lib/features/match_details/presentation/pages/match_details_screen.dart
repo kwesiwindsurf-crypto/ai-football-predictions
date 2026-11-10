@@ -2462,27 +2462,21 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
 
     final rawH2H = m.h2hSummary;
     if (rawH2H != null && rawH2H.isNotEmpty) {
-      final cleanH2H = rawH2H.replaceAll(RegExp(r'\s*\([\d\-,\s]+\)'), '');
-      
-      final wonMatches = RegExp(r'([A-Za-z0-9\s\.\-]+?)\s+won\s+(\d+)', caseSensitive: false).allMatches(cleanH2H);
-      for (final match in wonMatches) {
-        final tName = (match.group(1) ?? '').trim().toLowerCase();
-        final count = int.tryParse(match.group(2) ?? '0') ?? 0;
-        final homeClean = m.homeTeam.toLowerCase();
-        final awayClean = m.awayTeam.toLowerCase();
-        
-        if (tName.contains(homeClean) || homeClean.contains(tName)) {
-          hWins = count;
-        } else if (tName.contains(awayClean) || awayClean.contains(tName)) {
-          aWins = count;
-        }
+      // Literal club name: a character class drops accents and mis-credits the fragment.
+      int winsFor(String team) {
+        final hit = RegExp('${RegExp.escape(team)}\\s+won\\s+(\\d+)', caseSensitive: false).firstMatch(rawH2H);
+        return hit == null ? 0 : int.tryParse(hit.group(1) ?? '0') ?? 0;
       }
 
-      final drawMatch = RegExp(r'(\d+)\s+Draw', caseSensitive: false).firstMatch(cleanH2H);
+      hWins = winsFor(m.homeTeam);
+      aWins = winsFor(m.awayTeam);
+
+      final drawMatch = RegExp(r'(\d+)\s+Draws?\b', caseSensitive: false).firstMatch(rawH2H);
       if (drawMatch != null) {
         draws = int.tryParse(drawMatch.group(1) ?? '0') ?? 0;
       }
-      total = hWins + aWins + draws;
+      final totalMatch = RegExp(r'of last (\d+) meetings?', caseSensitive: false).firstMatch(rawH2H);
+      total = totalMatch == null ? hWins + aWins + draws : (int.tryParse(totalMatch.group(1) ?? '0') ?? 0);
     }
 
     final bool isFirstMeeting = total == 0;
