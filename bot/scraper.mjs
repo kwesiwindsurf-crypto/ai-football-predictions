@@ -1074,9 +1074,9 @@ function determineLeagueStrategy(league, home, away, fHp, fDp, fAp, isBig, hOdds
   const stakingOptions = [
     primarySafe,
     dnbOdds ? `Value: ${fav} Draw No Bet (${dnbOdds})` : `Value: ${fav} Draw No Bet`,
-    (isBig && maxProb < 55) ? `Goals: Over 1.5 Total Goals (1.30)` : `Risky: ${fav} to WIN by 2+ Goals (2.85)`,
-    `BTTS: Both Teams To Score - Yes (1.78)`,
-    maxProb < 45 ? `Alternative: Under 2.5 Goals (1.80)` : `Alternative: Over 2.5 Total Goals (1.70)`
+    (isBig && maxProb < 55) ? `Goals: Over 1.5 Total Goals` : `Risky: ${fav} to WIN by 2+ Goals`,
+    `BTTS: Both Teams To Score - Yes`,
+    maxProb < 45 ? `Alternative: Under 2.5 Goals` : `Alternative: Over 2.5 Total Goals`
   ];
   
   const aiRating = Math.round(fAp - fHp);

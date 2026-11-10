@@ -903,9 +903,9 @@ class AIPrediction {
       dnbOdds != null
           ? 'Value: $fav Draw No Bet (${dnbOdds.toStringAsFixed(2)})'
           : 'Value: $fav Draw No Bet',
-      (isElite && maxProb < 55) ? 'Goals: Over 1.5 Total Goals (1.30)' : 'Risky: $fav to WIN by 2+ Goals (2.85)',
-      'BTTS: Both Teams To Score - Yes (1.78)',
-      maxProb < 45 ? 'Alternative: Under 2.5 Goals (1.80)' : 'Alternative: Over 2.5 Total Goals (1.70)'
+      (isElite && maxProb < 55) ? 'Goals: Over 1.5 Total Goals' : 'Risky: $fav to WIN by 2+ Goals',
+      'BTTS: Both Teams To Score - Yes',
+      maxProb < 45 ? 'Alternative: Under 2.5 Goals' : 'Alternative: Over 2.5 Total Goals'
     ];
 
     return AIPrediction(
