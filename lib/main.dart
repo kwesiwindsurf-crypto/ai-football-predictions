@@ -7,7 +7,7 @@ import 'core/services/leagues_provider.dart';
 import 'core/services/live_sync_engine.dart';
 import 'core/services/matches_provider.dart';
 import 'core/theme/app_theme.dart';
-import 'core/widgets/app_bottom_nav_bar.dart';
+import 'features/splash/presentation/pages/splash_screen.dart';
 
 import 'dart:ui';
 import 'package:google_fonts/google_fonts.dart';
@@ -67,7 +67,7 @@ class AIScorecastApp extends StatelessWidget {
           themeMode: settings.themeMode,
           theme: AppTheme.lightTheme(accent),
           darkTheme: AppTheme.darkTheme(accent),
-          home: const MainNavigationShell(),
+          home: const SplashScreen(),
         );
       },
     );

@@ -505,20 +505,17 @@ function isBigGame(homeTeam, awayTeam) {
 }
 
 function parseFormStr(formStr) {
-  if (!formStr || typeof formStr !== 'string') return 50; 
+  if (!formStr || typeof formStr !== 'string') return 50;
   const clean = formStr.toUpperCase().replace(/[^WDL]/g, '');
   if (clean.length === 0) return 50;
-  
+
   let pts = 0;
   for (const char of clean) {
     if (char === 'W') pts += 3;
     else if (char === 'D') pts += 1;
-    else if (char === 'L') pts -= 1; // Penalize losses
   }
-  
-  // Calculate percentage and ensure it doesn't drop below 0%
-  const percentage = Math.round((pts / (clean.length * 3)) * 100);
-  return Math.max(0, percentage);
+
+  return Math.round((pts / (clean.length * 3)) * 100);
 }
 
 // ─── Odds substitute: season W-D-L rates + big-team standing ─────────────────
@@ -762,44 +759,46 @@ function makePrediction(home, away, hOdds, dOdds, aOdds, league, homeFormStr, aw
     oddsSource = `season-rates (${proxy.source})`;
   }
   
-  // 2. Form (30% or 40%)
+  // 2. Form (Laplace-smoothed so 0% recent form never triggers a 100% vs 0% spike)
   const hForm = parseFormStr(homeFormStr);
   const aForm = parseFormStr(awayFormStr);
   let formHp = 38, formDp = 24, formAp = 38;
   if (hForm !== 50 || aForm !== 50) {
-    const totalF = hForm + aForm;
-    if (totalF > 0) {
-      formHp = (hForm / totalF) * 100;
-      formAp = (aForm / totalF) * 100;
-      const gap = Math.abs(formHp - formAp);
-      formDp = Math.max(5, 30 - gap); 
-      const fTotal = formHp + formAp + formDp;
-      formHp = (formHp / fTotal) * 100;
-      formAp = (formAp / fTotal) * 100;
-      formDp = (formDp / fTotal) * 100;
-    }
+    const denom = hForm + aForm + 50;
+    const rawH = ((hForm + 25) / denom) * 100;
+    const rawA = ((aForm + 25) / denom) * 100;
+    const gap = Math.abs(rawH - rawA);
+    formDp = Math.max(16, 30 - (gap * 0.25));
+    const winPool = 100 - formDp;
+    formHp = (rawH / 100) * winPool;
+    formAp = (rawA / 100) * winPool;
   }
 
-  // 3. H2H (20% or 0%)
+  // 3. H2H
   const h2h = parseH2HStr(summaryData, home, away);
   const hasH2H = h2h !== null;
-  
-  // 4. Weights
-  const isUCL = (league || '').toLowerCase().includes('champions league') || (league || '').toLowerCase().includes('europa');
-  
-  const wOdds = hasH2H ? 0.45 : 0.55;
-  const wForm = hasH2H ? 0.30 : 0.40;
-  const wH2H  = hasH2H ? 0.20 : 0.00;
+
+  // 4. Weights (Always sums to 100% — trust real market odds over short-term form)
   const wHome = 0.05;
-  
+  let wOdds, wForm, wH2H;
+  if (hasOdds) {
+    wOdds = hasH2H ? 0.65 : 0.75;
+    wForm = hasH2H ? 0.15 : 0.20;
+    wH2H  = hasH2H ? 0.15 : 0.00;
+  } else {
+    wOdds = hasH2H ? 0.45 : 0.60;
+    wForm = hasH2H ? 0.25 : 0.35;
+    wH2H  = hasH2H ? 0.25 : 0.00;
+  }
+
   // Home Adv (5%)
   const homeAdvHp = 60, homeAdvDp = 20, homeAdvAp = 20;
-  
+
   // Final Probabilities
   let fHp = (oddsHp * wOdds) + (formHp * wForm) + (hasH2H ? h2h.h * wH2H : 0) + (homeAdvHp * wHome);
   let fDp = (oddsDp * wOdds) + (formDp * wForm) + (hasH2H ? h2h.d * wH2H : 0) + (homeAdvDp * wHome);
   let fAp = (oddsAp * wOdds) + (formAp * wForm) + (hasH2H ? h2h.a * wH2H : 0) + (homeAdvAp * wHome);
-  
+
   const fTotal = fHp + fDp + fAp;
   fHp = Math.round((fHp / fTotal) * 100);
   fDp = Math.round((fDp / fTotal) * 100);
@@ -816,11 +815,10 @@ function makePrediction(home, away, hOdds, dOdds, aOdds, league, homeFormStr, aw
   const isFormFav = formGap >= 25 || hForm >= 60 || aForm >= 60;
   const formFav = hForm >= aForm ? home : away;
   const isHomeFormFav = hForm >= aForm;
-  
-// ─── League-Tailored Strategy Engine ──────────────────────────────────────────
+
 // ─── League & Tournament Strategy Engine ──────────────────────────────────────
 // Tailors predictions across 62+ world competitions including UCL, Europa, World Cups & Domestic Leagues
-function determineLeagueStrategy(league, home, away, fHp, fDp, fAp, isBig, hOdds, aOdds) {
+function determineLeagueStrategy(league, home, away, fHp, fDp, fAp, isBig, hOdds, aOdds, h2h = null) {
   const lStr = (league || '').toLowerCase();
   const prob1X = fHp + fDp;
   const probX2 = fAp + fDp;
@@ -834,9 +832,10 @@ function determineLeagueStrategy(league, home, away, fHp, fDp, fAp, isBig, hOdds
   const isOddsClose = hasOdds ? oddsGap <= 0.40 : Math.abs(fHp - fAp) <= 8;
 
   // Symmetrical Favorite & Edge Determination
-  // If Away probability is noticeably higher OR Away odds are much shorter, Away is the true favorite.
   const isAwayFav = (hasOdds && aOdds < hOdds && aOdds <= 2.20) || (fAp >= fHp + 5);
   const isHomeFav = (hasOdds && hOdds < aOdds && hOdds <= 2.20) || (fHp >= fAp + 5);
+
+  const isFriendly = lStr.includes('friendly') || lStr.includes('friendlies');
 
   // 1. UEFA Champions League
   const isUCL = lStr.includes('champions league') || lStr.includes('uefa.champions');
@@ -854,8 +853,8 @@ function determineLeagueStrategy(league, home, away, fHp, fDp, fAp, isBig, hOdds
     lStr.includes('africa cup') || lStr.includes('caf.nations') ||
     lStr.includes('asian cup');
 
-  // 5. Domestic Knockout Cups (FA Cup, Copa del Rey, DFB Pokal, Coppa Italia, etc.)
-  const isDomesticCup = lStr.includes('cup') || lStr.includes('pokal') ||
+  // 5. Domestic Knockout Cups (FA Cup, EFL Trophy, Copa del Rey, DFB Pokal, Coppa Italia, etc.)
+  const isDomesticCup = lStr.includes('cup') || lStr.includes('trophy') || lStr.includes('pokal') ||
     lStr.includes('copa del rey') || lStr.includes('coppa italia') ||
     lStr.includes('coupe de france') || lStr.includes('beker') ||
     lStr.includes('taca de portugal');
@@ -898,8 +897,28 @@ function determineLeagueStrategy(league, home, away, fHp, fDp, fAp, isBig, hOdds
   let primarySafe = '';
   let strategyAnalysis = '';
 
-  // ── 0. BLOCKBUSTER CLASHES (Big vs Big across any league or tournament) ──
-  if (isBig) {
+  const isMajorTopLeague = lStr.includes('premier league') ||
+    (lStr.includes('la liga') && !lStr.includes('2')) ||
+    (lStr.includes('serie a') && !lStr.includes('brazil')) ||
+    (lStr.includes('bundesliga') && !lStr.includes('2.')) ||
+    (lStr.includes('ligue 1')) ||
+    isUCL || isEuroCups;
+  // ── 0. BLOCKBUSTER CLASHES & FRIENDLIES ──
+  if (isFriendly) {
+    recommendation = `Over 1.5 Goals`;
+    primarySafe = `Safe: Over 1.5 Goals`;
+    strategyAnalysis = `Club Friendly: Open exhibition match — Goals Market (Over 1.5).`;
+  } else if (!hasOdds && !isMajorTopLeague) {
+    if (isDefensive) {
+      recommendation = `Under 3.5 Goals`;
+      primarySafe = `Safe: Under 3.5 Goals`;
+      strategyAnalysis = `No-Odds Defensive Fixture: Safer Under 3.5 Goals instead of guessing a side.`;
+    } else {
+      recommendation = `Over 1.5 Goals`;
+      primarySafe = `Safe: Over 1.5 Goals`;
+      strategyAnalysis = `No-Odds Fixture: Avoids cross-tier form guesses — Goals Market (Over 1.5).`;
+    }
+  } else if (isBig) {
     if (isOddsClose) {
       if (isDefensive || isSouthAmericanCups) {
         recommendation = `Under 3.5 Goals`;
@@ -1177,12 +1196,39 @@ function determineLeagueStrategy(league, home, away, fHp, fDp, fAp, isBig, hOdds
     }
   }
 
+  // ── H2H EVEN-MATCHUP / DRAW-HEAVY GUARD ──
+  // If past meetings are tight (e.g. 2W-1D-2W) or draw-heavy (>= 35% draws),
+  // shield Direct Win picks with 1X/X2 unless market odds show an extreme mismatch.
+  if (h2h && (recommendation.includes('to Win (1)') || recommendation.includes('to Win (2)'))) {
+    const h2hEven = Math.abs(h2h.h - h2h.a) <= 20;
+    const h2hDrawHeavy = h2h.d >= 35;
+    if (h2hEven || h2hDrawHeavy) {
+      const pickingHome = recommendation.includes('to Win (1)');
+      const extremeMarketOdds = hasOdds && (pickingHome ? hOdds <= 1.38 : aOdds <= 1.38);
+      if (!extremeMarketOdds) {
+        if (pickingHome && prob1X >= 64) {
+          recommendation = `1X (${home} or Draw)`;
+          primarySafe = `Safe: 1X (${home} or Draw)`;
+          strategyAnalysis = `H2H Balance Guard: ${Math.round(h2h.h)}%/${Math.round(h2h.d)}%/${Math.round(h2h.a)}% past meetings — shielded with 1X.`;
+        } else if (!pickingHome && probX2 >= 64) {
+          recommendation = `X2 (${away} or Draw)`;
+          primarySafe = `Safe: X2 (${away} or Draw)`;
+          strategyAnalysis = `H2H Balance Guard: ${Math.round(h2h.h)}%/${Math.round(h2h.d)}%/${Math.round(h2h.a)}% past meetings — shielded with X2.`;
+        } else {
+          recommendation = `Over 1.5 Goals`;
+          primarySafe = `Safe: Over 1.5 Goals`;
+          strategyAnalysis = `H2H Balance Guard: Evenly matched series — Goals Market (Over 1.5).`;
+        }
+      }
+    }
+  }
+
   return { recommendation, primarySafe, strategyAnalysis };
 }
 
   // Decision logic via League-Tailored Strategy Engine
   const { recommendation, primarySafe, strategyAnalysis } = determineLeagueStrategy(
-    league, home, away, fHp, fDp, fAp, isBig, hOdds, aOdds
+    league, home, away, fHp, fDp, fAp, isBig, hOdds, aOdds, h2h
   );
   
   // Only quote a price when the market actually gave us one — never invent

@@ -46,6 +46,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
   final ScrollController _scrollController = ScrollController();
   Timer? _scrollSaveTimer;
   bool _isRestoringScroll = false;
+  bool _userScrolledBeforeRestore = false;
   
   List<model.Match>? _matches = ApiService.inMemoryCache;
   bool _isLoading = ApiService.inMemoryCache == null || ApiService.inMemoryCache!.isEmpty;
@@ -138,6 +139,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
   // ── Last-view persistence ────────────────────────────────────────────────
   void _onScrollChanged() {
     if (_isRestoringScroll || !_scrollController.hasClients) return;
+    _userScrolledBeforeRestore = true;
     _scrollSaveTimer?.cancel();
     _scrollSaveTimer = Timer(const Duration(milliseconds: 400), () {
       _persistScrollOffset(_scrollController.offset);
@@ -177,9 +179,9 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
   /// Retries because the list height is 0 (or still short) while the first
   /// network load is in flight.
   void _restoreScrollOffset(double offset, {int attempt = 0}) {
-    if (!mounted || attempt > 15) return;
+    if (!mounted || attempt > 15 || _userScrolledBeforeRestore) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
+      if (!mounted || _userScrolledBeforeRestore) return;
       void retry() {
         Future.delayed(const Duration(milliseconds: 150), () {
           _restoreScrollOffset(offset, attempt: attempt + 1);

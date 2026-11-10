@@ -733,19 +733,16 @@ class AIPrediction {
     if (formStr == null || formStr.isEmpty) return 50.0;
     final clean = formStr.toUpperCase().replaceAll(RegExp(r'[^WDL]'), '');
     if (clean.isEmpty) return 50.0;
-    
+
     int pts = 0;
     for (int i = 0; i < clean.length; i++) {
       if (clean[i] == 'W') {
         pts += 3;
       } else if (clean[i] == 'D') {
         pts += 1;
-      } else if (clean[i] == 'L') {
-        pts -= 1; // Penalize losses
       }
     }
-    double percentage = (pts / (clean.length * 3)) * 100.0;
-    return percentage < 0 ? 0 : percentage;
+    return (pts / (clean.length * 3)) * 100.0;
   }
 
   factory AIPrediction.generateLocal(String homeTeam, String awayTeam, String? homeForm, String? awayForm, String? h2hSummary, {int? homeRank, int? homePts, int? awayRank, int? awayPts, double? realHomeOdds, double? realDrawOdds, double? realAwayOdds, String league = '', int? oddsRating}) {
@@ -795,18 +792,14 @@ class AIPrediction {
     final double aForm = _parseForm(awayForm);
     double formHp = 38.0, formDp = 24.0, formAp = 38.0;
     if (hForm != 50.0 || aForm != 50.0) {
-      final totalF = hForm + aForm;
-      if (totalF > 0) {
-        formHp = (hForm / totalF) * 100;
-        formAp = (aForm / totalF) * 100;
-        final gap = (formHp - formAp).abs();
-        formDp = 30.0 - gap;
-        if (formDp < 5.0) formDp = 5.0;
-        final fTotal = formHp + formAp + formDp;
-        formHp = (formHp / fTotal) * 100;
-        formAp = (formAp / fTotal) * 100;
-        formDp = (formDp / fTotal) * 100;
-      }
+      final denom = hForm + aForm + 50.0;
+      final rawH = ((hForm + 25.0) / denom) * 100.0;
+      final rawA = ((aForm + 25.0) / denom) * 100.0;
+      final gap = (rawH - rawA).abs();
+      formDp = (30.0 - gap * 0.25).clamp(16.0, 30.0);
+      final winPool = 100.0 - formDp;
+      formHp = (rawH / 100.0) * winPool;
+      formAp = (rawA / 100.0) * winPool;
     }
 
     int hWins = 0, aWins = 0, draws = 0;
@@ -836,13 +829,11 @@ class AIPrediction {
         h2hAp = (aWins / total) * 100;
       }
     }
-    
-    
-    
-    final wOdds = hasH2H ? 0.45 : 0.55;
-    final wForm = hasH2H ? 0.30 : 0.40;
-    final wH2H  = hasH2H ? 0.20 : 0.00;
-    final wHome = 0.05;
+
+    const double wHome = 0.05;
+    final double wOdds = hasOdds ? (hasH2H ? 0.65 : 0.75) : (hasH2H ? 0.45 : 0.60);
+    final double wForm = hasOdds ? (hasH2H ? 0.15 : 0.20) : (hasH2H ? 0.25 : 0.35);
+    final double wH2H  = hasOdds ? (hasH2H ? 0.15 : 0.00) : (hasH2H ? 0.25 : 0.00);
     
     const double homeAdvHp = 60.0, homeAdvDp = 20.0, homeAdvAp = 20.0;
     
@@ -879,8 +870,24 @@ class AIPrediction {
     String rec = '';
     String strategyAnalysis = '';
     String primarySafe = '';
+    final isFriendly = lStr.contains('friendly') || lStr.contains('friendlies');
+    final isMajorTopLeague = lStr.contains('premier league') ||
+        (lStr.contains('la liga') && !lStr.contains('2')) ||
+        (lStr.contains('serie a') && !lStr.contains('brazil')) ||
+        (lStr.contains('bundesliga') && !lStr.contains('2.')) ||
+        lStr.contains('ligue 1') ||
+        lStr.contains('champions league') ||
+        lStr.contains('europa');
 
-    if (isLowerLeague) {
+    if (isFriendly) {
+      rec = 'Over 1.5 Goals';
+      primarySafe = 'Safe: Over 1.5 Goals';
+      strategyAnalysis = 'Club Friendly: Goals Market (Over 1.5).';
+    } else if (!hasOdds && !isMajorTopLeague && !isElite) {
+      rec = 'Over 1.5 Goals';
+      primarySafe = 'Safe: Over 1.5 Goals';
+      strategyAnalysis = 'No-Odds Fixture: Avoids cross-tier form guesses (Over 1.5).';
+    } else if (isLowerLeague) {
       if (fHp >= 74 || (realHomeOdds != null && realHomeOdds <= 1.35)) {
         rec = '$homeTeam to Win (1)';
         primarySafe = 'Safe: 1X ($homeTeam or Draw)';
@@ -928,6 +935,29 @@ class AIPrediction {
       rec = 'Over 1.5 Goals';
       primarySafe = 'Safe: Over 1.5 Goals';
       strategyAnalysis = 'Not Big Teams & Tight: Goals Market (Over 1.5).';
+    }
+
+    if (hasH2H && (rec.contains('to Win (1)') || rec.contains('to Win (2)'))) {
+      final h2hEven = (h2hHp - h2hAp).abs() <= 20;
+      final h2hDrawHeavy = h2hDp >= 35;
+      if (h2hEven || h2hDrawHeavy) {
+        final pickingHome = rec.contains('to Win (1)');
+        final extremeOdds = hasOdds &&
+            (pickingHome ? realHomeOdds <= 1.38 : realAwayOdds <= 1.38);
+        if (!extremeOdds) {
+          if (pickingHome && prob1X >= 64) {
+            rec = '1X ($homeTeam or Draw)';
+            primarySafe = 'Safe: 1X ($homeTeam or Draw)';
+          } else if (!pickingHome && probX2 >= 64) {
+            rec = 'X2 ($awayTeam or Draw)';
+            primarySafe = 'Safe: X2 ($awayTeam or Draw)';
+          } else {
+            rec = 'Over 1.5 Goals';
+            primarySafe = 'Safe: Over 1.5 Goals';
+          }
+          strategyAnalysis = 'H2H Balance Guard: Evenly matched past meetings.';
+        }
+      }
     }
 
     // Only quote a price when the market gave us one — never invent 1.70.

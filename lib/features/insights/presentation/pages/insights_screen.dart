@@ -755,6 +755,7 @@ class _InsightsScreenState extends State<InsightsScreen> with TickerProviderStat
     }
 
     return ListView.separated(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 24),
       itemCount: insights.length + 1,
       separatorBuilder: (_, _) => const SizedBox(height: 10),

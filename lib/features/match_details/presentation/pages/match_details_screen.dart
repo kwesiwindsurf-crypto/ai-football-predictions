@@ -188,6 +188,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
         top: false,
         bottom: true,
         child: NestedScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
           headerSliverBuilder: (context, innerBoxIsScrolled) {
             return [
               SliverToBoxAdapter(
@@ -1081,42 +1082,52 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
     final events = m.events ?? [];
 
     if (events.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 48),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  color: AppTheme.primary.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.timer_outlined, size: 28, color: AppTheme.primary),
+      return LayoutBuilder(
+        builder: (context, constraints) => ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 32),
+          children: [
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: (constraints.maxHeight - 64).clamp(0.0, double.infinity),
               ),
-              const SizedBox(height: 16),
-              Text(
-                'No Match Events Yet',
-                style: TextStyle(
-                  color: AppTheme.textPrimaryOf(context),
-                  fontWeight: FontWeight.bold,
-                  fontSize: 15,
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        color: AppTheme.primary.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.timer_outlined, size: 28, color: AppTheme.primary),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'No Match Events Yet',
+                      style: TextStyle(
+                        color: AppTheme.textPrimaryOf(context),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Goals, bookings, and substitutions will stream live here as they happen during the match.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: AppTheme.textSecondaryOf(context),
+                        fontSize: 12,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 6),
-              Text(
-                'Goals, bookings, and substitutions will stream live here as they happen during the match.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: AppTheme.textSecondaryOf(context),
-                  fontSize: 12,
-                  height: 1.4,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       );
     }
@@ -1135,6 +1146,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
           ),
         ),
         ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
           padding: EdgeInsets.fromLTRB(14, 12, 14, bottomInset + 32),
           children: [
         Text(
@@ -1371,6 +1383,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
   Widget _buildAIInsightsTab() {
     final bottomInset = MediaQuery.of(context).padding.bottom;
     return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: EdgeInsets.fromLTRB(14, 14, 14, bottomInset + 32),
       children: [
         _buildModelVerdictCard(),
@@ -1400,6 +1413,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
 
     if (stats == null) {
       return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.all(14),
         children: [
           Container(
@@ -1449,6 +1463,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
 
     final bottomInset = MediaQuery.of(context).padding.bottom;
     return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: EdgeInsets.fromLTRB(14, 12, 14, bottomInset + 32),
       children: [
         // Teams Header Banner
