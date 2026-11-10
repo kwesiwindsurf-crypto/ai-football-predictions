@@ -879,10 +879,34 @@ class AIPrediction {
         lStr.contains('champions league') ||
         lStr.contains('europa');
 
+    final bool isOddsClose = hasOdds
+        ? (realHomeOdds - realAwayOdds).abs() <= 0.40
+        : (fHp - fAp).abs() <= 8.0;
+    final bool isAwayFavLocal = (hasOdds && realAwayOdds < realHomeOdds && realAwayOdds <= 2.20) || (fAp >= fHp + 5.0);
+    final bool isHomeFavLocal = (hasOdds && realHomeOdds < realAwayOdds && realHomeOdds <= 2.20) || (fHp >= fAp + 5.0);
+
     if (isFriendly) {
-      rec = 'Over 1.5 Goals';
-      primarySafe = 'Safe: Over 1.5 Goals';
-      strategyAnalysis = 'Club Friendly: Goals Market (Over 1.5).';
+      if ((fHp >= 60 || (realHomeOdds != null && realHomeOdds <= 1.55)) && !isAwayFavLocal) {
+        rec = '$homeTeam to Win (1)';
+        primarySafe = 'Safe: 1X ($homeTeam or Draw)';
+        strategyAnalysis = 'Club Friendly: Clear Home edge.';
+      } else if ((fAp >= 58 || (realAwayOdds != null && realAwayOdds <= 1.55)) && !isHomeFavLocal) {
+        rec = '$awayTeam to Win (2)';
+        primarySafe = 'Safe: X2 ($awayTeam or Draw)';
+        strategyAnalysis = 'Club Friendly: Clear Away edge.';
+      } else if (isHomeFavLocal && prob1X >= 64 && !isOddsClose) {
+        rec = '1X ($homeTeam or Draw)';
+        primarySafe = 'Safe: 1X ($homeTeam or Draw)';
+        strategyAnalysis = 'Club Friendly: Home Double Chance edge.';
+      } else if (isAwayFavLocal && probX2 >= 64 && !isOddsClose) {
+        rec = 'X2 ($awayTeam or Draw)';
+        primarySafe = 'Safe: X2 ($awayTeam or Draw)';
+        strategyAnalysis = 'Club Friendly: Away Double Chance edge.';
+      } else {
+        rec = 'Over 1.5 Goals';
+        primarySafe = 'Safe: Over 1.5 Goals';
+        strategyAnalysis = 'Club Friendly: Balanced exhibition match (Over 1.5).';
+      }
     } else if (!hasOdds && !isMajorTopLeague && !isElite) {
       rec = 'Over 1.5 Goals';
       primarySafe = 'Safe: Over 1.5 Goals';

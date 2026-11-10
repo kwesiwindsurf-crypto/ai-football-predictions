@@ -1162,7 +1162,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
         ...List.generate(events.length, (index) {
           final ev = events[index];
           final clockStr = ev.clock.replaceAll("'", "").trim();
-          final minute = int.tryParse(clockStr) ?? (ev.clock.isNotEmpty ? ev.clock : "-");
+          final minuteLabel = clockStr.isNotEmpty ? "$clockStr'" : '-';
           final isGoal = ev.scoringPlay || ev.type.toLowerCase().contains('goal');
           final isRed = ev.redCard || ev.type.toLowerCase().contains('red');
           final isYellow = ev.yellowCard || ev.type.toLowerCase().contains('yellow');
@@ -1197,6 +1197,25 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
           final isHomeSide = ev.team == 'home';
           final teamLabel = isHomeSide ? m.homeTeam : m.awayTeam;
           final teamColor = isHomeSide ? AppTheme.primary : AppTheme.secondary;
+
+          final badgeWidget = Container(
+            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
+            decoration: BoxDecoration(
+              color: eventColor.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Text(
+              eventBadge,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: eventColor,
+                fontSize: 8.5,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.3,
+              ),
+            ),
+          );
 
           // Glassy card, corner-snapped toward the center rail
           final eventCard = Stack(
@@ -1239,49 +1258,42 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
                   children: [
                     Row(
                       children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
-                          decoration: BoxDecoration(
-                            color: eventColor.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(999),
+                        if (!isHomeSide)
+                          Flexible(child: badgeWidget)
+                        else ...[
+                          ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 86),
+                            child: badgeWidget,
                           ),
-                          child: Text(
-                            eventBadge,
-                            style: TextStyle(
-                              color: eventColor,
-                              fontSize: 8.5,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 0.3,
-                            ),
-                          ),
-                        ),
-                        if (isHomeSide) ...[
-                          const Spacer(),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                width: 6,
-                                height: 6,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: teamColor,
-                                ),
-                              ),
-                              const SizedBox(width: 5),
-                             Flexible(
-                                child: Text(
-                                  teamLabel,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    color: AppTheme.textSecondaryOf(context),
-                                    fontSize: 9.5,
-                                    fontWeight: FontWeight.w700,
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Container(
+                                  width: 6,
+                                  height: 6,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: teamColor,
                                   ),
                                 ),
-                              ),
-                            ],
+                                const SizedBox(width: 4),
+                                Flexible(
+                                  child: Text(
+                                    teamLabel,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.right,
+                                    style: TextStyle(
+                                      color: AppTheme.textSecondaryOf(context),
+                                      fontSize: 9.5,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ],
@@ -1312,7 +1324,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
-                    "$minute'",
+                    minuteLabel,
                     style: TextStyle(
                       fontFamily: 'monospace',
                       fontSize: 9.5,

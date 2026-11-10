@@ -905,9 +905,27 @@ function determineLeagueStrategy(league, home, away, fHp, fDp, fAp, isBig, hOdds
     isUCL || isEuroCups;
   // ── 0. BLOCKBUSTER CLASHES & FRIENDLIES ──
   if (isFriendly) {
-    recommendation = `Over 1.5 Goals`;
-    primarySafe = `Safe: Over 1.5 Goals`;
-    strategyAnalysis = `Club Friendly: Open exhibition match — Goals Market (Over 1.5).`;
+    if ((fHp >= 60 || (hasOdds && hOdds <= 1.55)) && !isAwayFav) {
+      recommendation = `${home} to Win (1)`;
+      primarySafe = `Safe: 1X (${home} or Draw)`;
+      strategyAnalysis = `Club Friendly: Clear Home edge (${fHp}% Win).`;
+    } else if ((fAp >= 58 || (hasOdds && aOdds <= 1.55)) && !isHomeFav) {
+      recommendation = `${away} to Win (2)`;
+      primarySafe = `Safe: X2 (${away} or Draw)`;
+      strategyAnalysis = `Club Friendly: Clear Away edge (${fAp}% Win).`;
+    } else if (isHomeFav && prob1X >= 64 && !isOddsClose) {
+      recommendation = `1X (${home} or Draw)`;
+      primarySafe = `Safe: 1X (${home} or Draw)`;
+      strategyAnalysis = `Club Friendly: Home Double Chance edge (1X ${prob1X}%).`;
+    } else if (isAwayFav && probX2 >= 64 && !isOddsClose) {
+      recommendation = `X2 (${away} or Draw)`;
+      primarySafe = `Safe: X2 (${away} or Draw)`;
+      strategyAnalysis = `Club Friendly: Away Double Chance edge (X2 ${probX2}%).`;
+    } else {
+      recommendation = `Over 1.5 Goals`;
+      primarySafe = `Safe: Over 1.5 Goals`;
+      strategyAnalysis = `Club Friendly: Balanced exhibition match — Goals Market (Over 1.5).`;
+    }
   } else if (!hasOdds && !isMajorTopLeague) {
     if (isDefensive) {
       recommendation = `Under 3.5 Goals`;
