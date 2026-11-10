@@ -20,6 +20,11 @@
 /bot/secret.txt
 /android/app/google-services.json
 
+# H2H backtest scratch — regenerable with `node bot/eval_h2h.mjs`
+/bot/h2h_eval_cache.json
+/bot/h2h_eval_run.log
+/bot/h2h_eval_full.log
+
 # Keystores & sensitive build keys
 *.jks
 *.keystore
