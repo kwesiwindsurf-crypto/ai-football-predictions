@@ -175,6 +175,7 @@ async function pollLiveScores() {
     let hasLiveGame = false;
     let staleLiveDemoted = 0;
     const liveSnapshot = new Map();
+    const liveByTeams = new Map();
 
     for (const evt of allEvents) {
       const comp = evt.competitions?.[0];
@@ -335,6 +336,7 @@ function extractTeamLogo(compObj) {
       const matchData = {
         id: evt.id,
         name: evt.name,
+        date: evt.date || null,
         state: state,
         isPostponed: isPostponed,
         clock: clock,
@@ -361,8 +363,10 @@ function extractTeamLogo(compObj) {
       const dateKey = (evt.date || '').slice(0, 10);
       liveSnapshot.set(String(evt.id), matchData);
       if (dateKey) liveSnapshot.set(`${slugKey}-${dateKey}`, matchData);
-      liveSnapshot.set(slugKey, matchData);
-      liveSnapshot.set(normKey, matchData);
+      if (normKey.length > 1) {
+        if (!liveByTeams.has(normKey)) liveByTeams.set(normKey, []);
+        liveByTeams.get(normKey).push(matchData);
+      }
     }
 
     // ── Detect Goals & Send FCM Push Alerts ──
@@ -410,11 +414,16 @@ function extractTeamLogo(compObj) {
       const slugKey = `${m.homeTeam}-${m.awayTeam}`.replace(/\s+/g, '-').toLowerCase();
       const normKey = `${(m.homeTeam || '').toLowerCase().replace(/[^a-z0-9]/g, '')}-${(m.awayTeam || '').toLowerCase().replace(/[^a-z0-9]/g, '')}`;
       const mDateKey = (m.date || '').slice(0, 10);
+      const mDateMs = m.date ? Date.parse(m.date) : NaN;
       const live = (m.espnEventId && liveSnapshot.get(String(m.espnEventId))) ||
                    liveSnapshot.get(String(m.id)) ||
                    (mDateKey && liveSnapshot.get(`${slugKey}-${mDateKey}`)) ||
-                   liveSnapshot.get(slugKey) ||
-                   liveSnapshot.get(normKey);
+                   (!Number.isNaN(mDateMs)
+                     ? (liveByTeams.get(normKey) || []).find(cand => {
+                         const cMs = cand.date ? Date.parse(cand.date) : NaN;
+                         return !Number.isNaN(cMs) && Math.abs(mDateMs - cMs) <= 18 * 3600 * 1000;
+                       })
+                     : null);
 
       if (live) {
         m.homeScore = live.homeScore;

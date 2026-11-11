@@ -123,9 +123,32 @@ function isExcludedLeague(leagueName) {
 
 // ─── Convert American moneyline odds → decimal odds ───────────────────────────
 function amToDec(am) {
-  if (!am) return null;
+  if (am == null || am === '') return null;
+  if (typeof am === 'string') {
+    const trimmed = am.trim().toUpperCase();
+    if (!trimmed) return null;
+    if (trimmed === 'EVEN' || trimmed === 'EV') return 2.00;
+    am = Number(trimmed);
+  }
+  if (!Number.isFinite(am) || am === 0) return null;
   if (am > 0) return parseFloat(((am / 100) + 1).toFixed(2));
-  if (am < 0) return parseFloat(((100 / Math.abs(am)) + 1).toFixed(2));
+  return parseFloat(((100 / Math.abs(am)) + 1).toFixed(2));
+}
+
+// Scoreboard `competitions[0].odds` can be empty while the same event summary
+// still publishes provider prices under pickcenter/odds.
+function oddsFromSummary(summaryData) {
+  const sources = [
+    ...(Array.isArray(summaryData?.pickcenter) ? summaryData.pickcenter : []),
+    ...(Array.isArray(summaryData?.odds) ? summaryData.odds : [])
+  ];
+  for (const src of sources) {
+    const h = amToDec(src.homeTeamOdds?.moneyLine ?? src.moneyline?.home?.close?.odds);
+    const a = amToDec(src.awayTeamOdds?.moneyLine ?? src.moneyline?.away?.close?.odds);
+    if (!h || !a) continue;
+    const d = amToDec(src.drawOdds?.moneyLine ?? src.moneyline?.draw?.close?.odds);
+    return { h, d, a, provider: src.provider?.name || 'summary' };
+  }
   return null;
 }
 
@@ -730,6 +753,19 @@ function parseH2HStr(summaryData, homeTeam, awayTeam) {
   };
 }
 
+// Largest-remainder rounding guarantees displayed Home + Draw + Away === 100%.
+function roundPercentsTo100(h, d, a) {
+  const total = h + d + a || 1;
+  const exact = [(h / total) * 100, (d / total) * 100, (a / total) * 100];
+  const floored = exact.map(Math.floor);
+  const remainder = 100 - (floored[0] + floored[1] + floored[2]);
+  const order = [0, 1, 2].sort((i, j) => (exact[j] - floored[j]) - (exact[i] - floored[i]));
+  for (let k = 0; k < remainder; k++) {
+    floored[order[k % 3]] += 1;
+  }
+  return floored;
+}
+
 // ─── Prediction engine ────────────────────────────────────────────────────────
 function makePrediction(home, away, hOdds, dOdds, aOdds, league, homeFormStr, awayFormStr, summaryData, homeRecord, awayRecord) {
   const hasOdds = hOdds > 0 && aOdds > 0;
@@ -799,10 +835,7 @@ function makePrediction(home, away, hOdds, dOdds, aOdds, league, homeFormStr, aw
   let fDp = (oddsDp * wOdds) + (formDp * wForm) + (hasH2H ? h2h.d * wH2H : 0) + (homeAdvDp * wHome);
   let fAp = (oddsAp * wOdds) + (formAp * wForm) + (hasH2H ? h2h.a * wH2H : 0) + (homeAdvAp * wHome);
 
-  const fTotal = fHp + fDp + fAp;
-  fHp = Math.round((fHp / fTotal) * 100);
-  fDp = Math.round((fDp / fTotal) * 100);
-  fAp = Math.round((fAp / fTotal) * 100);
+  [fHp, fDp, fAp] = roundPercentsTo100(fHp, fDp, fAp);
 
   // Decision logic
   const isBig = isBigGame(home, away);
@@ -1276,16 +1309,17 @@ function determineLeagueStrategy(league, home, away, fHp, fDp, fAp, isBig, hOdds
 }
 
 // ─── Fetch ESPN fixtures for a single league slug and date string ──────────────
-async function fetchEspnLeagueFixtures(slug, dateStr) {
+async function fetchEspnLeagueFixtures(slug, dateStr, finishedEventIds = new Set()) {
   const url = `https://site.api.espn.com/apis/site/v2/sports/soccer/${slug}/scoreboard?dates=${dateStr}&limit=100`;
   const res = await safeFetch(url, 1);
   if (!res) return [];
   try {
     const data = await res.json();
     if (!data.events) return [];
-    
-    // Process sequentially with a 1-second delay to avoid rate limiting
+
+    // Persisted FT snapshots need no fresh summary or prediction inputs.
     for (const ev of data.events) {
+      if (finishedEventIds.has(String(ev.id))) continue;
       await new Promise(r => setTimeout(r, 1000));
       const summary = await fetchEspnSummary(slug, ev.id);
       if (summary) {
@@ -1370,6 +1404,14 @@ function parseEspnEvent(ev, leagueLabel, leagueSlug) {
     hOdds = amToDec(oddsObj.homeTeamOdds?.moneyLine ?? oddsObj.moneyline?.home?.close?.odds);
     dOdds = amToDec(oddsObj.drawOdds?.moneyLine ?? oddsObj.moneyline?.draw?.close?.odds);
     aOdds = amToDec(oddsObj.awayTeamOdds?.moneyLine ?? oddsObj.moneyline?.away?.close?.odds);
+  }
+  if (!(hOdds > 0 && aOdds > 0)) {
+    const summaryOdds = oddsFromSummary(ev.summaryData);
+    if (summaryOdds) {
+      hOdds = summaryOdds.h;
+      dOdds = summaryOdds.d ?? dOdds;
+      aOdds = summaryOdds.a;
+    }
   }
 
   const homeTeam = homeComp.team?.displayName || homeComp.team?.name || '';
@@ -1564,8 +1606,45 @@ function parseEspnEvent(ev, leagueLabel, leagueSlug) {
   };
 }
 
+function freezeFinishedMatches(matches, persistedMatches) {
+  const finishedById = new Map();
+  for (const m of persistedMatches) {
+    if (!m || (m.status !== 'finished' && m.statusShort !== 'FT')) continue;
+    finishedById.set(m.id, m);
+  }
+
+  let reused = 0;
+  const frozenMatches = matches.map(match => {
+    let frozen = finishedById.get(match.id);
+    if (!frozen) {
+      const legacyId = `${match.homeTeam}-${match.awayTeam}`.replace(/\s+/g, '-');
+      const candidate = finishedById.get(legacyId);
+      if (candidate && candidate.league === match.league) frozen = candidate;
+    }
+    if (!frozen) return match;
+    reused++;
+    // Keep prediction, pre-match odds, and final result locked; only backfill
+    // missing post-match telemetry if a Worker FT snapshot saved them as empty.
+    return {
+      ...frozen,
+      stats: frozen.stats ?? match.stats ?? null,
+      events: (Array.isArray(frozen.events) && frozen.events.length > 0) ? frozen.events : (match.events ?? []),
+      homeScorers: (Array.isArray(frozen.homeScorers) && frozen.homeScorers.length > 0) ? frozen.homeScorers : (match.homeScorers ?? []),
+      awayScorers: (Array.isArray(frozen.awayScorers) && frozen.awayScorers.length > 0) ? frozen.awayScorers : (match.awayScorers ?? []),
+      referee: frozen.referee ?? match.referee ?? null,
+      venue: frozen.venue ?? match.venue ?? null,
+      venueName: frozen.venueName ?? match.venueName ?? null,
+      venueCity: frozen.venueCity ?? match.venueCity ?? null,
+      attendance: frozen.attendance ?? match.attendance ?? null,
+      h2hSummary: frozen.h2hSummary ?? match.h2hSummary ?? null,
+    };
+  });
+
+  return { matches: frozenMatches, reused };
+}
+
 // ─── Fetch all fixtures from ESPN for yesterday + today + tomorrow ─────────────
-async function fetchAllEspnFixtures() {
+async function fetchAllEspnFixtures(finishedEventIds = new Set()) {
   const now = new Date();
   const dates = [
     espnDate(new Date(now.getTime() - 86400000)), // yesterday
@@ -1586,7 +1665,7 @@ async function fetchAllEspnFixtures() {
 
     // Fetch fixtures for all dates in parallel per league
     const allEvents = (await Promise.all(
-      dates.map(d => fetchEspnLeagueFixtures(league.slug, d))
+      dates.map(d => fetchEspnLeagueFixtures(league.slug, d, finishedEventIds))
     )).flat();
 
     for (const ev of allEvents) {
@@ -1994,6 +2073,29 @@ async function postDailyDashboardToTelegram(todayResults) {
   return false;
 }
 
+function preservePredictionLock(m, existing, isPosted, nowMs = Date.now()) {
+  if (!existing || !existing.prediction) return;
+
+  const analysisText = existing.prediction.analysis || '';
+  const hasCompetitionMismatch = analysisText.includes('Cup') && !m.league.toLowerCase().includes('cup');
+  const kickedOff = m.status !== 'notStarted' || new Date(m.date).getTime() <= nowMs;
+  const oddsErased = m.homeOdds == null && existing.homeOdds != null;
+
+  if ((kickedOff || oddsErased || isPosted) && !hasCompetitionMismatch) {
+    // Prediction and prices must come from the same pre-match snapshot. In
+    // particular, late prices cannot repair a prediction made without odds.
+    m.prediction = existing.prediction;
+    m.homeOdds = existing.homeOdds ?? null;
+    m.drawOdds = existing.drawOdds ?? null;
+    m.awayOdds = existing.awayOdds ?? null;
+    m.oddsRating = existing.oddsRating ?? null;
+    if (existing.h2hSummary != null) {
+      m.h2hSummary = existing.h2hSummary;
+    }
+  }
+  if (!m.matchUrl && existing.matchUrl) m.matchUrl = existing.matchUrl;
+}
+
 // ─── Main ─────────────────────────────────────────────────────────────────────
 async function main() {
   console.log('Starting ESPN-only scraper...');
@@ -2029,12 +2131,26 @@ async function main() {
     }
   } catch (_) {}
 
+  const persistedMatches = [...historicalMatchesMap.values(), ...existingMatchesMap.values()];
+  const finishedEventIds = new Set(
+    persistedMatches
+      .filter(m =>
+        m &&
+        (m.status === 'finished' || m.statusShort === 'FT') &&
+        m.espnEventId != null &&
+        (m.stats != null || historicalMatchesMap.has(m.id))
+      )
+      .map(m => String(m.espnEventId))
+  );
+
   console.log(`Fetching fixtures for yesterday → +6 days from ESPN...`);
 
-  const matches = await fetchAllEspnFixtures();
+  const fetchedMatches = await fetchAllEspnFixtures(finishedEventIds);
+  const { matches, reused: frozenCount } = freezeFinishedMatches(fetchedMatches, persistedMatches);
   const leagues = new Set(matches.map(m => m.league));
 
   console.log(`\nTotal: ${matches.length} matches across ${leagues.size} leagues`);
+  console.log(`FT freeze: reused ${frozenCount} persisted finished-match snapshots`);
   const dates = [...new Set(matches.map(m => m.date.substring(0, 10)))].sort();
   console.log('Dates included:', dates.join(', '));
 
@@ -2050,12 +2166,14 @@ async function main() {
   const yesterday = new Date(today);
   yesterday.setDate(today.getDate() - 1);
   const yesterdayStr = yesterday.toISOString().slice(0, 10);
-  // Enrich the fixtures the digest will preview as well as today's/live ones.
+  // Enrich only unresolved fixtures; FT snapshots must not be recalculated.
   const matchesToEnrich = matches.filter(m =>
-    m.date.startsWith(todayStr) ||
-    m.date.startsWith(yesterdayStr) ||
-    m.date.startsWith(digestDate) ||
-    m.status === 'live');
+    m.status !== 'finished' && m.statusShort !== 'FT' && (
+      m.date.startsWith(todayStr) ||
+      m.date.startsWith(yesterdayStr) ||
+      m.date.startsWith(digestDate) ||
+      m.status === 'live'
+    ));
   
   // Process in small batches to avoid spamming the API
   const batchSize = 10;
@@ -2069,7 +2187,17 @@ async function main() {
       const h2h = parseH2HStr(summary, m.homeTeam, m.awayTeam);
       m.h2hSummary = h2h ? h2h.summaryStr : null;
 
-      // Re-calculate prediction now that we have H2H data
+      // Recover summary odds if the initial fixture summary request missed them
+      if (!(m.homeOdds > 0 && m.awayOdds > 0)) {
+        const summaryOdds = oddsFromSummary(summary);
+        if (summaryOdds) {
+          m.homeOdds = summaryOdds.h;
+          m.drawOdds = summaryOdds.d ?? m.drawOdds;
+          m.awayOdds = summaryOdds.a;
+        }
+      }
+
+      // Re-calculate prediction now that we have H2H data (and any recovered odds)
       m.prediction = makePrediction(m.homeTeam, m.awayTeam, m.homeOdds, m.drawOdds, m.awayOdds, m.league, m.homeForm, m.awayForm, m.h2hSummary, m.homeRecord, m.awayRecord);
     }));
   }
@@ -2108,25 +2236,7 @@ async function main() {
         existing = candidate;
       }
     }
-    if (!existing || !existing.prediction) continue;
-
-    const analysisText = existing.prediction.analysis || '';
-    const hasCompetitionMismatch = analysisText.includes('Cup') && !m.league.toLowerCase().includes('cup');
-
-    const kickedOff = m.status !== 'notStarted' || new Date(m.date).getTime() <= nowMs;
-    const oddsErased = m.homeOdds == null && existing.homeOdds != null;
-    const isPosted = postedPickIds.has(m.id);
-
-    if ((kickedOff || oddsErased || isPosted) && !hasCompetitionMismatch) {
-      // Locked: keep the stored prediction and the pre-kickoff prices exactly.
-      m.prediction = existing.prediction;
-      if (existing.homeOdds != null) m.homeOdds = existing.homeOdds;
-      if (existing.drawOdds != null) m.drawOdds = existing.drawOdds;
-      if (existing.awayOdds != null) m.awayOdds = existing.awayOdds;
-      if (existing.oddsRating !== undefined) m.oddsRating = existing.oddsRating;
-      if (existing.h2hSummary !== undefined && existing.h2hSummary !== null) m.h2hSummary = existing.h2hSummary;
-    }
-    if (!m.matchUrl && existing.matchUrl) m.matchUrl = existing.matchUrl;
+    preservePredictionLock(m, existing, postedPickIds.has(m.id), nowMs);
   }
 
   // 3. Telegram Broadcast & Result Monitoring
@@ -2313,7 +2423,7 @@ async function main() {
 
 // Importing this module must never scrape or push: the backtest replays the
 // prediction engine offline, and only `node scraper.mjs` runs the pipeline.
-export { makePrediction, parseH2HStr, h2hFromSeasonseries, evaluatePrediction, ESPN_LEAGUES };
+export { makePrediction, parseH2HStr, h2hFromSeasonseries, evaluatePrediction, freezeFinishedMatches, preservePredictionLock, oddsFromSummary, amToDec, ESPN_LEAGUES };
 
 const isDirectRun = !!process.argv[1] &&
   import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href;

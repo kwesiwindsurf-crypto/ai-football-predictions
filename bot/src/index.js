@@ -219,6 +219,7 @@ export default {
 
     // Process event snapshot
     const snapshot = {};
+    const byNorm = {};
     for (const evt of allEvents) {
       const comp = evt.competitions?.[0];
       if (!comp) continue;
@@ -274,6 +275,7 @@ export default {
       const matchData = {
         id: evt.id,
         name: evt.name,
+        date: evt.date || null,
         state: state,
         clock: clock,
         detail: detail,
@@ -287,12 +289,14 @@ export default {
         awayScorers: awayScorers,
       };
 
-      // Index by ESPN event ID, team slug with date, and normalized name
+      // Index by ESPN event ID, team slug with date, and date-bounded normalized bucket
       const dateKey = (evt.date || '').slice(0, 10);
       snapshot[evt.id] = matchData;
       if (dateKey) snapshot[`${slugKey}-${dateKey}`] = matchData;
-      snapshot[slugKey] = matchData;
-      snapshot[normKey] = matchData;
+      if (normKey.length > 1) {
+        if (!byNorm[normKey]) byNorm[normKey] = [];
+        byNorm[normKey].push(matchData);
+      }
     }
 
     // Retrieve previous snapshot from KV
@@ -346,12 +350,19 @@ export default {
 
     // Update live score, elapsed minute, status, and goal scorers for matching games
     for (const m of existingMatches) {
+      const slugKey = `${m.homeTeam}-${m.awayTeam}`.replace(/\s+/g, '-');
+      const normKey = `${(m.homeTeam || '').toLowerCase().replace(/[^a-z0-9]/g, '')}-${(m.awayTeam || '').toLowerCase().replace(/[^a-z0-9]/g, '')}`;
       const mDateKey = (m.date || '').slice(0, 10);
+      const mDateMs = m.date ? Date.parse(m.date) : NaN;
       const live = (m.espnEventId && snapshot[m.espnEventId]) ||
                    snapshot[m.id] ||
                    (mDateKey && snapshot[`${slugKey}-${mDateKey}`]) ||
-                   snapshot[slugKey] ||
-                   snapshot[normKey];
+                   (!Number.isNaN(mDateMs)
+                     ? (byNorm[normKey] || []).find(cand => {
+                         const cMs = cand.date ? Date.parse(cand.date) : NaN;
+                         return !Number.isNaN(cMs) && Math.abs(mDateMs - cMs) <= 18 * 3600 * 1000;
+                       })
+                     : null);
 
       if (live) {
         m.homeScore = live.homeScore;

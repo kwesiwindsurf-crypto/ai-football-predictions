@@ -20,7 +20,8 @@ class MatchesProvider extends ChangeNotifier {
   MatchesProvider._internal();
 
   final Map<String, Match> _matchesById = {};
-  final Map<String, String> _idByTeamsKey = {};
+  final Map<String, String> _idByDayKey = {};
+  final Map<String, List<String>> _idsByTeamsKey = {};
   List<Match> _allMatches = [];
   List<Match> _liveMatches = [];
   bool _isInitialized = false;
@@ -31,7 +32,7 @@ class MatchesProvider extends ChangeNotifier {
   Match? getMatchById(String id) {
     final direct = _matchesById[id];
     if (direct != null) return direct;
-    final canonicalId = _idByTeamsKey[id];
+    final canonicalId = _idByDayKey[id] ?? _idsByTeamsKey[id]?.firstOrNull;
     if (canonicalId != null) return _matchesById[canonicalId];
     return null;
   }
@@ -90,26 +91,47 @@ class MatchesProvider extends ChangeNotifier {
     applyDeltas(latest);
   }
 
+  void _indexMatch(Match canonical, String aliasId) {
+    _matchesById[aliasId] = canonical;
+    _idByDayKey[canonical.normalizedTeamsDayKey] = canonical.id;
+    final list = _idsByTeamsKey.putIfAbsent(canonical.normalizedTeamsKey, () => []);
+    if (!list.contains(canonical.id)) {
+      list.add(canonical.id);
+    }
+  }
+
   /// Populates the initial master fixture set (from Cloudflare KV or local cache).
   void setInitialMatches(List<Match> matches) {
     _matchesById.clear();
-    _idByTeamsKey.clear();
+    _idByDayKey.clear();
+    _idsByTeamsKey.clear();
     final uniqueMatches = <String, Match>{};
     for (final m in matches) {
-      final dayKey = '${m.normalizedTeamsKey}-${m.date.year}-${m.date.month}-${m.date.day}';
+      final dayKey = m.normalizedTeamsDayKey;
       if (!uniqueMatches.containsKey(dayKey)) {
         uniqueMatches[dayKey] = m;
       }
-      final canonical = uniqueMatches[dayKey]!;
-      _matchesById[m.id] = canonical;
-      _idByTeamsKey[m.normalizedTeamsKey] = canonical.id;
-      _idByTeamsKey[dayKey] = canonical.id;
+      _indexMatch(uniqueMatches[dayKey]!, m.id);
     }
     _allMatches = uniqueMatches.values.toList();
     _liveMatches = _allMatches.where((m) => m.status == MatchStatus.live).toList();
     _isLoading = false;
     _error = null;
     notifyListeners();
+  }
+
+  Match? _findExistingForDelta(Match delta) {
+    final byId = _matchesById[delta.id] ?? _matchesById[_idByDayKey[delta.normalizedTeamsDayKey]];
+    if (byId != null) return byId;
+    final candidates = _idsByTeamsKey[delta.normalizedTeamsKey];
+    if (candidates == null) return null;
+    for (final candidateId in candidates) {
+      final candidate = _matchesById[candidateId];
+      if (candidate != null && candidate.isSameFixtureAs(delta)) {
+        return candidate;
+      }
+    }
+    return null;
   }
 
   /// 🛡️ Smart Delta Dirty Guard:
@@ -121,20 +143,11 @@ class MatchesProvider extends ChangeNotifier {
     bool hasMeaningfulChange = false;
 
     for (final delta in deltas) {
-      final deltaDayKey = '${delta.normalizedTeamsKey}-${delta.date.year}-${delta.date.month}-${delta.date.day}';
-      Match? existing = _matchesById[delta.id];
-      if (existing == null) {
-        final canonicalId = _idByTeamsKey[deltaDayKey] ?? _idByTeamsKey[delta.normalizedTeamsKey];
-        if (canonicalId != null) {
-          existing = _matchesById[canonicalId];
-        }
-      }
+      final existing = _findExistingForDelta(delta);
 
       if (existing == null) {
         // Brand new match entered scope
-        _matchesById[delta.id] = delta;
-        _idByTeamsKey[delta.normalizedTeamsKey] = delta.id;
-        _idByTeamsKey[deltaDayKey] = delta.id;
+        _indexMatch(delta, delta.id);
         _allMatches.add(delta);
         hasMeaningfulChange = true;
       } else {
@@ -148,13 +161,10 @@ class MatchesProvider extends ChangeNotifier {
 
         if (scoreChanged || statusChanged || minuteChanged || eventsChanged) {
           final merged = existing.mergeLiveDelta(delta);
-          _matchesById[existing.id] = merged;
+          _indexMatch(merged, existing.id);
           _matchesById[delta.id] = merged; // Alias incoming delta ID as well
-          _idByTeamsKey[existing.normalizedTeamsKey] = existing.id;
-          _idByTeamsKey[deltaDayKey] = existing.id;
 
-          final canonicalExisting = existing;
-          final idx = _allMatches.indexWhere((m) => m.id == canonicalExisting.id || m.normalizedTeamsKey == canonicalExisting.normalizedTeamsKey);
+          final idx = _allMatches.indexWhere((m) => m.id == existing.id);
           if (idx >= 0) {
             _allMatches[idx] = merged;
           } else {

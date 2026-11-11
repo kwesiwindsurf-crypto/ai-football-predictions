@@ -1892,18 +1892,6 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
     final awayProb = p.awayWinProbability.clamp(1.0, 100.0);
 
     final isHomeFav = p.homeWinProbability >= p.awayWinProbability;
-    final favProb = isHomeFav ? p.homeWinProbability : p.awayWinProbability;
-    final favOdds = isHomeFav ? m.homeOdds : m.awayOdds;
-
-    String sub = 'CONF ${p.confidence.round()}%';
-    if (favOdds != null && favOdds > 1.01) {
-      final edge = favProb - (1.0 / favOdds * 100);
-      final b = favOdds - 1.0;
-      final kelly = b > 0 ? ((favProb / 100 * favOdds - 1) / b) : 0.0;
-      final stake = (kelly * 100).clamp(0.0, 10.0);
-      sub = 'CONF ${p.confidence.round()}% · EDGE ${_edgeLabel(edge)} · KELLY ${stake.toStringAsFixed(1)}%';
-    }
-
     final pickName = p.recommendation.trim().isNotEmpty
         ? p.recommendation.trim()
         : _verdictPick(
@@ -1911,8 +1899,20 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
             '${_shortTeamName(isHomeFav ? m.homeTeam : m.awayTeam)} to WIN',
           );
 
-    // Resolve the market price that actually belongs to [pickName].
-    final double? pickOdds = _oddsForPick(m, pickName);
+    // Resolve price and model probability for the actual picked market so
+    // EDGE / KELLY never come from 1X2 moneyline odds when picking Over 1.5 / DC.
+    final pickedMarket = _marketForPick(m, pickName);
+    final double? pickOdds = pickedMarket.odds;
+    final double? pickedProb = pickedMarket.prob;
+
+    String sub = 'CONF ${p.confidence.round()}%';
+    if (pickOdds != null && pickOdds > 1.01 && pickedProb != null) {
+      final edge = pickedProb - (1.0 / pickOdds * 100);
+      final b = pickOdds - 1.0;
+      final kelly = b > 0 ? ((pickedProb / 100 * pickOdds - 1) / b) : 0.0;
+      final stake = (kelly * 100).clamp(0.0, 10.0);
+      sub = 'CONF ${p.confidence.round()}% · EDGE ${_edgeLabel(edge)} · KELLY ${stake.toStringAsFixed(1)}%';
+    }
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -2076,10 +2076,11 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
     return fallback;
   }
 
-  /// Resolves the market price that actually belongs to [pickLabel].
-  /// Returns null when the pick is on a market we don't have a price for
-  /// (e.g. Over 1.5 goals or Double Chance) — the UI then shows "—" instead of inventing one.
-  double? _oddsForPick(model.Match m, String pickLabel) {
+  /// Resolves the market price and model probability that belong to [pickLabel].
+  /// Returns nulls when the pick is on a market we don't have a price for
+  /// (e.g. Over 1.5 goals or Double Chance) so neither price nor EDGE/KELLY is faked.
+  ({double? odds, double? prob}) _marketForPick(model.Match m, String pickLabel) {
+    final p = m.prediction;
     final label = pickLabel.toLowerCase().trim();
     if (label.startsWith('1x') ||
         label.startsWith('x2') ||
@@ -2088,24 +2089,24 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
         label.contains('over ') ||
         label.contains('under ') ||
         label.contains('btts')) {
-      return null;
+      return (odds: null, prob: null);
     }
     if (label == 'draw' || label == 'x' || label.contains('draw (x)')) {
-      return m.drawOdds;
+      return (odds: m.drawOdds, prob: p.drawProbability);
     }
     final homeKey = _shortTeamName(m.homeTeam).toLowerCase();
     final awayKey = _shortTeamName(m.awayTeam).toLowerCase();
     if (label.contains('(1)') ||
         label.contains(m.homeTeam.toLowerCase()) ||
         (homeKey.isNotEmpty && label.contains(homeKey))) {
-      return m.homeOdds;
+      return (odds: m.homeOdds, prob: p.homeWinProbability);
     }
     if (label.contains('(2)') ||
         label.contains(m.awayTeam.toLowerCase()) ||
         (awayKey.isNotEmpty && label.contains(awayKey))) {
-      return m.awayOdds;
+      return (odds: m.awayOdds, prob: p.awayWinProbability);
     }
-    return null;
+    return (odds: null, prob: null);
   }
   String _stripOdds(String s) {
     return s.replaceAll(RegExp(r'\(\s*\d+(?:\.\d+)?\s*\)'), '').trim();
@@ -2130,9 +2131,15 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
     final totalXg = homeXg + awayXg;
 
     final isHomeFav = homeProb >= awayProb;
-    final favProb = isHomeFav ? homeProb : awayProb;
-    final favOdds = isHomeFav ? m.homeOdds : m.awayOdds;
-    final edge = (favOdds != null && favOdds > 1.01) ? favProb - (1.0 / favOdds * 100) : null;
+    final pickLabel = p.recommendation.trim().isNotEmpty
+        ? p.recommendation.trim()
+        : '${_shortTeamName(isHomeFav ? m.homeTeam : m.awayTeam)} to WIN';
+    final pickedMarket = _marketForPick(m, pickLabel);
+    final edge = (pickedMarket.odds != null &&
+            pickedMarket.odds! > 1.01 &&
+            pickedMarket.prob != null)
+        ? pickedMarket.prob! - (1.0 / pickedMarket.odds! * 100)
+        : null;
 
     // The analysis payload is "strategy line\nHomeForm: x%, ..." — show the
     // strategy sentence and turn the raw numbers into factor bars.

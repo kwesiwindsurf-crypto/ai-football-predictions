@@ -146,6 +146,8 @@ class ApiService {
         if (item is! Map || item['id'] == null) continue;
         byId[item['id'].toString()] = <String, dynamic>{
           'id': item['id'],
+          'homeTeam': item['homeTeam'],
+          'awayTeam': item['awayTeam'],
           'date': item['date'],
           'status': item['status'],
           'statusShort': item['statusShort'],
@@ -170,6 +172,21 @@ class ApiService {
     }
   }
 
+  static Match? _findMatchingDelta(
+    Match base,
+    Map<String, Match> byId,
+    Map<String, List<Match>> byTeams,
+  ) {
+    final exact = byId[base.id];
+    if (exact != null) return exact;
+    final candidates = byTeams[base.normalizedTeamsKey];
+    if (candidates == null) return null;
+    for (final candidate in candidates) {
+      if (base.isSameFixtureAs(candidate)) return candidate;
+    }
+    return null;
+  }
+
   /// Replays the stored telemetry onto a freshly parsed match list, preserving every
   /// static field (prediction, odds, ranks, form) that the override entry does not carry.
   static List<Match> _mergeLiveOverrides(List<Match> base, String overridesJson) {
@@ -190,10 +207,14 @@ class ApiService {
     }
     if (deltas.isEmpty) return base;
 
-    final byId = {for (final d in deltas) d.id: d};
-    final byTeams = {for (final d in deltas) d.normalizedTeamsKey: d};
+    final byId = <String, Match>{};
+    final byTeams = <String, List<Match>>{};
+    for (final d in deltas) {
+      byId[d.id] = d;
+      byTeams.putIfAbsent(d.normalizedTeamsKey, () => []).add(d);
+    }
     return base.map((m) {
-      final delta = byId[m.id] ?? byTeams[m.normalizedTeamsKey];
+      final delta = _findMatchingDelta(m, byId, byTeams);
       return delta == null ? m : m.mergeLiveDelta(delta);
     }).toList();
   }
@@ -247,14 +268,14 @@ class ApiService {
           }
 
           if (liveUpdatedList.isNotEmpty) {
-            final Map<String, Match> updateMapById = {
-              for (var m in liveUpdatedList) m.id: m,
-            };
-            final Map<String, Match> updateMapByTeams = {
-              for (var m in liveUpdatedList) m.normalizedTeamsKey: m,
-            };
+            final Map<String, Match> updateMapById = {};
+            final Map<String, List<Match>> updateMapByTeams = {};
+            for (final m in liveUpdatedList) {
+              updateMapById[m.id] = m;
+              updateMapByTeams.putIfAbsent(m.normalizedTeamsKey, () => []).add(m);
+            }
             _inMemoryCache = _inMemoryCache!.map((existing) {
-              final delta = updateMapById[existing.id] ?? updateMapByTeams[existing.normalizedTeamsKey];
+              final delta = _findMatchingDelta(existing, updateMapById, updateMapByTeams);
               if (delta != null) {
                 return existing.mergeLiveDelta(delta);
               }
@@ -398,7 +419,7 @@ class ApiService {
       if (item is Map) {
         try {
           final m = Match.fromJson(Map<String, dynamic>.from(item), standingsData);
-          final dayKey = '${m.normalizedTeamsKey}-${m.date.year}-${m.date.month}-${m.date.day}';
+          final dayKey = m.normalizedTeamsDayKey;
           if (seenKeys.add(dayKey)) {
             matches.add(m);
           }

@@ -145,6 +145,24 @@ class Match {
     return '$h-$a';
   }
 
+  /// Canonical UTC calendar-day key so adjacent-day rematches stay distinct.
+  String get normalizedTeamsDayKey {
+    final u = date.toUtc();
+    return '$normalizedTeamsKey-${u.year}-${u.month}-${u.day}';
+  }
+
+  /// True if [other] refers to the same fixture (exact ID or matching clubs
+  /// within an 18-hour kickoff window so yesterday's FT never hits tomorrow's rematch).
+  bool isSameFixtureAs(Match other) {
+    if (id == other.id) return true;
+    if (normalizedTeamsKey.length <= 1 ||
+        normalizedTeamsKey != other.normalizedTeamsKey) {
+      return false;
+    }
+    return date.toUtc().difference(other.date.toUtc()).abs() <=
+        const Duration(hours: 18);
+  }
+
   /// Merges live telemetry deltas (scores, clock, status, events, scorers, stats)
   /// from the lightweight Render /live endpoint while preserving the static AI prediction,
   /// H2H, and odds loaded from Cloudflare KV.
@@ -996,10 +1014,24 @@ class AIPrediction {
       maxProb < 45 ? 'Alternative: Under 2.5 Goals' : 'Alternative: Over 2.5 Total Goals'
     ];
 
+    // Largest-remainder rounding guarantees Home + Draw + Away == 100.
+    final exactPercents = [fHp, fDp, fAp];
+    final flooredPercents = exactPercents.map((v) => v.floor()).toList();
+    final remainder =
+        100 - (flooredPercents[0] + flooredPercents[1] + flooredPercents[2]);
+    final order = [0, 1, 2]
+      ..sort(
+        (i, j) => (exactPercents[j] - flooredPercents[j])
+            .compareTo(exactPercents[i] - flooredPercents[i]),
+      );
+    for (int k = 0; k < remainder; k++) {
+      flooredPercents[order[k % 3]] += 1;
+    }
+
     return AIPrediction(
-      homeWinProbability: fHp.roundToDouble(),
-      drawProbability: fDp.roundToDouble(),
-      awayWinProbability: fAp.roundToDouble(),
+      homeWinProbability: flooredPercents[0].toDouble(),
+      drawProbability: flooredPercents[1].toDouble(),
+      awayWinProbability: flooredPercents[2].toDouble(),
       recommendation: rec,
       analysis: '$strategyAnalysis\nHomeForm: ${hForm.round()}%, AwayForm: ${aForm.round()}%, BigGame: ${isElite || isMajor}',
       stakingOptions: stakingOptions,
