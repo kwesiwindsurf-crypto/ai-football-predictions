@@ -77,7 +77,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Isidro-Metapán-C.D.-Platense-2026-11-11",
@@ -209,7 +211,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Internacional-de-Bogotá-América-de-Cali-2026-11-10",
@@ -302,7 +306,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Cacahuatique-Luis-Ángel-Firpo-2026-11-10",
@@ -408,7 +414,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Tavernes-de-la-Valldigna-Valencia-2026-11-10",
@@ -608,7 +616,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Bradford-City-York-City-2026-11-10",
@@ -769,7 +779,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Bromley-Milton-Keynes-Dons-2026-11-10",
@@ -917,7 +929,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Amorebieta-UD-Logroñés-2026-11-10",
@@ -1036,7 +1050,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Mijas-Las-Lagunas-Real-Jaen-CF-2026-11-10",
@@ -1220,7 +1236,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Trival-Valderas-Leganés-2026-11-10",
@@ -1352,7 +1370,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Barnet-Leyton-Orient-2026-11-10",
@@ -1565,7 +1585,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Bristol-Rovers-Reading-2026-11-10",
@@ -1843,7 +1865,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Burton-Albion-Notts-County-2026-11-10",
@@ -1978,7 +2002,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Crewe-Alexandra-Wigan-Athletic-2026-11-10",
@@ -2139,7 +2165,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Leicester-City-Walsall-2026-11-10",
@@ -2274,7 +2302,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Mansfield-Town-Chesterfield-2026-11-10",
@@ -2487,7 +2517,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Northampton-Town-Gillingham-2026-11-10",
@@ -2609,7 +2641,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Oxford-United-Cheltenham-Town-2026-11-10",
@@ -2744,7 +2778,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Plymouth-Argyle-Swindon-Town-2026-11-10",
@@ -2918,7 +2954,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Stockport-County-Tranmere-Rovers-2026-11-10",
@@ -3105,7 +3143,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "SV-Bergisch-Gladbach-09-SV-SCHLEBUSCH-2026-11-10",
@@ -3158,7 +3198,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Anaitasuna-Alavés-2026-11-10",
@@ -3345,7 +3387,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "CD-Pamplona-Eibar-2026-11-10",
@@ -3464,7 +3508,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "SC-Paderborn-07-TSV-Eintracht-Braunschweig-2026-11-10",
@@ -3517,7 +3563,9 @@
         "BTTS: Both Teams To Score - Yes (1.78)",
         "Alternative: Under 2.5 Goals (1.80)"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Aurora-Universitario-de-Vinto-2026-11-10",
