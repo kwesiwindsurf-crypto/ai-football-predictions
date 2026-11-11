@@ -135,6 +135,24 @@ function amToDec(am) {
   return parseFloat(((100 / Math.abs(am)) + 1).toFixed(2));
 }
 
+function readSideMoneyline(src, legacyKey, sideKey) {
+  return amToDec(
+    src?.[legacyKey]?.moneyLine ??
+      src?.moneyline?.[sideKey]?.close?.odds ??
+      src?.moneyline?.[sideKey]?.current?.odds ??
+      src?.moneyline?.[sideKey]?.open?.odds
+  );
+}
+
+function oddsFromProvider(src) {
+  if (!src || typeof src !== 'object') return null;
+  const h = readSideMoneyline(src, 'homeTeamOdds', 'home');
+  const a = readSideMoneyline(src, 'awayTeamOdds', 'away');
+  if (!h || !a) return null;
+  const d = readSideMoneyline(src, 'drawOdds', 'draw');
+  return { h, d, a, provider: src.provider?.name || 'summary' };
+}
+
 // Scoreboard `competitions[0].odds` can be empty while the same event summary
 // still publishes provider prices under pickcenter/odds.
 function oddsFromSummary(summaryData) {
@@ -143,11 +161,8 @@ function oddsFromSummary(summaryData) {
     ...(Array.isArray(summaryData?.odds) ? summaryData.odds : [])
   ];
   for (const src of sources) {
-    const h = amToDec(src.homeTeamOdds?.moneyLine ?? src.moneyline?.home?.close?.odds);
-    const a = amToDec(src.awayTeamOdds?.moneyLine ?? src.moneyline?.away?.close?.odds);
-    if (!h || !a) continue;
-    const d = amToDec(src.drawOdds?.moneyLine ?? src.moneyline?.draw?.close?.odds);
-    return { h, d, a, provider: src.provider?.name || 'summary' };
+    const parsed = oddsFromProvider(src);
+    if (parsed) return parsed;
   }
   return null;
 }
@@ -1398,12 +1413,15 @@ function parseEspnEvent(ev, leagueLabel, leagueSlug) {
   }
 
   // Odds
-  const oddsObj = comp.odds?.[0];
   let hOdds = null, dOdds = null, aOdds = null;
-  if (oddsObj) {
-    hOdds = amToDec(oddsObj.homeTeamOdds?.moneyLine ?? oddsObj.moneyline?.home?.close?.odds);
-    dOdds = amToDec(oddsObj.drawOdds?.moneyLine ?? oddsObj.moneyline?.draw?.close?.odds);
-    aOdds = amToDec(oddsObj.awayTeamOdds?.moneyLine ?? oddsObj.moneyline?.away?.close?.odds);
+  for (const oddsObj of (Array.isArray(comp.odds) ? comp.odds : [])) {
+    const parsed = oddsFromProvider(oddsObj);
+    if (parsed) {
+      hOdds = parsed.h;
+      dOdds = parsed.d;
+      aOdds = parsed.a;
+      break;
+    }
   }
   if (!(hOdds > 0 && aOdds > 0)) {
     const summaryOdds = oddsFromSummary(ev.summaryData);
