@@ -467,44 +467,101 @@ function parseFormStr(formStr) {
   return Math.max(0, percentage);
 }
 
-function parseH2HStr(summaryData, homeTeam, awayTeam) {
-  if (!summaryData || !summaryData.seasonseries || summaryData.seasonseries.length === 0) return null;
-  
-  // Extract string from seasonseries
-  const series = summaryData.seasonseries[0];
-  const summaryStr = series.summary || '';
-  if (!summaryStr) return null;
+// Count a season series from the historical results themselves. ESPN's summary
+// sentence has changed wording over time ("WIM leads series 3-0-2"), and its
+// three-letter abbreviations do not map to club names, so scores are the only
+// stable source. Each series event carries `competitors` directly on the event
+// (there is no competitions[] array), which is why the old reader saw nothing.
+function h2hFromSeasonseries(summaryData, homeTeam, awayTeam) {
+  const series = summaryData?.seasonseries?.[0];
+  const events = Array.isArray(series?.events) ? series.events : [];
+  if (events.length === 0) return null;
+
+  const norm = (s) => String(s || '').toLowerCase().trim();
+  const sameTeam = (a, b) => {
+    const x = norm(a);
+    const y = norm(b);
+    if (!x || !y) return false;
+    return x === y || x.includes(y) || y.includes(x);
+  };
 
   let hWins = 0, aWins = 0, draws = 0;
-  const cleanH2H = summaryStr.replace(/\s*\([\d\-,\s]+\)/g, '');
+  const recentResults = [];
 
-  const wonMatches = [...cleanH2H.matchAll(/([A-Za-z0-9\s\.\-]+?)\s+won\s+(\d+)/gi)];
-  for (const match of wonMatches) {
-    const tName = (match[1] || '').trim().toLowerCase();
-    const count = parseInt(match[2] || '0', 10);
-    const homeClean = (homeTeam || '').toLowerCase();
-    const awayClean = (awayTeam || '').toLowerCase();
-    
-    if (tName.includes(homeClean) || homeClean.includes(tName)) {
-      hWins += count;
-    } else if (tName.includes(awayClean) || awayClean.includes(tName)) {
-      aWins += count;
-    }
+  for (const event of events) {
+    const comps = event?.competitors || event?.competitions?.[0]?.competitors || [];
+    const homeComp = comps.find(c => c?.homeAway === 'home');
+    const awayComp = comps.find(c => c?.homeAway === 'away');
+    if (!homeComp || !awayComp) continue;
+
+    const hScore = parseInt(homeComp.score, 10);
+    const aScore = parseInt(awayComp.score, 10);
+    if (Number.isNaN(hScore) || Number.isNaN(aScore)) continue;
+
+    // Which side of this historical game was our home team?
+    const homeIsOurHome = sameTeam(homeComp.team?.displayName || homeComp.team?.name, homeTeam);
+    const awayIsOurHome = sameTeam(awayComp.team?.displayName || awayComp.team?.name, homeTeam);
+    if (!homeIsOurHome && !awayIsOurHome) continue; // unmappable fixture — skip rather than guess
+
+    const ourHomeScore = homeIsOurHome ? hScore : aScore;
+    const ourAwayScore = homeIsOurHome ? aScore : hScore;
+    if (ourHomeScore > ourAwayScore) hWins++;
+    else if (ourAwayScore > ourHomeScore) aWins++;
+    else draws++;
+
+    recentResults.push(`${homeTeam} ${ourHomeScore}-${ourAwayScore} ${awayTeam} (${String(event.date || '').slice(0, 10)})`);
   }
 
-  const drawMatch = cleanH2H.match(/(\d+)\s+Draw/i);
-  if (drawMatch) {
-    draws = parseInt(drawMatch[1] || '0', 10);
-  }
-  
   const total = hWins + aWins + draws;
   if (total === 0) return null;
-  
+
+  const parts = [];
+  if (hWins > 0) parts.push(`${homeTeam} won ${hWins}`);
+  if (aWins > 0) parts.push(`${awayTeam} won ${aWins}`);
+  if (draws > 0) parts.push(`${draws} Draw${draws > 1 ? 's' : ''}`);
+  const summaryStr = parts.join(', ') + ` of last ${total} meetings. ` + recentResults.slice(0, 5).join(' | ');
+
   return {
     h: (hWins / total) * 100,
     d: (draws / total) * 100,
     a: (aWins / total) * 100,
-    summaryStr: cleanH2H
+    summaryStr
+  };
+}
+
+function parseH2HStr(summaryData, homeTeam, awayTeam) {
+  if (!summaryData) return null;
+
+  // Full ESPN summary payload — the reliable path.
+  if (typeof summaryData === 'object') {
+    return h2hFromSeasonseries(summaryData, homeTeam, awayTeam);
+  }
+
+  // Our own stored summary sentence ("X won 3, 2 Draws of last 5 meetings. ...").
+  // Team names carry accents, so match them literally instead of \w.
+  const escapeRe = (s) => String(s || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const summaryStr = String(summaryData);
+
+  const countFor = (team) => {
+    if (!team) return 0;
+    const m = new RegExp(`${escapeRe(team)}\\s+won\\s+(\\d+)`, 'i').exec(summaryStr);
+    return m ? parseInt(m[1], 10) : 0;
+  };
+
+  const hWins = countFor(homeTeam);
+  const aWins = countFor(awayTeam);
+  const drawMatch = summaryStr.match(/(\d+)\s+Draws?\b/i);
+  const draws = drawMatch ? parseInt(drawMatch[1], 10) : 0;
+
+  const totalMatch = summaryStr.match(/of last (\d+) meetings?/i);
+  const total = totalMatch ? parseInt(totalMatch[1], 10) : (hWins + aWins + draws);
+  if (total === 0) return null;
+
+  return {
+    h: (hWins / total) * 100,
+    d: (draws / total) * 100,
+    a: (aWins / total) * 100,
+    summaryStr
   };
 }
 
@@ -1026,50 +1083,9 @@ async function main() {
         m.awayLineup = parseLineup(r1IsHome ? r2 : r1);
       }
 
-      // -- Parse Real H2H from ESPN seasonseries --------------------------------
-      // ESPN structure: seasonseries[0].events[] each with competitions[0].competitors[]
-      const seriesList = summary.seasonseries;
-      if (Array.isArray(seriesList) && seriesList.length > 0) {
-        const h2hEvents = seriesList[0].events || [];
-        let hWins = 0, aWins = 0, draws = 0;
-        const recentResults = [];
-
-        for (const event of h2hEvents) {
-          const comps = event.competitions?.[0];
-          if (!comps) continue;
-          const homeComp = comps.competitors?.find(c => c.homeAway === 'home');
-          const awayComp = comps.competitors?.find(c => c.homeAway === 'away');
-          if (!homeComp || !awayComp) continue;
-
-          const hScore = parseInt(homeComp.score, 10);
-          const aScore = parseInt(awayComp.score, 10);
-          const hName = homeComp.team?.displayName || homeComp.team?.name || '';
-          const dateStr = event.date ? event.date.slice(0, 10) : '';
-
-          // Map to our match home/away perspective
-          const isOurHome = hName.toLowerCase().includes(m.homeTeam.toLowerCase()) ||
-                            m.homeTeam.toLowerCase().includes(hName.toLowerCase());
-
-          const ourHomeScore = isOurHome ? hScore : aScore;
-          const ourAwayScore = isOurHome ? aScore : hScore;
-
-          if (ourHomeScore > ourAwayScore) hWins++;
-          else if (ourAwayScore > ourHomeScore) aWins++;
-          else draws++;
-
-          recentResults.push(`${m.homeTeam} ${ourHomeScore}-${ourAwayScore} ${m.awayTeam} (${dateStr})`);
-        }
-
-        if (hWins + aWins + draws > 0) {
-          const total = hWins + aWins + draws;
-          const parts = [];
-          if (hWins > 0) parts.push(`${m.homeTeam} won ${hWins}`);
-          if (aWins > 0) parts.push(`${m.awayTeam} won ${aWins}`);
-          if (draws > 0) parts.push(`${draws} Draw${draws > 1 ? 's' : ''}`);
-          m.h2hSummary = parts.join(', ') + ` of last ${total} meetings. ` +
-                         recentResults.slice(0, 5).join(' | ');
-        }
-      }
+      // -- Head-to-head from ESPN season series -------------------------------
+      const h2h = parseH2HStr(summary, m.homeTeam, m.awayTeam);
+      m.h2hSummary = h2h ? h2h.summaryStr : null;
 
       // Re-calculate prediction now that we have H2H data
       m.prediction = makePrediction(m.homeTeam, m.awayTeam, m.homeOdds, m.drawOdds, m.awayOdds, m.league, m.homeForm, m.awayForm, m.h2hSummary);

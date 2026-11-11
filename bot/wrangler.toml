@@ -2,13 +2,14 @@ name = "ai-football-bot"
 main = "src/index.js"
 compatibility_date = "2023-10-30"
 
-# 23:59 UTC: dispatch the nightly GitHub Actions scrape on time.
-# Cloudflare cron fires within seconds; GitHub's own scheduler drifts hours late.
-# Render handles live polling 24/7, so this cron only dispatches the scrape and
-# never writes to KV (no quota risk).
-# Requires secret: wrangler secret put GITHUB_TOKEN   (fine-grained PAT, Actions: write)
-[triggers]
-crons = ["59 23 * * *"]
+# No cron trigger: the nightly scrape is scheduled by GitHub Actions itself
+# (`.github/workflows/scrape.yml`, cron '59 23 * * *'). That needs no extra
+# token anywhere. GitHub's scheduler can start the job a few hours late; the
+# scrape still runs every night.
+#
+# (The Worker still has dispatchNightlyScrape() in src/index.js. If you ever
+# want the scrape to start exactly on time, set the GITHUB_TOKEN secret and
+# re-enable: [triggers] crons = ["59 23 * * *"])
 
 # We use KV to store the JSON so the flutter app can fetch it instantly
 [[kv_namespaces]]

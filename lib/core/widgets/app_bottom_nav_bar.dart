@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/update_service.dart';
 import '../theme/app_theme.dart';
 import '../../features/matches/presentation/pages/home_screen.dart';
 import '../../features/insights/presentation/pages/insights_screen.dart';
@@ -32,6 +33,15 @@ class MainNavigationShellState extends State<MainNavigationShell> {
     if (index == currentIndex) return;
     setState(() {
       currentIndex = index;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Play's update sheet is system UI — raise it only once the shell is painted.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) UpdateService.checkForUpdates(context: context);
     });
   }
 
