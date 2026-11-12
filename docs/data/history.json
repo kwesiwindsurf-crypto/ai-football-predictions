@@ -158,7 +158,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Independiente-Petrolero-Always-Ready-2026-11-11",
@@ -280,7 +282,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Fuerte-San-Francisco-Alianza-FC-2026-11-11",
@@ -347,7 +351,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Real-Valladolid-Santa-Clara-2026-11-11",
@@ -400,7 +406,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Barnsley-Oldham-Athletic-2026-11-11",
@@ -610,7 +618,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Sheffield-Wednesday-Accrington-Stanley-2026-11-11",
@@ -794,7 +804,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "FC-Wegberg-Beeck-1920-Alemannia-Aachen-2026-11-11",
@@ -847,7 +859,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "SC-Wiedenbrück-2000-Preußen-Münster-II-2026-11-11",
@@ -900,7 +914,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Bangladesh-Sri-Lanka-2026-11-11",
@@ -953,7 +969,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Vietnam-Chinese-Taipei-2026-11-11",
@@ -1006,7 +1024,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "India-Maldives-2026-11-11",
