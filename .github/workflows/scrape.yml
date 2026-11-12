@@ -38,6 +38,10 @@ jobs:
         run: npm ci
         working-directory: bot
 
+      - name: Odds integrity tests
+        run: npm test
+        working-directory: bot
+
       - name: Run full scraper
         env:
           CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}

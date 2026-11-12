@@ -2270,6 +2270,31 @@ async function main() {
     preservePredictionLock(m, existing, postedPickIds.has(m.id), nowMs);
   }
 
+  // Odds integrity net ---------------------------------------------------------
+  // ESPN erases the prices at kickoff, so a pre-match snapshot must never be
+  // lost. Whatever path dropped it (lock guard, freeze, merge), any match that
+  // had odds in KV and comes back without them is repaired here and reported.
+  const oddsRepairs = [];
+  for (const m of matches) {
+    const existing = existingMatchesMap.get(m.id);
+    if (!existing || existing.homeOdds == null) continue;
+    if (m.homeOdds != null) continue;
+    // Only repair the same fixture — event ids are unique per match.
+    if (existing.espnEventId != null && m.espnEventId != null &&
+        String(existing.espnEventId) !== String(m.espnEventId)) continue;
+
+    m.homeOdds = existing.homeOdds;
+    m.drawOdds = existing.drawOdds ?? null;
+    m.awayOdds = existing.awayOdds ?? null;
+    if (existing.oddsRating != null) m.oddsRating = existing.oddsRating;
+    if (existing.prediction) m.prediction = existing.prediction;
+    oddsRepairs.push(`${m.homeTeam} v ${m.awayTeam}`);
+  }
+  if (oddsRepairs.length > 0) {
+    console.warn(`⚠️ Odds integrity: restored ${oddsRepairs.length} pre-match price snapshot(s)`);
+    console.warn(`   ${oddsRepairs.slice(0, 8).join(' | ')}${oddsRepairs.length > 8 ? ' | …' : ''}`);
+  }
+
   // 3. Telegram Broadcast & Result Monitoring
   const FORCE_TELEGRAM = process.env.FORCE_TELEGRAM === 'true' || process.argv.includes('--push-telegram');
   const FORCE_DASHBOARD = process.env.FORCE_DASHBOARD === 'true' || process.argv.includes('--post-dashboard');
@@ -2449,7 +2474,13 @@ async function main() {
     lastTelegramPostDate,
     lastDashboardDate,
     activeTelegramPicks,
-    todayResults
+    todayResults,
+    // Visibility for the nightly health check: how many pre-match price
+    // snapshots had to be repaired because something dropped them.
+    oddsIntegrity: {
+      repaired: oddsRepairs.length,
+      checkedAt: new Date().toISOString()
+    }
   });
 
   console.log('\nPushing to Render Live Engine...');

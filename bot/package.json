@@ -7,7 +7,8 @@
     "start": "node server.mjs",
     "serve": "node server.mjs",
     "dev": "wrangler dev",
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler deploy",
+    "test": "node --test tests/*.test.mjs"
   },
   "devDependencies": {
     "wrangler": "^3.15.0"

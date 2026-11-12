@@ -2137,18 +2137,55 @@
           if (sRes.ok) staticHistory = await sRes.json();
         } catch (_) {}
 
-        // Merge all matches (static history + Cloudflare historical + live rolling)
+        // Merge all matches (static history + Cloudflare historical + live rolling).
+        // Merging is field-level: a fresher record must never blank out a value it
+        // does not have. ESPN erases prices at kickoff, so a later snapshot can
+        // legitimately arrive with null odds — the archived one keeps the price.
         const matchMap = new Map();
 
-        // 1. Add historical records
-        [...staticHistory, ...historicalMatches].forEach(m => {
-          if (m && m.id) matchMap.set(m.id, m);
-        });
+        // >>> match-merge (kept self-contained: tests extract this block)
+        const isBlank = (v) => v === null || v === undefined || v === '';
+        const PRESERVE_IF_BLANK = [
+          'homeOdds', 'drawOdds', 'awayOdds', 'oddsRating',
+          'homeForm', 'awayForm', 'homeRecord', 'awayRecord',
+          'h2hSummary', 'matchUrl', 'referee', 'attendance',
+          'venue', 'venueName', 'venueCity', 'stats', 'events',
+          'homeScorers', 'awayScorers'
+        ];
 
-        // 2. Add / overwrite with live rolling records
-        rollingMatches.forEach(m => {
-          if (m && m.id) matchMap.set(m.id, m);
-        });
+        const mergeMatch = (base, update) => {
+          if (!base) return update;
+          const merged = { ...base, ...update };
+
+          for (const key of PRESERVE_IF_BLANK) {
+            if (isBlank(update[key]) && !isBlank(base[key])) merged[key] = base[key];
+          }
+
+          // A prediction built without odds must not replace a market-backed one.
+          const updateHadOdds = !isBlank(update.homeOdds) && !isBlank(update.awayOdds);
+          const baseHadOdds = !isBlank(base.homeOdds) && !isBlank(base.awayOdds);
+          if (!updateHadOdds && baseHadOdds) {
+            merged.homeOdds = base.homeOdds;
+            merged.drawOdds = base.drawOdds;
+            merged.awayOdds = base.awayOdds;
+            if (base.oddsRating != null) merged.oddsRating = base.oddsRating;
+            if (base.prediction) merged.prediction = { ...(update.prediction || {}), ...base.prediction };
+          }
+
+          return merged;
+        };
+        // <<< match-merge
+
+        const putMatch = (m) => {
+          if (!m || !m.id) return;
+          matchMap.set(m.id, mergeMatch(matchMap.get(m.id), m));
+        };
+
+        // 1. Add historical records
+        [...staticHistory, ...historicalMatches].forEach(putMatch);
+
+        // 2. Overlay live rolling records (fresher status/score, without data loss)
+        rollingMatches.forEach(putMatch);
 
         const rawMatches = Array.from(matchMap.values());
 
