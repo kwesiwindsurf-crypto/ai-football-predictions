@@ -14,6 +14,11 @@ on:
       - 'bot/**'
   # Allow manual trigger from GitHub UI
   workflow_dispatch:
+    inputs:
+      force_telegram:
+        description: 'Post the picks card even if today was already posted'
+        type: boolean
+        default: false
 
 jobs:
   scrape:
@@ -49,6 +54,9 @@ jobs:
           CF_KV_NAMESPACE_ID: ${{ secrets.CF_KV_NAMESPACE_ID }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          # Manual runs can repost the daily picks card: Actions → Scrape
+          # Football Matches → Run workflow → force_telegram.
+          FORCE_TELEGRAM: ${{ inputs.force_telegram }}
         run: node scraper.mjs
         working-directory: bot
 
