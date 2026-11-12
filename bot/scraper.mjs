@@ -1878,7 +1878,8 @@ async function postDailyDigestToTelegram(matches, digestDate = new Date().toISOS
   const upcomingToday = todaysMatches.filter(m => m.status !== 'finished' && m.statusShort !== 'FT');
   const candidatePool = upcomingToday.length > 0 ? upcomingToday : todaysMatches;
 
-  // Rank matches by highest probability and confidence to identify the 2 best banker picks to kill off the game
+  // Rank matches by highest probability and confidence to find the single
+  // strongest Pick of the Day for the channel.
   candidatePool.sort((a, b) => {
     const probA = Math.max(a.prediction?.homeWinProbability || 0, a.prediction?.awayWinProbability || 0, a.prediction?.drawProbability || 0);
     const probB = Math.max(b.prediction?.homeWinProbability || 0, b.prediction?.awayWinProbability || 0, b.prediction?.drawProbability || 0);
@@ -1890,8 +1891,8 @@ async function postDailyDigestToTelegram(matches, digestDate = new Date().toISOS
     return edgeB - edgeA;
   });
 
-  // Pick ONLY the top 2 best picks
-  const topPicks = candidatePool.slice(0, 2);
+  // The channel publishes exactly one pick per day: the Pick of the Day.
+  const topPicks = candidatePool.slice(0, 1);
 
   const dateTag = ticketDateTag(digestDate);
   const rule = '━━━━━━━━━━━━━━━━━━━━';
@@ -1899,7 +1900,7 @@ async function postDailyDigestToTelegram(matches, digestDate = new Date().toISOS
   // Monospace block so the columns line up on a phone. Links can't live inside
   // a code block, so the dashboard URL is appended after it.
   let msg = '```\n';
-  msg += `🎟 ${dateTag} · ${topPicks.length} PICK${topPicks.length === 1 ? '' : 'S'}\n`;
+  msg += `🎟 PICK OF THE DAY · ${dateTag}\n`;
   msg += `${rule}\n`;
 
   topPicks.forEach(m => {
@@ -1923,7 +1924,7 @@ async function postDailyDigestToTelegram(matches, digestDate = new Date().toISOS
 
   const ok = await sendTelegramMessage(msg);
   if (ok) {
-    console.log(`✅ Successfully posted top ${topPicks.length} banker picks to Telegram!`);
+    console.log(`✅ Successfully posted the Pick of the Day to Telegram!`);
     return topPicks.map((m, idx) => ({
       id: m.id,
       homeTeam: m.homeTeam,
@@ -1981,7 +1982,7 @@ function evaluatePrediction(rec, hScore, aScore, hTeam, aTeam) {
   return { result, isDraw };
 }
 
-async function checkAndPostMatchResults(activePicks, matches, todayResults = []) {
+async function checkAndPostMatchResults(activePicks, matches, todayResults = [], { silent = false } = {}) {
   if (!activePicks || activePicks.length === 0 || !TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
     return { remainingPicks: activePicks || [], updatedTodayResults: todayResults };
   }
@@ -2019,11 +2020,11 @@ async function checkAndPostMatchResults(activePicks, matches, todayResults = [])
                 `🌐 [View Full Match Details & Scorecard](https://kwesiwindsurf-crypto.github.io/ai-football-predictions/)\n` +
                 `📲 _Check the app for live results & upcoming predictions!_`;
 
-    const success = await sendTelegramMessage(msg);
+    const success = silent ? true : await sendTelegramMessage(msg);
     if (!success) {
       remainingPicks.push(pick);
     } else {
-      console.log(`✅ Posted result for ${match.homeTeam} vs ${match.awayTeam} (${result}, ${hScore}-${aScore}) to Telegram!`);
+      console.log(`✅ ${silent ? 'Recorded' : 'Posted'} result for ${match.homeTeam} vs ${match.awayTeam} (${result}, ${hScore}-${aScore})`);
       updatedTodayResults.push({
         id: match.id,
         homeTeam: match.homeTeam,
@@ -2260,6 +2261,11 @@ async function main() {
   // 3. Telegram Broadcast & Result Monitoring
   const FORCE_TELEGRAM = process.env.FORCE_TELEGRAM === 'true' || process.argv.includes('--push-telegram');
   const FORCE_DASHBOARD = process.env.FORCE_DASHBOARD === 'true' || process.argv.includes('--post-dashboard');
+  // Channel policy: ONE Pick of the Day, and nothing else. Match results are
+  // still evaluated internally (they feed the archive and prediction locking),
+  // but the FT messages and the daily dashboard are not broadcast.
+  // Set POST_RESULTS=true (or --post-results) to restore them.
+  const POST_RESULTS = process.env.POST_RESULTS === 'true' || process.argv.includes('--post-results');
 
   let lastTelegramPostDate = null;
   let lastDashboardDate = null;
@@ -2280,10 +2286,13 @@ async function main() {
     }
   }
 
-  // A. Check if any active picks have finished and post individual FT results
+  // A. Evaluate finished active picks. Results are recorded for the archive;
+  //    the FT message itself is only sent when POST_RESULTS is enabled.
   if (activeTelegramPicks.length > 0) {
     console.log(`\nChecking results for ${activeTelegramPicks.length} active Telegram pick(s)...`);
-    const { remainingPicks, updatedTodayResults } = await checkAndPostMatchResults(activeTelegramPicks, matches, todayResults);
+    const { remainingPicks, updatedTodayResults } = await checkAndPostMatchResults(
+      activeTelegramPicks, matches, todayResults, { silent: !POST_RESULTS }
+    );
     activeTelegramPicks = remainingPicks;
     todayResults = updatedTodayResults;
   }
@@ -2294,7 +2303,7 @@ async function main() {
   const remainingTodayPicks = activeTelegramPicks.filter(p => p.date && p.date.startsWith(todayStr));
   const shouldPostDashboard = (todayResults.length > 0 && remainingTodayPicks.length === 0 && lastDashboardDate !== todayStr) || (FORCE_DASHBOARD && todayResults.length > 0);
 
-  if (shouldPostDashboard) {
+  if (POST_RESULTS && shouldPostDashboard) {
     console.log(`\nAll today's matches have finished! Posting Daily Performance Dashboard...`);
     const dashboardSent = await postDailyDashboardToTelegram(todayResults);
     if (dashboardSent) {
@@ -2302,9 +2311,9 @@ async function main() {
     }
   }
 
-  // C. Post Daily Digest of all games once per day (or if forced)
+  // C. Post the daily Pick of the Day once per day (or if forced)
   if (lastTelegramPostDate !== digestDate || FORCE_TELEGRAM) {
-    console.log(`\nNew day detected! Attempting to post Top 2 Banker Picks to Telegram...`);
+    console.log(`\nNew day detected! Attempting to post the Pick of the Day to Telegram...`);
     const newActivePicks = await postDailyDigestToTelegram(matches, digestDate);
     if (newActivePicks && newActivePicks.length > 0) {
       const existingIds = new Set(activeTelegramPicks.map(p => p.id));
@@ -2441,7 +2450,7 @@ async function main() {
 
 // Importing this module must never scrape or push: the backtest replays the
 // prediction engine offline, and only `node scraper.mjs` runs the pipeline.
-export { makePrediction, parseH2HStr, h2hFromSeasonseries, evaluatePrediction, freezeFinishedMatches, preservePredictionLock, oddsFromSummary, amToDec, ESPN_LEAGUES };
+export { makePrediction, parseH2HStr, h2hFromSeasonseries, evaluatePrediction, freezeFinishedMatches, preservePredictionLock, oddsFromSummary, amToDec, ESPN_LEAGUES, postDailyDigestToTelegram, checkAndPostMatchResults };
 
 const isDirectRun = !!process.argv[1] &&
   import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href;
