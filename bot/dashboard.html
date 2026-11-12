@@ -483,7 +483,7 @@
     /* Performance HUD Dashboard */
     .tracker-card {
       display: grid;
-      grid-template-columns: 290px repeat(5, 1fr);
+      grid-template-columns: 290px repeat(2, 1fr);
       gap: 1.2rem;
       background: var(--card-bg);
       border: 1px solid var(--card-border);
@@ -1706,15 +1706,6 @@
         <span class="stat-tile-sub">Direct &amp; Safe Hits</span>
       </div>
 
-      <div class="stat-tile touch-haptic" onclick="filterByResult('DRAW_SHIELD'); triggerHaptic('medium');" title="Filter to Shielded Draws">
-        <div class="stat-tile-top">
-          <span class="stat-tile-label">Draws Shielded</span>
-          <span class="stat-tile-icon">🛡️</span>
-        </div>
-        <span class="stat-tile-val val-draw" id="tracker-draws">0</span>
-        <span class="stat-tile-sub">Protected by 1X / X2</span>
-      </div>
-
       <div class="stat-tile touch-haptic" onclick="filterByResult('LOST'); triggerHaptic('medium');" title="Filter to Losses">
         <div class="stat-tile-top">
           <span class="stat-tile-label">Losses</span>
@@ -1722,24 +1713,6 @@
         </div>
         <span class="stat-tile-val val-loss" id="tracker-losses">0</span>
         <span class="stat-tile-sub">Uncovered Upsets</span>
-      </div>
-
-      <div class="stat-tile touch-haptic" onclick="filterByResult('PENDING'); triggerHaptic('medium');" title="Filter to Live / In-Play">
-        <div class="stat-tile-top">
-          <span class="stat-tile-label">Live / In-Play</span>
-          <span class="stat-tile-icon">⏳</span>
-        </div>
-        <span class="stat-tile-val val-pending" id="tracker-pending">0</span>
-        <span class="stat-tile-sub">Active &amp; Upcoming</span>
-      </div>
-
-      <div class="stat-tile touch-haptic" onclick="filterByResult('ALL'); triggerHaptic('medium');" title="Reset to All Matches">
-        <div class="stat-tile-top">
-          <span class="stat-tile-label">Total Matches</span>
-          <span class="stat-tile-icon">📈</span>
-        </div>
-        <span class="stat-tile-val val-total" id="tracker-total">0</span>
-        <span class="stat-tile-sub">In Database</span>
       </div>
     </section>
 
@@ -2200,27 +2173,22 @@
     }
 
     function updateScorecard() {
-      let wins = 0, losses = 0, draws = 0, pending = 0;
+      let wins = 0, losses = 0;
       allMatches.forEach(m => {
         if (m.evalResult === 'WON') {
           wins++;
-          if (m.isDraw) draws++;
         } else if (m.evalResult === 'LOST') {
           losses++;
-        } else {
-          pending++;
         }
       });
 
+      // Overall record = decided bets only (wins + losses); pending/ungraded games are excluded
       const decided = wins + losses;
       const accuracy = decided > 0 ? Math.round((wins / decided) * 100) : 0;
 
       document.getElementById('tracker-accuracy').innerText = `${accuracy}%`;
       document.getElementById('tracker-wins').innerText = wins;
-      document.getElementById('tracker-draws').innerText = draws;
       document.getElementById('tracker-losses').innerText = losses;
-      document.getElementById('tracker-pending').innerText = pending;
-      document.getElementById('tracker-total').innerText = allMatches.length;
 
       // Update radial SVG ring progress
       const maxOffset = 219.9;
@@ -2390,6 +2358,8 @@
 
     function setQuickTag(tag, el) {
       currentQuickTag = tag;
+      // "All Games" also clears any active WON/LOST result filter (result tiles no longer include a Reset tile)
+      if (tag === 'all') currentResultFilter = 'ALL';
       document.querySelectorAll('.quick-tag').forEach(b => b.classList.remove('active'));
       if (el) el.classList.add('active');
       renderFeaturedBankers();
