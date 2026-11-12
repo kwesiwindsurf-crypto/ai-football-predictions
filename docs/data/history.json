@@ -1,5 +1,137 @@
 [
   {
+    "id": "New-Zealand-India-2026-11-12",
+    "espnEventId": "401906458",
+    "homeTeam": "New Zealand",
+    "awayTeam": "India",
+    "homeLogo": "https://a.espncdn.com/i/teamlogos/countries/500/nzl.png",
+    "awayLogo": "https://a.espncdn.com/i/teamlogos/countries/500/ind.png",
+    "league": "International Friendly",
+    "date": "2026-11-12T06:00Z",
+    "status": "finished",
+    "statusShort": "FT",
+    "homeScore": 5,
+    "awayScore": 0,
+    "homeOdds": 1.21,
+    "drawOdds": 6.5,
+    "awayOdds": 12,
+    "oddsRating": -53,
+    "homeRank": null,
+    "awayRank": null,
+    "homeForm": "WWDLL",
+    "awayForm": "LWWLL",
+    "homeRecord": null,
+    "awayRecord": null,
+    "homePoints": 0,
+    "awayPoints": 0,
+    "h2hSummary": "New Zealand won 1 of last 1 meetings. New Zealand 2-1 India (2018-06-07)",
+    "matchUrl": "https://www.espn.com/soccer/match/_/gameId/401906458/india-new-zealand",
+    "stats": null,
+    "events": [
+      {
+        "type": "Own Goal",
+        "clock": "5'",
+        "team": "home",
+        "player": "Bijoy Varghese",
+        "playerIn": "Bijoy Varghese",
+        "playerOut": null,
+        "scoringPlay": true,
+        "redCard": false,
+        "yellowCard": false,
+        "penalty": false,
+        "ownGoal": true
+      },
+      {
+        "type": "Goal",
+        "clock": "34'",
+        "team": "home",
+        "player": "Jesse Randall",
+        "playerIn": "Jesse Randall",
+        "playerOut": null,
+        "scoringPlay": true,
+        "redCard": false,
+        "yellowCard": false,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Goal",
+        "clock": "43'",
+        "team": "home",
+        "player": "Jesse Randall",
+        "playerIn": "Jesse Randall",
+        "playerOut": null,
+        "scoringPlay": true,
+        "redCard": false,
+        "yellowCard": false,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Yellow Card",
+        "clock": "50'",
+        "team": "home",
+        "player": "Lachlan Bayliss",
+        "playerIn": "Lachlan Bayliss",
+        "playerOut": null,
+        "scoringPlay": false,
+        "redCard": false,
+        "yellowCard": true,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Goal",
+        "clock": "57'",
+        "team": "home",
+        "player": "Chris Wood",
+        "playerIn": "Chris Wood",
+        "playerOut": null,
+        "scoringPlay": true,
+        "redCard": false,
+        "yellowCard": false,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Goal",
+        "clock": "74'",
+        "team": "home",
+        "player": "Lachlan Bayliss",
+        "playerIn": "Lachlan Bayliss",
+        "playerOut": null,
+        "scoringPlay": true,
+        "redCard": false,
+        "yellowCard": false,
+        "penalty": false,
+        "ownGoal": false
+      }
+    ],
+    "venue": "Go Media Stadium, Auckland",
+    "venueName": "Go Media Stadium",
+    "venueCity": "Auckland",
+    "attendance": null,
+    "seriesSummary": null,
+    "referee": null,
+    "prediction": {
+      "homeWinProbability": 73,
+      "drawProbability": 15,
+      "awayWinProbability": 12,
+      "oddsRating": -61,
+      "h2hSummary": "New Zealand won 1 of last 1 meetings. New Zealand 2-1 India (2018-06-07)",
+      "recommendation": "New Zealand to Win (1)",
+      "analysis": "Club Friendly: Clear Home edge (73% Win).\nHomeForm: 33%, AwayForm: 47%, BigGame: false\nOddsSource: market",
+      "oddsSource": "market",
+      "stakingOptions": [
+        "Safe: 1X (New Zealand or Draw)",
+        "Value: New Zealand Draw No Bet (1.3)",
+        "Risky: New Zealand to WIN by 2+ Goals",
+        "BTTS: Both Teams To Score - Yes",
+        "Alternative: Over 2.5 Total Goals"
+      ]
+    }
+  },
+  {
     "id": "Piratas-Club-Atlético-La-Paz-2026-11-12",
     "espnEventId": "401931915",
     "homeTeam": "Piratas",
@@ -145,7 +277,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "CD-FAS-Internacional-Santa-Tecla-2026-11-12",
@@ -251,7 +385,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Londrina-Náutico-2026-11-11",
