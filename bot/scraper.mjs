@@ -2095,12 +2095,24 @@ async function postDailyDashboardToTelegram(todayResults) {
 function preservePredictionLock(m, existing, isPosted, nowMs = Date.now()) {
   if (!existing || !existing.prediction) return;
 
-  const analysisText = existing.prediction.analysis || '';
-  const hasCompetitionMismatch = analysisText.includes('Cup') && !m.league.toLowerCase().includes('cup');
+  // Only reuse a snapshot that belongs to this exact fixture. ESPN event ids are
+  // unique per match, so they are the safe identity check.
+  //
+  // This used to guess from the analysis text ("Domestic Cup: ..." vs a league
+  // name containing "cup"), which rejected every knockout competition whose
+  // name lacks the literal word "cup" — EFL Trophy, FA Trophy, Copa del Rey,
+  // Coppa Italia, Coupe de France, DFB Pokal — and wiped their pre-match odds
+  // as soon as ESPN erased the prices at kickoff.
+  const sameFixture = (m.espnEventId != null && existing.espnEventId != null)
+    ? String(m.espnEventId) === String(existing.espnEventId)
+    : true;
+
+  if (!sameFixture) return;
+
   const kickedOff = m.status !== 'notStarted' || new Date(m.date).getTime() <= nowMs;
   const oddsErased = m.homeOdds == null && existing.homeOdds != null;
 
-  if ((kickedOff || oddsErased || isPosted) && !hasCompetitionMismatch) {
+  if (kickedOff || oddsErased || isPosted) {
     // Prediction and prices must come from the same pre-match snapshot. In
     // particular, late prices cannot repair a prediction made without odds.
     m.prediction = existing.prediction;
