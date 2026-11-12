@@ -1861,57 +1861,63 @@ function utcHHMM(iso) {
   return `${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`;
 }
 
-async function postDailyDigestToTelegram(matches, digestDate = new Date().toISOString().slice(0, 10)) {
-  if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
-    console.log('Skipping Telegram: Missing TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID');
-    return [];
-  }
-  
-  const todaysMatches = matches.filter(m => m.date.startsWith(digestDate) && m.prediction && hasMarketOdds(m) && m.status !== 'postponed' && !m.statusShort?.toLowerCase().includes('postp'));
-  
-  if (todaysMatches.length === 0) {
-    console.log('No matches today to post to Telegram.');
-    return [];
-  }
+// The channel publishes the two strongest picks of the day, ranked by the
+// model's confidence. Two is the floor, not a cap on how many qualified
+// fixtures exist — see selectDigestPicks().
+const DIGEST_PICKS_PER_DAY = 2;
 
-  // Filter for today's non-finished matches (so we don't pick already completed matches)
+function pickConfidence(m) {
+  return Math.max(
+    m.prediction?.homeWinProbability || 0,
+    m.prediction?.awayWinProbability || 0,
+    m.prediction?.drawProbability || 0
+  );
+}
+
+// Pure selection so the daily card can be tested without hitting Telegram.
+// A fixture only qualifies when the market has priced it: odds-less matches
+// never reach the channel.
+function selectDigestPicks(matches, digestDate = new Date().toISOString().slice(0, 10), limit = DIGEST_PICKS_PER_DAY) {
+  const todaysMatches = matches.filter(m =>
+    m.date.startsWith(digestDate) &&
+    m.prediction &&
+    hasMarketOdds(m) &&
+    m.status !== 'postponed' &&
+    !m.statusShort?.toLowerCase().includes('postp'));
+
+  if (todaysMatches.length === 0) return [];
+
+  // Prefer fixtures that have not kicked off yet so the pick is still bettable.
   const upcomingToday = todaysMatches.filter(m => m.status !== 'finished' && m.statusShort !== 'FT');
   const candidatePool = upcomingToday.length > 0 ? upcomingToday : todaysMatches;
 
-  // Rank matches by highest probability and confidence to find the single
-  // strongest Pick of the Day for the channel.
   candidatePool.sort((a, b) => {
-    const probA = Math.max(a.prediction?.homeWinProbability || 0, a.prediction?.awayWinProbability || 0, a.prediction?.drawProbability || 0);
-    const probB = Math.max(b.prediction?.homeWinProbability || 0, b.prediction?.awayWinProbability || 0, b.prediction?.drawProbability || 0);
-    if (probB !== probA) {
-      return probB - probA;
-    }
-    const edgeA = Math.abs(a.oddsRating || 0);
-    const edgeB = Math.abs(b.oddsRating || 0);
-    return edgeB - edgeA;
+    const probA = pickConfidence(a);
+    const probB = pickConfidence(b);
+    if (probB !== probA) return probB - probA;
+    return Math.abs(b.oddsRating || 0) - Math.abs(a.oddsRating || 0);
   });
 
-  // The channel publishes exactly one pick per day: the Pick of the Day.
-  const topPicks = candidatePool.slice(0, 1);
+  return candidatePool.slice(0, limit);
+}
 
+// Renders the ticket-stub card. Monospace so the columns line up on a phone;
+// links can't live inside a code block, so the dashboard URL is appended after
+// it.
+function formatDigestMessage(topPicks, digestDate) {
   const dateTag = ticketDateTag(digestDate);
   const rule = '━━━━━━━━━━━━━━━━━━━━';
 
-  // Monospace block so the columns line up on a phone. Links can't live inside
-  // a code block, so the dashboard URL is appended after it.
   let msg = '```\n';
-  msg += `🎟 PICK OF THE DAY · ${dateTag}\n`;
+  const cardTitle = topPicks.length > 1 ? `TOP ${topPicks.length} PICKS` : 'PICK OF THE DAY';
+  msg += `🎟 ${cardTitle} · ${dateTag}\n`;
   msg += `${rule}\n`;
 
-  topPicks.forEach(m => {
+  topPicks.forEach((m, idx) => {
     const time = utcHHMM(m.date);
-    const prob = Math.max(
-      m.prediction?.homeWinProbability || 0,
-      m.prediction?.awayWinProbability || 0,
-      m.prediction?.drawProbability || 0
-    );
+    const prob = pickConfidence(m);
 
-    msg += `${(m.homeTeam || '').toUpperCase()}  v  ${(m.awayTeam || '').toUpperCase()}\n` +
+    msg += `#${idx + 1}  ${(m.homeTeam || '').toUpperCase()}  v  ${(m.awayTeam || '').toUpperCase()}\n` +
            `🏆 ${shortLeague(m.league)} · ⏰ ${time}\n` +
            `🎯 PICK  ${shortPick(m)}\n` +
            `📊 CONF  ${confidenceBar(prob)}  ${prob}%\n` +
@@ -1921,16 +1927,35 @@ async function postDailyDigestToTelegram(matches, digestDate = new Date().toISOS
 
   msg += '```\n';
   msg += '📲 All matches → https://kwesiwindsurf-crypto.github.io/ai-football-predictions/';
+  return msg;
+}
+
+async function postDailyDigestToTelegram(matches, digestDate = new Date().toISOString().slice(0, 10)) {
+  if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
+    console.log('Skipping Telegram: Missing TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID');
+    return [];
+  }
+
+  const topPicks = selectDigestPicks(matches, digestDate);
+
+  if (topPicks.length === 0) {
+    console.log('No priced matches today to post to Telegram.');
+    return [];
+  }
+
+  const msg = formatDigestMessage(topPicks, digestDate);
 
   const ok = await sendTelegramMessage(msg);
   if (ok) {
-    console.log(`✅ Successfully posted the Pick of the Day to Telegram!`);
+    console.log(`✅ Posted ${topPicks.length} pick(s) to Telegram (ranked by confidence).`);
     return topPicks.map((m, idx) => ({
       id: m.id,
       homeTeam: m.homeTeam,
       awayTeam: m.awayTeam,
       league: m.league,
       recommendation: m.prediction.recommendation,
+      confidence: pickConfidence(m),
+      rank: idx + 1,
       isPickOfTheDay: idx === 0,
       date: m.date
     }));
@@ -2298,10 +2323,10 @@ async function main() {
   // 3. Telegram Broadcast & Result Monitoring
   const FORCE_TELEGRAM = process.env.FORCE_TELEGRAM === 'true' || process.argv.includes('--push-telegram');
   const FORCE_DASHBOARD = process.env.FORCE_DASHBOARD === 'true' || process.argv.includes('--post-dashboard');
-  // Channel policy: ONE Pick of the Day, and nothing else. Match results are
-  // still evaluated internally (they feed the archive and prediction locking),
-  // but the FT messages and the daily dashboard are not broadcast.
-  // Set POST_RESULTS=true (or --post-results) to restore them.
+  // Channel policy: the top two picks of the day, and nothing else. Match
+  // results are still evaluated internally (they feed the archive and
+  // prediction locking), but the FT messages and the daily dashboard are not
+  // broadcast. Set POST_RESULTS=true (or --post-results) to restore them.
   const POST_RESULTS = process.env.POST_RESULTS === 'true' || process.argv.includes('--post-results');
 
   let lastTelegramPostDate = null;
@@ -2350,7 +2375,7 @@ async function main() {
 
   // C. Post the daily Pick of the Day once per day (or if forced)
   if (lastTelegramPostDate !== digestDate || FORCE_TELEGRAM) {
-    console.log(`\nNew day detected! Attempting to post the Pick of the Day to Telegram...`);
+    console.log(`\nNew day detected! Attempting to post today's top picks to Telegram...`);
     const newActivePicks = await postDailyDigestToTelegram(matches, digestDate);
     if (newActivePicks && newActivePicks.length > 0) {
       const existingIds = new Set(activeTelegramPicks.map(p => p.id));
@@ -2493,7 +2518,7 @@ async function main() {
 
 // Importing this module must never scrape or push: the backtest replays the
 // prediction engine offline, and only `node scraper.mjs` runs the pipeline.
-export { makePrediction, parseH2HStr, h2hFromSeasonseries, evaluatePrediction, freezeFinishedMatches, preservePredictionLock, oddsFromSummary, amToDec, ESPN_LEAGUES, postDailyDigestToTelegram, checkAndPostMatchResults };
+export { makePrediction, parseH2HStr, h2hFromSeasonseries, evaluatePrediction, freezeFinishedMatches, preservePredictionLock, oddsFromSummary, amToDec, ESPN_LEAGUES, postDailyDigestToTelegram, checkAndPostMatchResults, selectDigestPicks, pickConfidence, formatDigestMessage, DIGEST_PICKS_PER_DAY };
 
 const isDirectRun = !!process.argv[1] &&
   import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href;
