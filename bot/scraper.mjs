@@ -880,6 +880,11 @@ function determineLeagueStrategy(league, home, away, fHp, fDp, fAp, isBig, hOdds
   const oddsGap = hasOdds ? Math.abs(hOdds - aOdds) : 0;
   const isOddsClose = hasOdds ? oddsGap <= 0.40 : Math.abs(fHp - fAp) <= 8;
 
+  // Coin-flip: neither side owns a usable edge. A win-or-draw pick bought here
+  // is ~60-65% cover dressed up as a sure thing, and the "favourite" flips
+  // between market and model (e.g. 38/21/41 with the home side priced 2.15).
+  const isCoinFlip = Math.abs(fHp - fAp) <= 5;
+
   // Symmetrical Favorite & Edge Determination
   const isAwayFav = (hasOdds && aOdds < hOdds && aOdds <= 2.20) || (fAp >= fHp + 5);
   const isHomeFav = (hasOdds && hOdds < aOdds && hOdds <= 2.20) || (fHp >= fAp + 5);
@@ -986,7 +991,7 @@ function determineLeagueStrategy(league, home, away, fHp, fDp, fAp, isBig, hOdds
       strategyAnalysis = `No-Odds Fixture: Avoids cross-tier form guesses — Goals Market (Over 1.5).`;
     }
   } else if (isBig) {
-    if (isOddsClose) {
+    if (isOddsClose || isCoinFlip) {
       if (isDefensive || isSouthAmericanCups) {
         recommendation = `Under 3.5 Goals`;
         primarySafe = `Safe: Under 3.5 Goals`;
@@ -996,14 +1001,19 @@ function determineLeagueStrategy(league, home, away, fHp, fDp, fAp, isBig, hOdds
         primarySafe = `Safe: Over 1.5 Goals`;
         strategyAnalysis = `Blockbuster Clash (${league}): Evenly matched titans, goals market is the winning pick (Over 1.5).`;
       }
-    } else if (isAwayOddsFav && (aOdds < hOdds - 0.20 || fAp > fHp + 5)) {
+    } else if (isAwayOddsFav && fAp > fHp) {
       recommendation = `X2 (${away} or Draw)`;
       primarySafe = `Safe: X2 (${away} or Draw)`;
-      strategyAnalysis = `Blockbuster Clash (${league}): Market odds favor away giant ${away} (X2 Double Chance - No blind home bias).`;
-    } else {
+      strategyAnalysis = `Blockbuster Clash (${league}): ${away} leads for market and model (X2 Double Chance - No blind home bias).`;
+    } else if (isHomeOddsFav && fHp > fAp) {
       recommendation = `1X (${home} or Draw)`;
       primarySafe = `Safe: 1X (${home} or Draw)`;
-      strategyAnalysis = `Blockbuster Clash (${league}): Market odds favor home giant ${home} (1X Double Chance).`;
+      strategyAnalysis = `Blockbuster Clash (${league}): ${home} leads for market and model (1X Double Chance).`;
+    } else {
+      // Market and model name different favourites - do not guess a side.
+      recommendation = `Over 1.5 Goals`;
+      primarySafe = `Safe: Over 1.5 Goals`;
+      strategyAnalysis = `Blockbuster Clash (${league}): Market and model disagree on the favourite - Goals Market (Over 1.5).`;
     }
   }
 
@@ -1034,26 +1044,33 @@ function determineLeagueStrategy(league, home, away, fHp, fDp, fAp, isBig, hOdds
 
   // ── 2. SOUTH AMERICAN CONTINENTAL & INTERNATIONAL TOURNAMENTS ──
   else if (isSouthAmericanCups || isInternational) {
-    if (fHp >= 65 && !isAwayFav) {
+    // Double chance is only sold on the side the model actually leads, and
+    // never in a coin flip. Selling the underdog's win-or-draw (e.g. 1X at
+    // 38/21/41) is how tight internationals turned into lost tickets.
+    const homeLeads = fHp > fAp;
+    const dcCoverage = homeLeads ? prob1X : probX2;
+    if (!isCoinFlip && fHp >= 65 && !isAwayFav) {
       recommendation = `${home} to Win (1)`;
       primarySafe = `Safe: 1X (${home} or Draw)`;
       strategyAnalysis = `International/Continental: Strong Host Advantage (${fHp}%).`;
-    } else if (fAp >= 60 && !isHomeFav) {
+    } else if (!isCoinFlip && fAp >= 60 && !isHomeFav) {
       recommendation = `${away} to Win (2)`;
       primarySafe = `Safe: X2 (${away} or Draw)`;
       strategyAnalysis = `International/Continental: Superior Away Giant (${fAp}%).`;
-    } else if (isAwayFav && probX2 >= 64) {
-      recommendation = `X2 (${away} or Draw)`;
-      primarySafe = `Safe: X2 (${away} or Draw)`;
-      strategyAnalysis = `International/Continental: Compound X2 Coverage (${probX2}%).`;
-    } else if (isHomeFav && prob1X >= 64) {
-      recommendation = `1X (${home} or Draw)`;
-      primarySafe = `Safe: 1X (${home} or Draw)`;
-      strategyAnalysis = `International/Continental: Compound 1X Coverage (${prob1X}%).`;
+    } else if (!isCoinFlip && dcCoverage >= 64) {
+      recommendation = homeLeads ? `1X (${home} or Draw)` : `X2 (${away} or Draw)`;
+      primarySafe = `Safe: ${recommendation}`;
+      strategyAnalysis = `International/Continental: Compound ${homeLeads ? '1X' : 'X2'} Coverage (${dcCoverage}%).`;
     } else {
-      recommendation = `Under 3.5 Goals`;
-      primarySafe = `Safe: Under 3.5 Goals`;
-      strategyAnalysis = `Tournament Strategy: Cautious Knockout Context (Under 3.5).`;
+      // No side edge worth selling: use the goals market instead. Low-scoring
+      // continental profiles keep the Under 3.5 buffer; open international
+      // fixtures get Over 1.5 (the far more reliable side of that market).
+      const preferUnder = isDefensive || isSouthAmericanCups;
+      recommendation = preferUnder ? `Under 3.5 Goals` : `Over 1.5 Goals`;
+      primarySafe = `Safe: ${recommendation}`;
+      strategyAnalysis = isCoinFlip
+        ? `International/Continental: Coin-flip fixture (${fHp}/${fDp}/${fAp}) - ${recommendation} instead of a thin win-or-draw.`
+        : `International/Continental Strategy: Cautious Knockout Context (${recommendation}).`;
     }
   }
 
@@ -1233,9 +1250,11 @@ function determineLeagueStrategy(league, home, away, fHp, fDp, fAp, isBig, hOdds
 
   // ── ANTI-CONTRADICTION FINAL SANITY GUARD ──
   // Mathematically impossible for a 1/1X pick to stand if Away has overwhelming odds/probability advantage, and vice versa!
+  // The model has to lead the side too: the market can call a tight game
+  // for the home team while the probabilities point the other way.
   const picksHomeSide = recommendation.startsWith('1X') || recommendation.includes('to Win (1)');
   const picksAwaySide = recommendation.startsWith('X2') || recommendation.includes('to Win (2)');
-  if (isAwayFav && picksHomeSide) {
+  if (isAwayFav && fAp >= fHp && picksHomeSide) {
     const allowDirectAway = isLowerLeague
       ? (fAp >= 70 || (hasOdds && aOdds <= 1.38))
       : (fAp >= 60 || (hasOdds && aOdds <= 1.48));
@@ -1248,7 +1267,7 @@ function determineLeagueStrategy(league, home, away, fHp, fDp, fAp, isBig, hOdds
       primarySafe = `Safe: X2 (${away} or Draw)`;
       strategyAnalysis = `Corrected Alignment: Away Compound Edge (X2 ${probX2}%).`;
     }
-  } else if (isHomeFav && picksAwaySide) {
+  } else if (isHomeFav && fHp >= fAp && picksAwaySide) {
     const allowDirectHome = isLowerLeague
       ? (fHp >= 74 || (hasOdds && hOdds <= 1.35))
       : (fHp >= 62 || (hasOdds && hOdds <= 1.48));
