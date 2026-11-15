@@ -19,7 +19,7 @@ class FeaturedAiBanner extends StatelessWidget {
 
     final match = featuredMatch!;
     final primary = AppTheme.primaryOf(context);
-    final recommendation = match.prediction.recommendation;
+    final recommendation = match.resolvedPickLabel;
     final recLower = recommendation.toLowerCase();
     final isDirectWin = recLower.contains('to win (1)') || recLower.contains('to win (2)');
     final conf = match.prediction.confidence.round();

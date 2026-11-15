@@ -182,13 +182,22 @@ class MatchesProvider extends ChangeNotifier {
     }
   }
 
+  /// Ensures fixtures are loaded when the provider is still empty (deduped via ApiService).
+  Future<void> ensureLoaded() async {
+    if (_allMatches.isNotEmpty || _isLoading) return;
+    await _fetchAndApply(forceRefresh: false);
+  }
+
   /// Manually trigger a fresh network fetch of the full master fixtures.
-  Future<void> refresh() async {
+  Future<void> refresh() => _fetchAndApply(forceRefresh: true);
+
+  Future<void> _fetchAndApply({required bool forceRefresh}) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
     try {
-      final fresh = await ApiService.instance.fetchMatches(forceRefresh: true);
+      final fresh =
+          await ApiService.instance.fetchMatches(forceRefresh: forceRefresh);
       setInitialMatches(fresh);
     } catch (e) {
       _error = e.toString();

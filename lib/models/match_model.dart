@@ -207,6 +207,128 @@ class Match {
     );
   }
 
+  /// Last whitespace-separated token of [name] (e.g. "Arsenal" from "Arsenal FC").
+  static String shortTeamName(String name) {
+    final parts = name.trim().split(RegExp(r'\s+'));
+    return parts.isNotEmpty ? parts.last : name;
+  }
+
+  /// Strips trailing market odds suffixes such as `" (1.70)"` from tier labels.
+  static String stripOddsLabel(String text) {
+    return text.replaceAll(RegExp(r'\(\s*\d+(?:\.\d+)?\s*\)'), '').trim();
+  }
+
+  /// Canonical pick label matching the Match Details verdict card:
+  /// 1. `prediction.recommendation` when non-empty
+  /// 2. `Safe:` entry from `prediction.stakingOptions`
+  /// 3. Fallback `"<FavTeam> to WIN"`
+  String get resolvedPickLabel {
+    final rec = prediction.recommendation.trim();
+    if (rec.isNotEmpty) return rec;
+    for (final raw in prediction.stakingOptions) {
+      final idx = raw.indexOf(':');
+      if (idx > 0 && raw.substring(0, idx).trim().toLowerCase() == 'safe') {
+        final rest = raw.substring(idx + 1).trim();
+        if (rest.isNotEmpty) return stripOddsLabel(rest);
+      }
+    }
+    final isHomeFav =
+        prediction.homeWinProbability >= prediction.awayWinProbability;
+    return '${shortTeamName(isHomeFav ? homeTeam : awayTeam)} to WIN';
+  }
+
+  /// Resolves the 1X2 market price, model probability, value edge, and Kelly
+  /// fraction for [pickLabel] (defaults to [resolvedPickLabel]).
+  ///
+  /// Returns nulls for non-1X2 markets (Double Chance, Goals, BTTS, DNB,
+  /// handicap) so 1X2 moneyline prices and EDGE/KELLY are never fabricated.
+  ({double? odds, double? prob, double? edge, double? kelly}) resolvedPickMarket([
+    String? pickLabel,
+  ]) {
+    final p = prediction;
+    final label = (pickLabel ?? resolvedPickLabel).toLowerCase().trim();
+    if (label.isEmpty ||
+        label.startsWith('1x') ||
+        label.startsWith('x2') ||
+        RegExp(r'^12(?![\d.])').hasMatch(label) ||
+        label.contains('double chance') ||
+        label.contains('over ') ||
+        label.contains('under ') ||
+        label.contains('btts') ||
+        label.contains('draw no bet') ||
+        label.contains('by 2+')) {
+      return (odds: null, prob: null, edge: null, kelly: null);
+    }
+
+    double? odds;
+    double? prob;
+
+    if (label == 'draw' || label == 'x' || label.contains('draw (x)')) {
+      odds = drawOdds;
+      prob = p.drawProbability;
+    } else if (label.contains('(1)') ||
+        label == '1' ||
+        RegExp(r'^1(?![\d.x])').hasMatch(label)) {
+      odds = homeOdds;
+      prob = p.homeWinProbability;
+    } else if (label.contains('(2)') ||
+        label == '2' ||
+        RegExp(r'^2(?![\d.])(?!x)').hasMatch(label)) {
+      odds = awayOdds;
+      prob = p.awayWinProbability;
+    } else {
+      final homeFull = homeTeam.toLowerCase().trim();
+      final awayFull = awayTeam.toLowerCase().trim();
+      if (homeFull.isNotEmpty && label.contains(homeFull)) {
+        odds = homeOdds;
+        prob = p.homeWinProbability;
+      } else if (awayFull.isNotEmpty && label.contains(awayFull)) {
+        odds = awayOdds;
+        prob = p.awayWinProbability;
+      } else {
+        final homeKey = shortTeamName(homeTeam).toLowerCase();
+        final awayKey = shortTeamName(awayTeam).toLowerCase();
+        if (homeKey != awayKey) {
+          if (homeKey.isNotEmpty && label.contains(homeKey)) {
+            odds = homeOdds;
+            prob = p.homeWinProbability;
+          } else if (awayKey.isNotEmpty && label.contains(awayKey)) {
+            odds = awayOdds;
+            prob = p.awayWinProbability;
+          }
+        }
+      }
+    }
+
+    double? edge;
+    double? kelly;
+    if (odds != null && odds > 1.01 && prob != null) {
+      edge = prob - (1.0 / odds * 100);
+      final b = odds - 1.0;
+      kelly = b > 0 ? ((prob / 100 * odds - 1) / b) : 0.0;
+    }
+
+    return (odds: odds, prob: prob, edge: edge, kelly: kelly);
+  }
+
+  /// Canonical model probability (1–100) for [pickLabel] (defaults to
+  /// [resolvedPickLabel]), used consistently across progress gauges and rings.
+  double resolvedPickProbability([String? pickLabel]) {
+    final p = prediction;
+    final label = (pickLabel ?? resolvedPickLabel).toLowerCase().trim();
+    double chance;
+    if (label.startsWith('1x')) {
+      chance = p.homeWinProbability + p.drawProbability;
+    } else if (label.startsWith('x2')) {
+      chance = p.drawProbability + p.awayWinProbability;
+    } else if (RegExp(r'^12(?![\d.])').hasMatch(label)) {
+      chance = p.homeWinProbability + p.awayWinProbability;
+    } else {
+      chance = resolvedPickMarket(label).prob ?? p.confidence;
+    }
+    return chance.clamp(1.0, 100.0);
+  }
+
   factory Match.fromJson(Map<String, dynamic> json, [Map<String, dynamic>? standingsData]) {
     int? hRank = json['homeRank'];
     int? hPts = json['homePoints'];
@@ -282,8 +404,10 @@ class Match {
 
     final isPostponedGame = parsedStatus == MatchStatus.postponed ||
         parsedStatus == MatchStatus.cancelled;
-    final int? parsedHomeScore = isPostponedGame ? null : (json['homeScore'] as num?)?.toInt();
-    final int? parsedAwayScore = isPostponedGame ? null : (json['awayScore'] as num?)?.toInt();
+    final hasNoMatchScore =
+        isPostponedGame || parsedStatus == MatchStatus.notStarted;
+    final int? parsedHomeScore = hasNoMatchScore ? null : (json['homeScore'] as num?)?.toInt();
+    final int? parsedAwayScore = hasNoMatchScore ? null : (json['awayScore'] as num?)?.toInt();
 
     return Match(
       id: json['id'],

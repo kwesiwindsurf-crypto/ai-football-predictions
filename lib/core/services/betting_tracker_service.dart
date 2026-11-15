@@ -348,7 +348,7 @@ class BettingTrackerService extends ChangeNotifier {
     final isFinished = match.status == MatchStatus.finished;
     final isLive = match.status == MatchStatus.live;
 
-    final rec = match.prediction.recommendation;
+    final rec = match.resolvedPickLabel;
     final homeName = match.homeTeam.toLowerCase();
     final awayName = match.awayTeam.toLowerCase();
     final recLower = rec.toLowerCase().trim();
@@ -362,13 +362,7 @@ class BettingTrackerService extends ChangeNotifier {
         recLower.contains('over ') ||
         recLower.contains('under ');
     if (!isDoubleChanceOrGoals) {
-      if ((recLower.contains('(1)') || recLower.contains(homeName)) && match.homeOdds != null) {
-        odds = match.homeOdds!;
-      } else if ((recLower.contains('(2)') || recLower.contains(awayName)) && match.awayOdds != null) {
-        odds = match.awayOdds!;
-      } else if ((recLower == 'draw' || recLower.contains('(x)')) && match.drawOdds != null) {
-        odds = match.drawOdds!;
-      }
+      odds = match.resolvedPickMarket(rec).odds ?? 1.85;
     } else if (recLower.startsWith('1x') && match.homeOdds != null && match.drawOdds != null) {
       final implied = (1.0 / match.homeOdds!) + (1.0 / match.drawOdds!);
       if (implied > 0) {

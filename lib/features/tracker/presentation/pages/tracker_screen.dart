@@ -7,7 +7,7 @@ import '../../../../core/services/betting_tracker_service.dart';
 import '../../../../core/services/analytics_service.dart';
 import '../../../../core/services/matches_provider.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/widgets/breathing_gradient.dart';
+import '../../../../core/widgets/app_tab_header.dart';
 
 class TrackerScreen extends StatefulWidget {
   const TrackerScreen({super.key});
@@ -63,90 +63,28 @@ class _TrackerScreenState extends State<TrackerScreen> with AutomaticKeepAliveCl
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(84),
-        child: Container(
-          color: AppTheme.surfaceOf(context),
-          child: Stack(
-            children: [
-              SafeArea(
-                bottom: false,
-                child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                        // Title Row: BETTING & AI TRACKER + Subtitle on left, Circular refresh button on right
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              BreathingText(
-                                'BETTING & AI TRACKER',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w900,
-                                  fontSize: 18,
-                                  letterSpacing: -0.3,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                'Continuous 1-unit flat simulation',
-                                style: TextStyle(
-                                  color: AppTheme.textSecondaryOf(context),
-                                  fontSize: 12.5,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                          GestureDetector(
-                            onTap: _isRefreshing ? null : () => _refreshData(force: true),
-                            child: Container(
-                              width: 36,
-                              height: 36,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: AppTheme.surfaceOf(context),
-                              border: Border.all(
-                                color: AppTheme.cardBorderOf(context),
-                                width: 1,
-                              ),
-                            ),
-                              child: _isRefreshing
-                                  ? const Padding(
-                                      padding: EdgeInsets.all(9),
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: AppTheme.primary,
-                                      ),
-                                    )
-                                  : Icon(
-                                      Icons.refresh_rounded,
-                                      size: 18,
-                                      color: AppTheme.textSecondaryOf(context),
-                                    ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+      appBar: AppTabHeader.asAppBar(
+        context,
+        icon: const Icon(Icons.trending_up_rounded),
+        title: 'Betting Tracker',
+        subtitle: '1-unit flat simulation',
+        trailing: AppTabHeaderAction(
+          onTap: _isRefreshing ? null : () => _refreshData(force: true),
+          child: _isRefreshing
+              ? Padding(
+                  padding: const EdgeInsets.all(9),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: primary,
+                  ),
+                )
+              : Icon(
+                  Icons.refresh_rounded,
+                  size: 18,
+                  color: AppTheme.textSecondaryOf(context),
                 ),
-              ),
-              const Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: BreathingUnderline(),
-              ),
-            ],
-          ),
-          ),
-          ),
+        ),
+      ),
           body: RefreshIndicator(
             color: primary,
             onRefresh: () => _refreshData(force: true),

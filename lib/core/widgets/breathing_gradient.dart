@@ -40,10 +40,7 @@ class BreathingColors {
 /// App-wide single 9s heartbeat. Widgets listen to this instance so
 /// the tile, titles and island breathe in sync instead of drifting.
 class BreathingPhase extends ChangeNotifier {
-  BreathingPhase._() {
-    Ticker(_tick);
-    _ticker.start();
-  }
+  BreathingPhase._();
 
   static final BreathingPhase instance = BreathingPhase._();
 
@@ -51,6 +48,22 @@ class BreathingPhase extends ChangeNotifier {
   double _value = 0;
 
   double get value => _value;
+
+  @override
+  void addListener(VoidCallback listener) {
+    super.addListener(listener);
+    if (!_ticker.isActive) {
+      _ticker.start();
+    }
+  }
+
+  @override
+  void removeListener(VoidCallback listener) {
+    super.removeListener(listener);
+    if (!hasListeners && _ticker.isActive) {
+      _ticker.stop();
+    }
+  }
 
   void _tick(Duration elapsed) {
     final v = (elapsed.inMicroseconds / BreathingColors.cycle.inMicroseconds) % 1;

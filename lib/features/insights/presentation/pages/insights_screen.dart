@@ -9,7 +9,8 @@ import 'package:provider/provider.dart';
 import '../../../../core/services/betting_tracker_service.dart';
 import '../../../../core/services/matches_provider.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/widgets/breathing_gradient.dart';
+import '../../../../core/widgets/app_tab_header.dart';
+import '../../../../core/widgets/shimmer_loading.dart';
 import '../../../../models/match_model.dart' as model;
 import '../../../match_details/presentation/pages/match_details_screen.dart';
 
@@ -28,6 +29,7 @@ class _InsightsScreenState extends State<InsightsScreen> with TickerProviderStat
   String _filter = 'All';
   final PageController _heroController = PageController(viewportFraction: 0.88);
   Timer? _heroAutoScroll;
+  Timer? _retryTimer;
   int _heroPage = 0;
   // Slow "Ken Burns" breathing/zoom applied to the active hero photo.
   late final AnimationController _heroZoom = AnimationController(
@@ -41,6 +43,23 @@ class _InsightsScreenState extends State<InsightsScreen> with TickerProviderStat
   void initState() {
     super.initState();
     _startHeroAutoScroll();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _ensureDataLoaded();
+    });
+  }
+
+  Future<void> _ensureDataLoaded() async {
+    final provider = MatchesProvider.instance;
+    if (provider.allMatches.isNotEmpty) return;
+    await provider.ensureLoaded();
+    if (!mounted) return;
+    if (provider.allMatches.isEmpty && (_retryTimer == null || !_retryTimer!.isActive)) {
+      _retryTimer = Timer(const Duration(seconds: 4), () {
+        if (mounted && MatchesProvider.instance.allMatches.isEmpty) {
+          _ensureDataLoaded();
+        }
+      });
+    }
   }
 
   void _startHeroAutoScroll() {
@@ -68,6 +87,7 @@ class _InsightsScreenState extends State<InsightsScreen> with TickerProviderStat
   @override
   void dispose() {
     _heroAutoScroll?.cancel();
+    _retryTimer?.cancel();
     _heroZoom.dispose();
     _heroController.dispose();
     super.dispose();
@@ -103,15 +123,10 @@ class _InsightsScreenState extends State<InsightsScreen> with TickerProviderStat
   }
 
   /// Value edge = model probability minus bookmaker implied probability
-  /// for the recommended favourite outcome.
+  /// for the canonical resolved pick market.
   ({double edge, model.Match match})? _computeValueEdge(model.Match m) {
-    final p = m.prediction;
-    final isHomeFav = p.homeWinProbability >= p.awayWinProbability;
-    final favProb = isHomeFav ? p.homeWinProbability : p.awayWinProbability;
-    final odds = isHomeFav ? m.homeOdds : m.awayOdds;
-    if (odds == null || odds <= 1.01) return null;
-    final implied = 1.0 / odds * 100; // bookmaker margin included, conservative
-    final edge = favProb - implied;
+    final edge = m.resolvedPickMarket().edge;
+    if (edge == null) return null;
     return (edge: edge, match: m);
   }
 
@@ -174,107 +189,31 @@ class _InsightsScreenState extends State<InsightsScreen> with TickerProviderStat
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(86),
-        child: Stack(
-          children: [
-            Container(
-              // Light: clean white header (only the accents breathe).
-              // Dark: the GoalFlow band, unchanged.
-              color: AppTheme.isDark(context)
-                  ? const Color(0xFF0D1117)
-                  : AppTheme.surfaceOf(context),
-              child: SafeArea(
-                bottom: false,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0, vertical: 10.0),
-                  child: Row(
-                    children: [
-                      Icon(Icons.bar_chart_rounded,
-                          color: AppTheme.isDark(context)
-                              ? AppTheme.primary
-                              : const Color(0xFF00A855),
-                          size: 26),
-                      SizedBox(width: 10),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          BreathingText(
-                            'Insights',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w900,
-                              fontSize: 22,
-                              letterSpacing: -0.4,
-                            ),
-                          ),
-                          SizedBox(height: 2),
-                          Text(
-                            'AI-powered football insights',
-                            style: TextStyle(
-                              color: AppTheme.textSecondaryOf(context),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Spacer(),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: AppTheme.isDark(context)
-                              ? AppTheme.primary
-                              : const Color(0xFFF3EFFD),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: AppTheme.isDark(context)
-                                ? Colors.transparent
-                                : const Color(0xFF7C3AED)
-                                    .withValues(alpha: 0.25),
-                          ),
-                        ),
-                        child: Text(
-                          'AI',
-                          style: TextStyle(
-                            color: AppTheme.isDark(context)
-                                ? Colors.black
-                                : const Color(0xFF5B21B6),
-                            fontWeight: FontWeight.w900,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            const Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: BreathingUnderline(),
-            ),
-          ],
-        ),
+      appBar: AppTabHeader.asAppBar(
+        context,
+        icon: const Icon(Icons.bar_chart_rounded),
+        title: 'AI Insights',
+        subtitle: 'High-confidence model picks',
+        trailing: const AppTabHeaderBadge(label: 'AI'),
       ),
-      // The screen has no local loading state — it renders directly from
-      // MatchesProvider. This subscription makes the whole feed rebuild the
-      // moment new match data lands (otherwise the screen stays in its empty
-      // state until the user taps a tab or filter pill and forces a setState).
-      body: Selector<MatchesProvider, List<String>>(
-        selector: (_, p) => p.liveMatchIds,
-        builder: (context, _, _) => Column(
-          children: [
-            _buildHeroCarousel(),
-            _buildHeroDots(),
-            _buildDateTabs(),
-            _buildFilterPills(),
-            Expanded(child: _buildInsightFeed()),
-          ],
+      // Rebuild whenever allMatches, loading/error state, or live scores update.
+      // Previously watching only `liveMatchIds` skipped rebuilds whenever the
+      // initial fixture list loaded with 0 live games.
+      body: Consumer<MatchesProvider>(
+        builder: (context, provider, _) => RefreshIndicator(
+          onRefresh: MatchesProvider.instance.refresh,
+          child: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics(),
+            ),
+            slivers: [
+              SliverToBoxAdapter(child: _buildHeroCarousel()),
+              SliverToBoxAdapter(child: _buildHeroDots()),
+              SliverToBoxAdapter(child: _buildDateTabs()),
+              SliverToBoxAdapter(child: _buildFilterPills()),
+              ..._buildInsightFeedSlivers(provider),
+            ],
+          ),
         ),
       ),
     );
@@ -318,7 +257,13 @@ class _InsightsScreenState extends State<InsightsScreen> with TickerProviderStat
     final featured = (pending.isEmpty ? pool : pending)
       ..sort((a, b) =>
           b.prediction.confidence.compareTo(a.prediction.confidence));
-    final picks = featured.take(8).toList();
+    // The carousel is capped at the photo pool: every visible card must own a
+    // distinct backdrop, so the card count can never exceed the pool size.
+    final cardCount = _stadiumPhotos.length < 8 ? _stadiumPhotos.length : 8;
+    final picks = featured.take(cardCount).toList();
+
+    // Never show the same backdrop twice on screen.
+    final backdrops = _assignBackdrops(picks);
 
     if (picks.isEmpty) return const SizedBox.shrink();
 
@@ -334,7 +279,7 @@ class _InsightsScreenState extends State<InsightsScreen> with TickerProviderStat
           controller: _heroController,
           itemCount: picks.length,
           onPageChanged: (i) => setState(() => _heroPage = i),
-          itemBuilder: (context, i) => _buildHeroCard(context, picks[i], i),
+          itemBuilder: (context, i) => _buildHeroCard(context, picks[i], backdrops[i]),
         ),
       ),
     );
@@ -351,34 +296,60 @@ class _InsightsScreenState extends State<InsightsScreen> with TickerProviderStat
     );
   }
 
-  Widget _buildHeroCard(BuildContext context, model.Match m, int index) {
-    // Verified-realistic stadium shots only (visually checked), alternating
-    // with slightly different crops so consecutive cards don't repeat identically.
-    const photos = [
-      (
-        url:
-            'https://images.unsplash.com/photo-1522778119026-d647f0596c20', // packed floodlit bowl at night
-        extra: '',
-      ),
-      (
-        url:
-            'https://images.unsplash.com/photo-1489944440615-453fc2b6a9a9', // stadium interior, red seats + pitch
-        extra: '&crop=focalpoint&fp-y=0.65&fp-z=1.15', // lower, tighter crop variant
-      ),
-      (
-        url:
-            'https://images.unsplash.com/photo-1522778119026-d647f0596c20',
-        extra: '&crop=entropy', // wide auto-crop variant
-      ),
-      (
-        url:
-            'https://images.unsplash.com/photo-1489944440615-453fc2b6a9a9',
-        extra: '&crop=edges', // edges-crop variant
-      ),
-    ];
-    final p = photos[index % photos.length];
-    final photo =
-        '${p.url}?auto=format&fit=crop&w=800&q=70${p.extra}';
+  /// Real stadium backdrops (Unsplash licence, no attribution required).
+  /// Each entry was fetched and visually checked; only distinct football
+  /// grounds belong here. The pool is deliberately larger than the carousel so
+  /// two visible cards can never share an image.
+  static const List<String> _stadiumPhotos = [
+    'https://images.unsplash.com/photo-1522778119026-d647f0596c20', // packed floodlit bowl
+    'https://images.unsplash.com/photo-1489944440615-453fc2b6a9a9', // covered stand at night
+    'https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d', // floodlights over the pitch
+    'https://images.unsplash.com/photo-1577223625816-7546f13df25d', // players' tunnel
+    'https://images.unsplash.com/photo-1504450758481-7338eba7524a', // arena bowl, lights on
+    'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e', // open bowl at dusk
+    'https://images.unsplash.com/photo-1543351611-58f69d7c1781', // empty pitch at sunset
+    'https://images.unsplash.com/photo-1459865264687-595d652de67e', // touchline and grass
+    'https://images.unsplash.com/photo-1574629810360-7efbbe195018', // ball at a defender's feet
+    'https://images.unsplash.com/photo-1556056504-5c7696c4c28d', // marked pitch, evening light
+    'https://images.unsplash.com/photo-1587329310686-91414b8e3cb7', // goal net, stand behind
+    'https://images.unsplash.com/photo-1496241028573-69327bf8f9d5', // aerial view of the pitches
+  ];
+
+  /// Deterministic, collision-free backdrop per card.
+  ///
+  /// A fixture always resolves to the same photo, so a card does not flicker
+  /// between rebuilds, while two cards on screen can never land on the same
+  /// index — collisions are resolved by probing across the pool.
+  List<String> _assignBackdrops(List<model.Match> picks) {
+    final used = <int>{};
+    final assigned = <String>[];
+
+    for (final m in picks) {
+      var index = _stableHash(m.id) % _stadiumPhotos.length;
+      var probes = 0;
+      while (used.contains(index) && probes < _stadiumPhotos.length) {
+        index = (index + 1) % _stadiumPhotos.length;
+        probes++;
+      }
+      used.add(index);
+      assigned.add('${_stadiumPhotos[index]}?auto=format&fit=crop&w=800&q=70');
+    }
+    return assigned;
+  }
+
+  /// FNV-1a — stable across runs and platforms, unlike `String.hashCode`.
+  /// Masked to 31 bits so the result stays non-negative on every target,
+  /// including dart2js where ints are doubles.
+  int _stableHash(String value) {
+    var hash = 0x811c9dc5;
+    for (final unit in value.codeUnits) {
+      hash ^= unit;
+      hash = (hash * 0x01000193) & 0x7FFFFFFF;
+    }
+    return hash;
+  }
+
+  Widget _buildHeroCard(BuildContext context, model.Match m, String photo) {
     final isLive = m.status == model.MatchStatus.live;
     final isFinished = m.status == model.MatchStatus.finished;
     final kickoff =
@@ -650,13 +621,15 @@ class _InsightsScreenState extends State<InsightsScreen> with TickerProviderStat
     final textPrimary = AppTheme.textPrimaryOf(context);
 
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 10),
       color: surface,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: Wrap(
+        alignment: WrapAlignment.center,
+        spacing: 8,
+        runSpacing: 6,
         children: [
-          for (int i = 0; i < _filters.length; i++) ...[
-            if (i > 0) const SizedBox(width: 8),
+          for (int i = 0; i < _filters.length; i++)
             GestureDetector(
               onTap: () => setState(() => _filter = _filters[i]),
               behavior: HitTestBehavior.opaque,
@@ -687,82 +660,70 @@ class _InsightsScreenState extends State<InsightsScreen> with TickerProviderStat
                 ),
               ),
             ),
-          ],
         ],
       ),
     );
   }
 
-  Widget _buildInsightFeed() {
-    final provider = context.read<MatchesProvider>();
+  List<Widget> _buildInsightFeedSlivers(MatchesProvider provider) {
     final insights = _insights();
     final hasAnyData = provider.allMatches.isNotEmpty;
 
     if (insights.isEmpty) {
-      // While the master fetch is still landing, show progress rather than a
-      // bare empty state — the subscription above swaps this out as soon as
-      // the data arrives.
       if (!hasAnyData) {
-        return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const SizedBox(
-                width: 30,
-                height: 30,
-                child: CircularProgressIndicator(strokeWidth: 2.6),
-              ),
-              const SizedBox(height: 14),
-              Text(
-                'Fetching the latest AI picks…',
-                style: TextStyle(
-                  color: AppTheme.textPrimaryOf(context),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
+        return const [
+          SliverToBoxAdapter(
+            child: MatchListShimmer(),
           ),
-        );
+        ];
       }
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.auto_awesome_outlined,
-                size: 44, color: AppTheme.textSecondaryOf(context)),
-            const SizedBox(height: 12),
-            Text(
-              'No insights for this filter yet',
-              style: TextStyle(
-                color: AppTheme.textPrimaryOf(context),
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-              ),
+      return [
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.auto_awesome_outlined,
+                    size: 44, color: AppTheme.textSecondaryOf(context)),
+                const SizedBox(height: 12),
+                Text(
+                  'No insights for this filter yet',
+                  style: TextStyle(
+                    color: AppTheme.textPrimaryOf(context),
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Try another date or loosen the filter to see more AI picks.',
+                  style: TextStyle(
+                    color: AppTheme.textSecondaryOf(context),
+                    fontSize: 12.5,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
-            const SizedBox(height: 6),
-            Text(
-              'Try another date or loosen the filter to see more AI picks.',
-              style: TextStyle(
-                color: AppTheme.textSecondaryOf(context),
-                fontSize: 12.5,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
+          ),
         ),
-      );
+      ];
     }
 
-    return ListView.separated(
-      physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 24),
-      itemCount: insights.length + 1,
-      separatorBuilder: (_, _) => const SizedBox(height: 10),
-      itemBuilder: (context, i) => i == 0
-          ? _buildSpotlightCard(context)
-          : _buildInsightCard(context, insights[i - 1]),
-    );
+    return [
+      SliverPadding(
+        padding: const EdgeInsets.fromLTRB(16, 10, 16, 24),
+        sliver: SliverList.separated(
+          itemCount: insights.length + 1,
+          separatorBuilder: (_, _) => const SizedBox(height: 10),
+          itemBuilder: (context, i) => i == 0
+              ? _buildSpotlightCard(context)
+              : _buildInsightCard(context, insights[i - 1]),
+        ),
+      ),
+    ];
   }
 
   /// ─────────────────────────────────────────────────────────────
@@ -779,54 +740,23 @@ class _InsightsScreenState extends State<InsightsScreen> with TickerProviderStat
     return featured.isEmpty ? null : featured.first;
   }
 
-  /// (pick label, odds, tier) anchored to `prediction.recommendation` as the
-  /// single source of truth; falls back to stakingOptions only if empty.
+  /// (pick label, odds, tier) from `Match.resolvedPickLabel` /
+  /// `Match.resolvedPickMarket` so spotlight cards match Match Details.
   (String, double?, String) _spotlightPick(model.Match m) {
     final p = m.prediction;
-    final rec = p.recommendation.trim();
-    if (rec.isNotEmpty) {
-      final recLower = rec.toLowerCase();
-      final isCompoundOrGoals = recLower.startsWith('1x') ||
-          recLower.startsWith('x2') ||
-          RegExp(r'^12(?![\d.])').hasMatch(recLower) ||
-          recLower.contains('double chance') ||
-          recLower.contains('over ') ||
-          recLower.contains('under ');
-      double? odds;
-      if (!isCompoundOrGoals) {
-        if (recLower.contains('(1)') || recLower.contains(m.homeTeam.toLowerCase())) {
-          odds = m.homeOdds;
-        } else if (recLower.contains('(2)') || recLower.contains(m.awayTeam.toLowerCase())) {
-          odds = m.awayOdds;
-        } else if (recLower == 'draw' || recLower.contains('(x)')) {
-          odds = m.drawOdds;
-        }
-      }
-      final tier = recLower.contains('over ') || recLower.contains('under ')
-          ? 'goals'
-          : 'ai';
-      return (rec, odds, tier);
+    final label = m.resolvedPickLabel;
+    final lower = label.toLowerCase();
+    final odds = m.resolvedPickMarket(label).odds;
+    String tier;
+    if (lower.contains('over ') || lower.contains('under ')) {
+      tier = 'goals';
+    } else if (p.recommendation.trim().isEmpty &&
+        p.stakingOptions.any((s) => s.toLowerCase().startsWith('safe:'))) {
+      tier = 'safe';
+    } else {
+      tier = 'ai';
     }
-
-    String? label;
-    double? odds;
-    String tier = 'ai';
-    for (final key in ['safe', 'value', 'goals', 'risky']) {
-      for (final raw in p.stakingOptions) {
-        if (!raw.toLowerCase().startsWith('$key:')) continue;
-        final text = raw.substring(raw.indexOf(':') + 1).trim();
-        final cleaned =
-            text.replaceAll(RegExp(r'\(\s*\d+(?:\.\d+)?\s*\)'), '').trim();
-        if (cleaned.isEmpty) continue;
-        label = cleaned;
-        tier = key;
-        final m1 = RegExp(r'\((\d+(?:\.\d+)?)\)\s*$').firstMatch(text);
-        odds = m1 == null ? null : double.tryParse(m1.group(1)!);
-        break;
-      }
-      if (label != null) break;
-    }
-    return (label ?? '', odds, tier);
+    return (label, odds, tier);
   }
 
   Widget _buildSpotlightCard(BuildContext context) {
@@ -925,18 +855,21 @@ class _InsightsScreenState extends State<InsightsScreen> with TickerProviderStat
                       fontFamily: 'monospace',
                     ),
                   ),
-                  const Spacer(),
-                  Text(
-                    m.league.toUpperCase(),
-                    style: TextStyle(
-                      fontSize: 9,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.5,
-                      color: textSecondary,
-                      fontFamily: 'monospace',
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      m.league.toUpperCase(),
+                      textAlign: TextAlign.end,
+                      style: TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.5,
+                        color: textSecondary,
+                        fontFamily: 'monospace',
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
@@ -1227,30 +1160,8 @@ class _InsightsScreenState extends State<InsightsScreen> with TickerProviderStat
     final verdict =
         isFinished ? BettingTrackerService.instance.pickVerdict(m) : null;
     final confidence = p.confidence;
-    // Real odds from the staking payload — drives the pick progress gauge.
-    final (_, pickOdds, _) = _spotlightPick(m);
-    final pickImplied =
-        pickOdds == null ? null : (100.0 / pickOdds).clamp(1.0, 100.0);
-    // Model probability the pick itself: derivable from the real H/D/A
-    // shares for 1X/X2/12/1/2 verdicts; otherwise the true implied(1/odds).
-    final rec = p.recommendation.toLowerCase().trim();
-    double pickChance;
-    if (rec.startsWith('1x')) {
-      pickChance = p.homeWinProbability + p.drawProbability;
-    } else if (rec.startsWith('x2')) {
-      pickChance = p.drawProbability + p.awayWinProbability;
-    } else if (RegExp(r'^12(?![\d.])').hasMatch(rec)) {
-      pickChance = p.homeWinProbability + p.awayWinProbability;
-    } else if (RegExp(r'^1(?![\d.x])').hasMatch(rec)) {
-      pickChance = p.homeWinProbability;
-    } else if (RegExp(r'^2(?![\d.])(?!x)').hasMatch(rec)) {
-      pickChance = p.awayWinProbability;
-    } else {
-      // No verdict-derivable model number: true odds-implied chance when
-      // the payload carries odds, else the model's own confidence.
-      pickChance = pickImplied ?? p.confidence;
-    }
-    pickChance = pickChance.clamp(1.0, 100.0);
+    final pickLabel = m.resolvedPickLabel;
+    final pickChance = m.resolvedPickProbability(pickLabel);
 
     return GestureDetector(
       onTap: () {
@@ -1481,9 +1392,7 @@ class _InsightsScreenState extends State<InsightsScreen> with TickerProviderStat
                   const SizedBox(width: 7),
                   Expanded(
                     child: Text(
-                      p.recommendation.isNotEmpty
-                          ? p.recommendation
-                          : _spotlightPick(m).$1,
+                      pickLabel,
                       style: TextStyle(
                         fontSize: 12.5,
                         fontWeight: FontWeight.w700,

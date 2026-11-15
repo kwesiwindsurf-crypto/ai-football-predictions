@@ -7,6 +7,7 @@ import '../../../../core/theme/app_theme.dart';
 
 import '../../../../core/services/analytics_service.dart';
 import '../../../../core/services/api_service.dart';
+import '../../../../core/services/matches_provider.dart';
 
 
 class MatchDetailsScreen extends StatefulWidget {
@@ -56,7 +57,24 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
         AnimationController(vsync: this, duration: const Duration(milliseconds: 700));
     _fadeIn = CurvedAnimation(parent: _headerAnim, curve: Curves.easeOut);
     _headerAnim.forward();
+    MatchesProvider.instance.addListener(_onProviderMatchesUpdated);
     _startAutoRefreshIfNeeded();
+  }
+
+  void _onProviderMatchesUpdated() {
+    final provider = MatchesProvider.instance;
+    final updated = provider.getMatchById(_liveMatch.id) ??
+        provider.getMatchById(_liveMatch.normalizedTeamsDayKey) ??
+        provider.allMatches.where((m) => m.isSameFixtureAs(_liveMatch)).firstOrNull;
+    if (updated != null && !identical(updated, _liveMatch) && mounted) {
+      setState(() {
+        _liveMatch = updated;
+      });
+      if (updated.status == model.MatchStatus.finished) {
+        _refreshTimer?.cancel();
+        _refreshTimer = null;
+      }
+    }
   }
 
   /// Polls the API every 30 s while the match is live or within 3 h of kickoff.
@@ -79,7 +97,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
     try {
       final matches = await _apiService.fetchLiveUpdates() ?? await _apiService.getCachedMatches();
       if (matches != null) {
-        final updated = matches.where((m) => m.id == _liveMatch.id).firstOrNull;
+        final updated = matches.where((m) => m.isSameFixtureAs(_liveMatch)).firstOrNull;
         if (updated != null && mounted) {
           setState(() {
             _liveMatch = updated;
@@ -98,6 +116,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
 
   @override
   void dispose() {
+    MatchesProvider.instance.removeListener(_onProviderMatchesUpdated);
     _refreshTimer?.cancel();
     _pulseAnim.dispose();
     _tabController.dispose();
@@ -446,9 +465,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
                             letterSpacing: 0.5,
                           ),
                         ),
-                      ] else if (m.status == model.MatchStatus.notStarted &&
-                          m.homeScore == null &&
-                          m.awayScore == null) ...[
+                      ] else if (m.status == model.MatchStatus.notStarted) ...[
                         // Upcoming fixture: show kickoff time — never a fake "0 - 0"
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
@@ -723,7 +740,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
                 children: [
                   _buildFotMobOddsButton(
                     context,
-                    '1 (${_shortTeamName(m.homeTeam)})',
+                    '1 (${model.Match.shortTeamName(m.homeTeam)})',
                     m.homeOdds,
                     m.prediction.homeWinProbability >=
                         m.prediction.awayWinProbability,
@@ -738,7 +755,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
                   const SizedBox(width: 8),
                   _buildFotMobOddsButton(
                     context,
-                    '2 (${_shortTeamName(m.awayTeam)})',
+                    '2 (${model.Match.shortTeamName(m.awayTeam)})',
                     m.awayOdds,
                     m.prediction.homeWinProbability <
                         m.prediction.awayWinProbability,
@@ -766,11 +783,6 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
         ),
       ),
     );
-  }
-
-  String _shortTeamName(String name) {
-    final parts = name.trim().split(RegExp(r'\s+'));
-    return parts.isNotEmpty ? parts.last : name;
   }
 
   Widget _buildFotMobOddsButton(
@@ -1891,27 +1903,17 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
     final drawProb = p.drawProbability.clamp(1.0, 100.0);
     final awayProb = p.awayWinProbability.clamp(1.0, 100.0);
 
-    final isHomeFav = p.homeWinProbability >= p.awayWinProbability;
-    final pickName = p.recommendation.trim().isNotEmpty
-        ? p.recommendation.trim()
-        : _verdictPick(
-            p.stakingOptions,
-            '${_shortTeamName(isHomeFav ? m.homeTeam : m.awayTeam)} to WIN',
-          );
+    final pickName = m.resolvedPickLabel;
 
-    // Resolve price and model probability for the actual picked market so
-    // EDGE / KELLY never come from 1X2 moneyline odds when picking Over 1.5 / DC.
-    final pickedMarket = _marketForPick(m, pickName);
+    // Resolve price, model probability, edge, and Kelly fraction for the
+    // picked market from the canonical helper shared with AI Insights & Tracker.
+    final pickedMarket = m.resolvedPickMarket(pickName);
     final double? pickOdds = pickedMarket.odds;
-    final double? pickedProb = pickedMarket.prob;
 
     String sub = 'CONF ${p.confidence.round()}%';
-    if (pickOdds != null && pickOdds > 1.01 && pickedProb != null) {
-      final edge = pickedProb - (1.0 / pickOdds * 100);
-      final b = pickOdds - 1.0;
-      final kelly = b > 0 ? ((pickedProb / 100 * pickOdds - 1) / b) : 0.0;
-      final stake = (kelly * 100).clamp(0.0, 10.0);
-      sub = 'CONF ${p.confidence.round()}% · EDGE ${_edgeLabel(edge)} · KELLY ${stake.toStringAsFixed(1)}%';
+    if (pickedMarket.edge != null && pickedMarket.kelly != null) {
+      final stake = (pickedMarket.kelly! * 100).clamp(0.0, 10.0);
+      sub = 'CONF ${p.confidence.round()}% · EDGE ${_edgeLabel(pickedMarket.edge!)} · KELLY ${stake.toStringAsFixed(1)}%';
     }
 
     return Container(
@@ -2065,53 +2067,6 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
     );
   }
 
-  String _verdictPick(List<String> stakingOptions, String fallback) {
-    for (final raw in stakingOptions) {
-      final idx = raw.indexOf(':');
-      if (idx > 0 && raw.substring(0, idx).trim().toLowerCase() == 'safe') {
-        final rest = raw.substring(idx + 1).trim();
-        if (rest.isNotEmpty) return _stripOdds(rest);
-      }
-    }
-    return fallback;
-  }
-
-  /// Resolves the market price and model probability that belong to [pickLabel].
-  /// Returns nulls when the pick is on a market we don't have a price for
-  /// (e.g. Over 1.5 goals or Double Chance) so neither price nor EDGE/KELLY is faked.
-  ({double? odds, double? prob}) _marketForPick(model.Match m, String pickLabel) {
-    final p = m.prediction;
-    final label = pickLabel.toLowerCase().trim();
-    if (label.startsWith('1x') ||
-        label.startsWith('x2') ||
-        RegExp(r'^12(?![\d.])').hasMatch(label) ||
-        label.contains('double chance') ||
-        label.contains('over ') ||
-        label.contains('under ') ||
-        label.contains('btts')) {
-      return (odds: null, prob: null);
-    }
-    if (label == 'draw' || label == 'x' || label.contains('draw (x)')) {
-      return (odds: m.drawOdds, prob: p.drawProbability);
-    }
-    final homeKey = _shortTeamName(m.homeTeam).toLowerCase();
-    final awayKey = _shortTeamName(m.awayTeam).toLowerCase();
-    if (label.contains('(1)') ||
-        label.contains(m.homeTeam.toLowerCase()) ||
-        (homeKey.isNotEmpty && label.contains(homeKey))) {
-      return (odds: m.homeOdds, prob: p.homeWinProbability);
-    }
-    if (label.contains('(2)') ||
-        label.contains(m.awayTeam.toLowerCase()) ||
-        (awayKey.isNotEmpty && label.contains(awayKey))) {
-      return (odds: m.awayOdds, prob: p.awayWinProbability);
-    }
-    return (odds: null, prob: null);
-  }
-  String _stripOdds(String s) {
-    return s.replaceAll(RegExp(r'\(\s*\d+(?:\.\d+)?\s*\)'), '').trim();
-  }
-
   String _edgeLabel(double edge) =>
       '${edge >= 0 ? '+' : ''}${edge.toStringAsFixed(1)}%';
 
@@ -2130,16 +2085,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
     final awayXg = (awayProb / 100 * 2.5).clamp(0.2, 3.8);
     final totalXg = homeXg + awayXg;
 
-    final isHomeFav = homeProb >= awayProb;
-    final pickLabel = p.recommendation.trim().isNotEmpty
-        ? p.recommendation.trim()
-        : '${_shortTeamName(isHomeFav ? m.homeTeam : m.awayTeam)} to WIN';
-    final pickedMarket = _marketForPick(m, pickLabel);
-    final edge = (pickedMarket.odds != null &&
-            pickedMarket.odds! > 1.01 &&
-            pickedMarket.prob != null)
-        ? pickedMarket.prob! - (1.0 / pickedMarket.odds! * 100)
-        : null;
+    final edge = m.resolvedPickMarket().edge;
 
     // The analysis payload is "strategy line\nHomeForm: x%, ..." — show the
     // strategy sentence and turn the raw numbers into factor bars.
@@ -2316,7 +2262,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
       double? odds;
       final oddsMatch = RegExp(r'\((\d+(?:\.\d+)?)\)\s*$').firstMatch(label);
       if (oddsMatch != null) odds = double.tryParse(oddsMatch.group(1)!);
-      label = _stripOdds(label);
+      label = model.Match.stripOddsLabel(label);
 
       String badge;
       Color color;
@@ -2324,7 +2270,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
       if (key == 'safe') {
         badge = 'SAFE PICK';
         color = AppTheme.success;
-        kellyRef = confidence;
+        kellyRef = m.resolvedPickProbability(label) / 100.0;
       } else if (key == 'value') {
         badge = 'VALUE EDGE';
         color = amber;
@@ -2344,7 +2290,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen>
       rows.add((
         badge: badge,
         name: label,
-        kellyRef: kellyRef.clamp(0.08, 0.95),
+        kellyRef: kellyRef.clamp(0.08, 0.98),
         color: color,
         odds: odds,
       ));

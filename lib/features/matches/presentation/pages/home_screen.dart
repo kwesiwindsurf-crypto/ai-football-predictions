@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../models/match_model.dart' as model;
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/app_tab_header.dart';
 import '../../../../core/widgets/breathing_gradient.dart';
 import '../../../../core/widgets/shimmer_loading.dart';
 import '../../../match_details/presentation/pages/match_details_screen.dart';
@@ -48,6 +49,15 @@ class _HomeScreenState extends State<HomeScreen>
   Timer? _scrollSaveTimer;
   bool _isRestoringScroll = false;
   bool _userScrolledBeforeRestore = false;
+
+  // Header search: opens from the magnifier beside the league filter icon and
+  // collapses again when it has been left untouched (or on focus loss).
+  final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
+  Timer? _searchIdleTimer;
+  bool _isSearchVisible = false;
+  String _searchQuery = '';
+  static const Duration _searchIdleTimeout = Duration(seconds: 8);
   
   List<model.Match>? _matches = ApiService.inMemoryCache;
   bool _isLoading = ApiService.inMemoryCache == null || ApiService.inMemoryCache!.isEmpty;
@@ -75,6 +85,7 @@ class _HomeScreenState extends State<HomeScreen>
       _updateSelectedDate(_matches!);
     }
     _scrollController.addListener(_onScrollChanged);
+    _searchFocusNode.addListener(_onSearchFocusChanged);
     WidgetsBinding.instance.addObserver(this);
     _loadData();
     _loadPreferences();
@@ -145,9 +156,121 @@ class _HomeScreenState extends State<HomeScreen>
     LiveSyncEngine.instance.removeSyncListener(_onLiveTick);
     MatchesProvider.instance.removeListener(_onProviderChanged);
     _scrollSaveTimer?.cancel();
+    _searchIdleTimer?.cancel();
+    _searchFocusNode.removeListener(_onSearchFocusChanged);
+    _searchFocusNode.dispose();
+    _searchController.dispose();
     unawaited(_persistViewState());
     _scrollController.dispose();
     super.dispose();
+  }
+
+  // ── Header search ────────────────────────────────────────────────────────
+  void _toggleSearch() {
+    if (_isSearchVisible) {
+      _hideSearch();
+    } else {
+      _showSearch();
+    }
+  }
+
+  void _showSearch() {
+    if (_isSearchVisible) return;
+    setState(() => _isSearchVisible = true);
+    _restartSearchIdleTimer();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _searchFocusNode.requestFocus();
+    });
+  }
+
+  void _hideSearch() {
+    _searchIdleTimer?.cancel();
+    _searchController.clear();
+    _searchFocusNode.unfocus();
+    if (!_isSearchVisible && _searchQuery.isEmpty) return;
+    setState(() {
+      _isSearchVisible = false;
+      _searchQuery = '';
+    });
+  }
+
+  void _onSearchFocusChanged() {
+    if (!_isSearchVisible) return;
+    if (!_searchFocusNode.hasFocus && _searchQuery.isEmpty) {
+      _hideSearch();
+    } else if (_searchFocusNode.hasFocus) {
+      _restartSearchIdleTimer();
+    }
+  }
+
+  void _restartSearchIdleTimer() {
+    _searchIdleTimer?.cancel();
+    if (!_isSearchVisible) return;
+    _searchIdleTimer = Timer(_searchIdleTimeout, () {
+      if (!mounted) return;
+      // Never tear down an active query: that would silently unfilter the feed.
+      if (_searchQuery.isEmpty) _hideSearch();
+    });
+  }
+
+  void _onSearchChanged(String value) {
+    setState(() => _searchQuery = value.trim());
+    _restartSearchIdleTimer();
+  }
+
+  void _clearSearch() {
+    _searchController.clear();
+    setState(() => _searchQuery = '');
+    _searchFocusNode.requestFocus();
+    _restartSearchIdleTimer();
+  }
+
+  Widget _buildSearchRow(BuildContext context) {
+    final primary = AppSettingsService.instance.accentColor;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(14, 0, 14, 8),
+      child: Container(
+        height: 42,
+        decoration: BoxDecoration(
+          color: AppTheme.surfaceOf(context),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppTheme.cardBorderOf(context), width: 1),
+        ),
+        child: Row(
+          children: [
+            const SizedBox(width: 11),
+            Icon(Icons.search_rounded, size: 18, color: primary),
+            const SizedBox(width: 8),
+            Expanded(
+              child: TextField(
+                controller: _searchController,
+                focusNode: _searchFocusNode,
+                onChanged: _onSearchChanged,
+                textInputAction: TextInputAction.search,
+                style: TextStyle(color: AppTheme.textPrimaryOf(context), fontSize: 13.5),
+                decoration: InputDecoration(
+                  hintText: 'Search teams, leagues or picks...',
+                  hintStyle: TextStyle(color: AppTheme.textSecondaryOf(context), fontSize: 13.5),
+                  border: InputBorder.none,
+                  isDense: true,
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+            ),
+            if (_searchQuery.isNotEmpty)
+              GestureDetector(
+                onTap: _clearSearch,
+                behavior: HitTestBehavior.opaque,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  child: Icon(Icons.close_rounded, size: 16, color: AppTheme.textSecondaryOf(context)),
+                ),
+              ),
+            const SizedBox(width: 8),
+          ],
+        ),
+      ),
+    );
   }
 
   // ── Last-view persistence ────────────────────────────────────────────────
@@ -442,26 +565,8 @@ class _HomeScreenState extends State<HomeScreen>
     final availableDates = _getAvailableDates(matches);
     debugPrint('🔥🔥🔥 HomeScreen build called! matches=${matches.length}, dates=${availableDates.length}, isLoading=$_isLoading, error=$_error');
 
-    // Live matches list
-    final liveMatches = matches.where((m) => m.status == model.MatchStatus.live).toList();
-
-    // Find highest EV value match for Featured Banner
-    model.Match? featuredMatch;
-    if (matches.isNotEmpty) {
-      if (liveMatches.isNotEmpty) {
-        featuredMatch = liveMatches.first;
-      } else {
-        featuredMatch = matches.reduce((curr, next) {
-          final currMax = curr.prediction.homeWinProbability >= curr.prediction.awayWinProbability
-              ? curr.prediction.homeWinProbability
-              : curr.prediction.awayWinProbability;
-          final nextMax = next.prediction.homeWinProbability >= next.prediction.awayWinProbability
-              ? next.prediction.homeWinProbability
-              : next.prediction.awayWinProbability;
-          return currMax >= nextMax ? curr : next;
-        });
-      }
-    }
+    // Featured banner: strongest model pick for the date currently in view.
+    final featuredMatch = _resolveFeaturedPick(matches, availableDates);
 
     // Count matches for today
     final now = DateTime.now();
@@ -473,14 +578,18 @@ class _HomeScreenState extends State<HomeScreen>
     return ListenableBuilder(
       listenable: AppSettingsService.instance,
       builder: (context, _) {
-        final primary = AppTheme.primaryOf(context);
+        final primary = AppSettingsService.instance.accentColor;
         final surface = AppTheme.surfaceOf(context);
-        final borderColor = AppTheme.cardBorderOf(context);
+
+        final hasLive = context.select<MatchesProvider, bool>((p) => p.hasLiveMatches);
+        final topInset = MediaQuery.paddingOf(context).top;
 
         return Scaffold(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           appBar: PreferredSize(
-            preferredSize: Size.fromHeight(context.select<MatchesProvider, bool>((p) => p.hasLiveMatches) ? 104 : 64),
+            preferredSize: Size.fromHeight(
+              topInset + (hasLive ? 40 : 0) + AppTabHeader.contentHeight + (_isSearchVisible ? 50 : 0),
+            ),
             child: Container(
               color: surface,
               child: SafeArea(
@@ -515,145 +624,33 @@ class _HomeScreenState extends State<HomeScreen>
                       },
                     ),
 
-                    // Header Row with Brand & Actions — clean white band,
-                    // only the accents breathe (tile + 3px underline).
-                    Container(
-                      color: AppTheme.isDark(context)
-                          ? null
-                          : AppTheme.surfaceOf(context),
-                      child: Column(
+                    AppTabHeader(
+                      includeTopSafeArea: false,
+                      icon: CrownIcon(size: 18, color: primary),
+                      title: 'AI Scorecast',
+                      subtitle: 'Live fixtures & model odds',
+                      trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16.0, vertical: 8.0),
-                          child: Row(
-                        children: [
-                          BreathingTile(
-                            size: 32,
-                            radius: 10,
-                            child: Center(
-                              child: CrownIcon(size: 17, color: Colors.white),
+                          AppTabHeaderAction(
+                            accentBorder: _isSearchVisible,
+                            onTap: _toggleSearch,
+                            child: Icon(
+                              _isSearchVisible ? Icons.search_off_rounded : Icons.search_rounded,
+                              size: 18,
+                              color: _isSearchVisible ? primary : AppTheme.textSecondaryOf(context),
                             ),
                           ),
                           const SizedBox(width: 8),
-                          Text(
-                            'AI SCORECAST',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: -0.5,
-                              fontSize: 16,
-                              color: AppTheme.textPrimaryOf(context),
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: AppTheme.isDark(context)
-                                  ? const Color(0xFF1F242C)
-                                  : const Color(0xFFE8EEF4),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              'PRO',
-                              style: TextStyle(
-                                color: primary,
-                                fontFamily: 'monospace',
-                                fontWeight: FontWeight.bold,
-                                fontSize: 10,
-                              ),
-                            ),
-                          ),
-                          const Spacer(),
-
-                          // League Filter / Sliders Button (Matching Image 1)
-                          GestureDetector(
+                          AppTabHeaderAction(
+                            accentBorder: true,
                             onTap: () => _showFiltersBottomSheet(context),
-                            child: Container(
-                              width: 36,
-                              height: 36,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: AppTheme.surfaceOf(context),
-                                border: Border.all(
-                                  color: const Color(0xFF00D06C).withValues(alpha: 0.35),
-                                  width: 1.2,
-                                ),
-                              ),
-                              child: const Icon(Icons.tune_rounded, size: 18, color: Color(0xFF00D06C)),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-
-                          // Notification Bell Button with live green badge
-                          GestureDetector(
-                            onTap: () {
-                              final alertsOn =
-                                  AppSettingsService.instance.masterAlerts;
-                              final hasLive =
-                                  MatchesProvider.instance.hasLiveMatches;
-                              final statusLabel = !alertsOn
-                                  ? 'Alerts Paused in Settings'
-                                  : (hasLive
-                                      ? 'In-App Live Alerts Active'
-                                      : 'Quiet Until a Live Match Is Active');
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  backgroundColor: AppTheme.surfaceOf(context),
-                                  behavior: SnackBarBehavior.floating,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                                  content: Row(
-                                    children: [
-                                      Icon(Icons.notifications_active_rounded, color: primary, size: 20),
-                                      const SizedBox(width: 10),
-                                      Expanded(
-                                        child: Text(
-                                          statusLabel,
-                                          style: TextStyle(color: AppTheme.textPrimaryOf(context), fontSize: 13, fontWeight: FontWeight.w600),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  duration: const Duration(seconds: 2),
-                                ),
-                              );
-                            },
-                            child: Container(
-                              width: 36,
-                              height: 36,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: AppTheme.surfaceOf(context),
-                                border: Border.all(color: borderColor),
-                              ),
-                              child: Stack(
-                                alignment: Alignment.center,
-                                children: [
-                                  Icon(Icons.notifications_none_rounded, size: 18, color: AppTheme.textSecondaryOf(context)),
-                                  Positioned(
-                                    top: 8,
-                                    right: 8,
-                                    child: Container(
-                                      width: 6,
-                                      height: 6,
-                                      decoration: BoxDecoration(
-                                        color: primary,
-                                        shape: BoxShape.circle,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                            child: Icon(Icons.tune_rounded, size: 18, color: primary),
                           ),
                         ],
                       ),
                     ),
-                    const BreathingUnderline(),
-                  ],
-                ),
-              ),
+                    if (_isSearchVisible) _buildSearchRow(context),
                   ],
                 ),
               ),
@@ -726,6 +723,54 @@ class _HomeScreenState extends State<HomeScreen>
         );
       },
     );
+  }
+
+  /// Resolves the match featured in the AI banner: the single strongest model
+  /// read for the day currently in view.
+  ///
+  /// Ranking mirrors the AI Insights tab (highest pick probability first, then
+  /// highest 1X2 confidence), so the banner always advertises a real top pick
+  /// instead of whichever match happened to be first in the feed.
+  model.Match? _resolveFeaturedPick(
+    List<model.Match> matches,
+    List<DateTime> availableDates,
+  ) {
+    if (matches.isEmpty) return null;
+
+    final selectedDate =
+        _selectedDate ?? (availableDates.isNotEmpty ? availableDates.first : null);
+
+    // Stay aligned with the feed: same date and no hidden leagues.
+    var pool = matches
+        .where((m) => !_hiddenLeagues.contains(m.league))
+        .toList(growable: false);
+    if (selectedDate != null) {
+      final onDate = pool.where((m) {
+        final local = m.date.toLocal();
+        return local.year == selectedDate.year &&
+            local.month == selectedDate.month &&
+            local.day == selectedDate.day;
+      }).toList(growable: false);
+      if (onDate.isNotEmpty) pool = onDate;
+    }
+    if (pool.isEmpty) return null;
+
+    // Prefer unsettled fixtures; fall back to the whole pool for past dates.
+    final pending = pool
+        .where((m) => m.status != model.MatchStatus.finished)
+        .toList(growable: false);
+    final ranked = List<model.Match>.of(pending.isEmpty ? pool : pending);
+
+    ranked.sort((a, b) {
+      // Rank by the same confidence number the banner prints, so "Top Pick"
+      // can never claim 45% while a stronger 70% read exists in the feed.
+      final byConfidence =
+          b.prediction.confidence.compareTo(a.prediction.confidence);
+      if (byConfidence != 0) return byConfidence;
+      return b.resolvedPickProbability().compareTo(a.resolvedPickProbability());
+    });
+
+    return ranked.first;
   }
 
   List<Widget> _buildMatchesSlivers(BuildContext context, List<DateTime> availableDates) {
@@ -908,6 +953,61 @@ class _HomeScreenState extends State<HomeScreen>
       }
     }
 
+    // Apply the header search query (team, league or recommended market).
+    final searchQuery = _searchQuery.trim().toLowerCase();
+    if (searchQuery.isNotEmpty) {
+      filteredMatches = filteredMatches.where((match) {
+        final haystack = '${match.homeTeam} ${match.awayTeam} ${match.league} '
+                '${match.prediction.recommendation}'
+            .toLowerCase();
+        return haystack.contains(searchQuery);
+      }).toList();
+
+      if (filteredMatches.isEmpty) {
+        return [
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height: 360,
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.search_off_rounded, size: 44, color: AppTheme.textSecondaryOf(context)),
+                      const SizedBox(height: 12),
+                      Text(
+                        'No matches for "$searchQuery"',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: AppTheme.textPrimaryOf(context), fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'Try a team, league or pick name.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: AppTheme.textSecondaryOf(context), fontSize: 13),
+                      ),
+                      const SizedBox(height: 16),
+                      OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppTheme.primary,
+                          side: const BorderSide(color: AppTheme.primary),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                        ),
+                        onPressed: _clearSearch,
+                        icon: const Icon(Icons.close_rounded, size: 16),
+                        label: const Text('Clear search', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ];
+      }
+    }
+
     if (filteredMatches.isEmpty) {
       return [
         SliverToBoxAdapter(
@@ -923,7 +1023,12 @@ class _HomeScreenState extends State<HomeScreen>
     final Map<String, List<model.Match>> grouped = {};
     for (var m in filteredMatches) {
       grouped.putIfAbsent(m.league, () => []).add(m);
-      _leagueExpandedState.putIfAbsent(m.league, () => true);
+      if (searchQuery.isNotEmpty) {
+        // Search results must be visible even if the league was collapsed.
+        _leagueExpandedState[m.league] = true;
+      } else {
+        _leagueExpandedState.putIfAbsent(m.league, () => true);
+      }
     }
 
     // Filter out hidden leagues and sort based on _preferredLeagues

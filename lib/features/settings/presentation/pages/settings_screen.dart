@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/services/app_settings_service.dart';
+import '../../../../core/services/matches_provider.dart';
 import '../../../../core/services/analytics_service.dart';
+import '../../../../core/widgets/app_tab_header.dart';
 import '../../../../core/widgets/breathing_gradient.dart';
 import '../../../../core/theme/app_theme.dart';
 
@@ -36,46 +38,13 @@ class _SettingsScreenState extends State<SettingsScreen> with AutomaticKeepAlive
 
         return Scaffold(
               backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-              appBar: PreferredSize(
-                preferredSize: const Size.fromHeight(64),
-                child: Container(
-                  color: AppTheme.surfaceOf(context),
-                  child: Stack(
-                    children: [
-                      SafeArea(
-                        bottom: false,
-                        child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Header Title: SETTINGS & ENGINE
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
-                          child: Row(
-                            children: [
-                              BreathingText(
-                                'SETTINGS & ENGINE',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w900,
-                                  fontSize: 18,
-                                  letterSpacing: -0.3,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Positioned(
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    child: BreathingUnderline(),
-                  ),
-                ],
+              appBar: AppTabHeader.asAppBar(
+                context,
+                icon: const Icon(Icons.tune_rounded),
+                title: 'Settings',
+                subtitle: 'Engine, alerts & theme',
+                trailing: const AppTabHeaderBadge(label: 'v3.4'),
               ),
-            ),
-          ),
           body: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             children: [
@@ -123,6 +92,8 @@ class _SettingsScreenState extends State<SettingsScreen> with AutomaticKeepAlive
 
               // SECTION 2: NOTIFICATIONS & ALERTS
               _buildSectionHeader('NOTIFICATIONS & ALERTS', textSecondary),
+              _buildAlertsStatusCard(primary, textPrimary, textSecondary),
+              const SizedBox(height: 10),
               _buildGroupedCard([
                 _buildSwitchTile(
                   icon: Icons.notifications_active_rounded,
@@ -396,6 +367,54 @@ class _SettingsScreenState extends State<SettingsScreen> with AutomaticKeepAlive
     );
   }
 
+  Widget _buildAlertsStatusCard(Color primary, Color textPrimary, Color textSecondary) {
+    // Mirrors the status that used to live behind the Matches bell icon.
+    return ListenableBuilder(
+      listenable: MatchesProvider.instance,
+      builder: (context, _) {
+        final alertsOn = _settings.masterAlerts;
+        final isLiveNow = MatchesProvider.instance.hasLiveMatches;
+        final label = !alertsOn
+            ? 'Alerts paused'
+            : (isLiveNow ? 'Live alerts active now' : 'Quiet until a live match kicks off');
+        final color = !alertsOn
+            ? textSecondary
+            : (isLiveNow ? primary : AppTheme.secondary);
+
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: color.withValues(alpha: 0.28)),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                alertsOn && isLiveNow
+                    ? Icons.notifications_active_rounded
+                    : Icons.notifications_none_rounded,
+                size: 18,
+                color: color,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    color: textPrimary,
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildSwitchTile({
     required IconData icon,
     required Color iconBg,
@@ -484,41 +503,50 @@ class _SettingsScreenState extends State<SettingsScreen> with AutomaticKeepAlive
         children: [
           // Header: Shapes Icon + CARD CURVE RADIUS + Badge
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _buildShapesIcon(),
-                  const SizedBox(width: 10),
-                  Text(
-                    'CARD CURVE RADIUS',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 0.8,
-                      color: AppTheme.textPrimaryOf(context),
+              Expanded(
+                child: Row(
+                  children: [
+                    _buildShapesIcon(),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        'CARD CURVE RADIUS',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.6,
+                          color: AppTheme.textPrimaryOf(context),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Flexible(
+                fit: FlexFit.loose,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF00D06C).withValues(alpha: 0.16),
+                    borderRadius: BorderRadius.circular(AppTheme.radiusPill),
+                    border: Border.all(
+                      color: const Color(0xFF00D06C).withValues(alpha: 0.28),
+                      width: 1,
                     ),
                   ),
-                ],
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF00D06C).withValues(alpha: 0.16),
-                  borderRadius: BorderRadius.circular(AppTheme.radiusPill),
-                  border: Border.all(
-                    color: const Color(0xFF00D06C).withValues(alpha: 0.28),
-                    width: 1,
-                  ),
-                ),
-                child: Text(
-                  badgeLabel,
-                  style: const TextStyle(
-                    fontSize: 11.5,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF00D06C),
+                  child: Text(
+                    badgeLabel,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF00D06C),
+                    ),
                   ),
                 ),
               ),
