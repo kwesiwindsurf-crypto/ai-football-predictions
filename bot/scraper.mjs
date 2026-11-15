@@ -79,6 +79,7 @@ const ESPN_LEAGUES = [
   { slug: 'col.1',  label: 'Colombia - Primera A' },
   { slug: 'sau.1',  label: 'Saudi Arabia - Pro League' },
   { slug: 'zaf.1',  label: 'South Africa - Premier League' },
+  { slug: 'aus.1',  label: 'Australia - A-League' },
   { slug: 'uefa.champions',        label: 'UEFA - Champions League' },
   { slug: 'uefa.europa',           label: 'UEFA - Europa League' },
   { slug: 'uefa.europa.conf',      label: 'UEFA - Conference League' },
