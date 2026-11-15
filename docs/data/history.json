@@ -1,5 +1,449 @@
 [
   {
+    "id": "ADO-Den-Haag-De-Graafschap-2026-11-15",
+    "espnEventId": "401882136",
+    "homeTeam": "ADO Den Haag",
+    "awayTeam": "De Graafschap",
+    "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/20798.png",
+    "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/131428.png",
+    "league": "Dutch Vrouwen Eredivisie",
+    "date": "2026-11-15T11:15Z",
+    "status": "finished",
+    "statusShort": "FT",
+    "homeScore": 0,
+    "awayScore": 2,
+    "homeOdds": null,
+    "drawOdds": null,
+    "awayOdds": null,
+    "oddsRating": 24,
+    "homeRank": null,
+    "awayRank": null,
+    "homeForm": "LLLWL",
+    "awayForm": "WWWWW",
+    "homeRecord": "2-1-7",
+    "awayRecord": "6-0-4",
+    "homePoints": 7,
+    "awayPoints": 18,
+    "h2hSummary": "ADO Den Haag won 1 of last 1 meetings. ADO Den Haag 3-2 De Graafschap (2026-09-13)",
+    "matchUrl": "https://www.espn.com/soccer/match/_/gameId/401882136/de-graafschap-ado-den-haag",
+    "stats": null,
+    "events": [
+      {
+        "type": "Yellow Card",
+        "clock": "33'",
+        "team": "home",
+        "player": "Nienke Mulder",
+        "playerIn": "Nienke Mulder",
+        "playerOut": null,
+        "scoringPlay": false,
+        "redCard": false,
+        "yellowCard": true,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Goal",
+        "clock": "38'",
+        "team": "away",
+        "player": "Naomi Pique",
+        "playerIn": "Naomi Pique",
+        "playerOut": null,
+        "scoringPlay": true,
+        "redCard": false,
+        "yellowCard": false,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Goal",
+        "clock": "54'",
+        "team": "away",
+        "player": "Sam Roddenhof",
+        "playerIn": "Sam Roddenhof",
+        "playerOut": null,
+        "scoringPlay": true,
+        "redCard": false,
+        "yellowCard": false,
+        "penalty": false,
+        "ownGoal": false
+      }
+    ],
+    "venue": "ADO Den Haag Stadium, Den Haag",
+    "venueName": "ADO Den Haag Stadium",
+    "venueCity": "Den Haag",
+    "attendance": null,
+    "seriesSummary": null,
+    "referee": null,
+    "prediction": {
+      "homeWinProbability": 48,
+      "drawProbability": 12,
+      "awayWinProbability": 40,
+      "oddsRating": -8,
+      "h2hSummary": "ADO Den Haag won 1 of last 1 meetings. ADO Den Haag 3-2 De Graafschap (2026-09-13)",
+      "recommendation": "Over 1.5 Goals",
+      "analysis": "No-Odds Fixture: Avoids cross-tier form guesses — Goals Market (Over 1.5).\nHomeForm: 20%, AwayForm: 80%, BigGame: false\nOddsSource: season-rates (record+record)",
+      "oddsSource": "season-rates (record+record)",
+      "stakingOptions": [
+        "Safe: Over 1.5 Goals",
+        "Value: ADO Den Haag Draw No Bet",
+        "Risky: ADO Den Haag to WIN by 2+ Goals",
+        "BTTS: Both Teams To Score - Yes",
+        "Alternative: Over 2.5 Total Goals"
+      ]
+    }
+  },
+  {
+    "id": "Dempo-Sports-Club-Chanmari-FC-2026-11-15",
+    "espnEventId": "401930696",
+    "homeTeam": "Dempo Sports Club",
+    "awayTeam": "Chanmari FC",
+    "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/22473.png",
+    "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/131707.png",
+    "league": "Indian Football League",
+    "date": "2026-11-15T10:30Z",
+    "status": "finished",
+    "statusShort": "FT",
+    "homeScore": 1,
+    "awayScore": 2,
+    "homeOdds": null,
+    "drawOdds": null,
+    "awayOdds": null,
+    "oddsRating": -31,
+    "homeRank": null,
+    "awayRank": null,
+    "homeForm": "DWWDD",
+    "awayForm": "DDDLW",
+    "homeRecord": "2-0-1",
+    "awayRecord": "1-1-0",
+    "homePoints": 6,
+    "awayPoints": 4,
+    "h2hSummary": "Chanmari FC won 1, 1 Draw of last 2 meetings. Dempo Sports Club 0-2 Chanmari FC (2026-05-09) | Dempo Sports Club 2-2 Chanmari FC (2026-03-12)",
+    "matchUrl": "https://www.espn.com/soccer/match/_/gameId/401930696/chanmari-fc-dempo-sports-club",
+    "stats": null,
+    "events": [
+      {
+        "type": "Goal",
+        "clock": "3'",
+        "team": "home",
+        "player": "Laximanrao Rane",
+        "playerIn": "Laximanrao Rane",
+        "playerOut": null,
+        "scoringPlay": true,
+        "redCard": false,
+        "yellowCard": false,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Yellow Card",
+        "clock": "19'",
+        "team": "away",
+        "player": "Fc Lalhmunmawia",
+        "playerIn": "Fc Lalhmunmawia",
+        "playerOut": null,
+        "scoringPlay": false,
+        "redCard": false,
+        "yellowCard": true,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Goal",
+        "clock": "23'",
+        "team": "away",
+        "player": "R Ramdinthara",
+        "playerIn": "R Ramdinthara",
+        "playerOut": null,
+        "scoringPlay": true,
+        "redCard": false,
+        "yellowCard": false,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Yellow Card",
+        "clock": "30'",
+        "team": "home",
+        "player": "Uzziel Yaw Asomaning Budu",
+        "playerIn": "Uzziel Yaw Asomaning Budu",
+        "playerOut": null,
+        "scoringPlay": false,
+        "redCard": false,
+        "yellowCard": true,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Yellow Card",
+        "clock": "89'",
+        "team": "home",
+        "player": "Athul Unnikrishnan",
+        "playerIn": "Athul Unnikrishnan",
+        "playerOut": null,
+        "scoringPlay": false,
+        "redCard": false,
+        "yellowCard": true,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Goal",
+        "clock": "90'+1'",
+        "team": "away",
+        "player": "Lalthanzuala Aineh",
+        "playerIn": "Lalthanzuala Aineh",
+        "playerOut": null,
+        "scoringPlay": true,
+        "redCard": false,
+        "yellowCard": false,
+        "penalty": false,
+        "ownGoal": false
+      }
+    ],
+    "venue": "Pandit Jawaharlal Nehru Stadium, Fatorda, Goa",
+    "venueName": "Pandit Jawaharlal Nehru Stadium",
+    "venueCity": "Fatorda, Goa",
+    "attendance": null,
+    "seriesSummary": null,
+    "referee": null,
+    "prediction": {
+      "homeWinProbability": 39,
+      "drawProbability": 33,
+      "awayWinProbability": 28,
+      "oddsRating": -11,
+      "h2hSummary": "Chanmari FC won 1, 1 Draw of last 2 meetings. Dempo Sports Club 0-2 Chanmari FC (2026-05-09) | Dempo Sports Club 2-2 Chanmari FC (2026-03-12)",
+      "recommendation": "Over 1.5 Goals",
+      "analysis": "No-Odds Fixture: Avoids cross-tier form guesses — Goals Market (Over 1.5).\nHomeForm: 53%, AwayForm: 33%, BigGame: false\nOddsSource: season-rates (record+record)",
+      "oddsSource": "season-rates (record+record)",
+      "stakingOptions": [
+        "Safe: Over 1.5 Goals",
+        "Value: Dempo Sports Club Draw No Bet",
+        "Risky: Dempo Sports Club to WIN by 2+ Goals",
+        "BTTS: Both Teams To Score - Yes",
+        "Alternative: Under 2.5 Goals"
+      ]
+    }
+  },
+  {
+    "id": "Chindia-Targoviste-FCSB-2026-11-15",
+    "espnEventId": "401934228",
+    "homeTeam": "Chindia Targoviste",
+    "awayTeam": "FCSB",
+    "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/19230.png",
+    "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/484.png",
+    "league": "Club Friendly",
+    "date": "2026-11-15T10:00Z",
+    "status": "finished",
+    "statusShort": "FT",
+    "homeScore": 1,
+    "awayScore": 2,
+    "homeOdds": null,
+    "drawOdds": null,
+    "awayOdds": null,
+    "oddsRating": -5,
+    "homeRank": null,
+    "awayRank": null,
+    "homeForm": "DLLLW",
+    "awayForm": "LLDLW",
+    "homeRecord": null,
+    "awayRecord": null,
+    "homePoints": 0,
+    "awayPoints": 0,
+    "h2hSummary": "FCSB won 5 of last 5 meetings. Chindia Targoviste 0-2 FCSB (2022-12-11) | Chindia Targoviste 2-3 FCSB (2022-08-14) | Chindia Targoviste 2-3 FCSB (2022-02-13) | Chindia Targoviste 0-1 FCSB (2021-10-01) | Chindia Targoviste 0-1 FCSB (2021-02-20)",
+    "matchUrl": "https://www.espn.com/soccer/match/_/gameId/401934228/fcsb-chindia-targoviste",
+    "stats": null,
+    "events": [],
+    "venue": "Stadionul Eugen Popescu, Targoviste",
+    "venueName": "Stadionul Eugen Popescu",
+    "venueCity": "Targoviste",
+    "attendance": null,
+    "seriesSummary": null,
+    "referee": null,
+    "prediction": {
+      "homeWinProbability": 29,
+      "drawProbability": 20,
+      "awayWinProbability": 51,
+      "oddsRating": 22,
+      "h2hSummary": "FCSB won 5 of last 5 meetings. Chindia Targoviste 0-2 FCSB (2022-12-11) | Chindia Targoviste 2-3 FCSB (2022-08-14) | Chindia Targoviste 2-3 FCSB (2022-02-13) | Chindia Targoviste 0-1 FCSB (2021-10-01) | Chindia Targoviste 0-1 FCSB (2021-02-20)",
+      "recommendation": "X2 (FCSB or Draw)",
+      "analysis": "Club Friendly: Away Double Chance edge (X2 71%).\nHomeForm: 27%, AwayForm: 27%, BigGame: false\nOddsSource: season-rates (form+form)",
+      "oddsSource": "season-rates (form+form)",
+      "stakingOptions": [
+        "Safe: X2 (FCSB or Draw)",
+        "Value: FCSB Draw No Bet",
+        "Risky: FCSB to WIN by 2+ Goals",
+        "BTTS: Both Teams To Score - Yes",
+        "Alternative: Over 2.5 Total Goals"
+      ]
+    }
+  },
+  {
+    "id": "AS-Tefana-Thionville-2026-11-15",
+    "espnEventId": "401933039",
+    "homeTeam": "AS Tefana",
+    "awayTeam": "Thionville",
+    "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/134076.png",
+    "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/10683.png",
+    "league": "France - Coupe de France",
+    "date": "2026-11-15T04:00Z",
+    "status": "finished",
+    "statusShort": "FT",
+    "homeScore": 0,
+    "awayScore": 0,
+    "homeOdds": null,
+    "drawOdds": null,
+    "awayOdds": null,
+    "oddsRating": -43,
+    "homeRank": null,
+    "awayRank": null,
+    "homeForm": "L",
+    "awayForm": "WLLL",
+    "homeRecord": null,
+    "awayRecord": null,
+    "homePoints": 0,
+    "awayPoints": 0,
+    "h2hSummary": null,
+    "matchUrl": "https://www.espn.com/soccer/match/_/gameId/401933039/thionville-as-tefana",
+    "stats": null,
+    "events": [],
+    "venue": "Stade Louis Ganivet",
+    "venueName": "Stade Louis Ganivet",
+    "venueCity": null,
+    "attendance": null,
+    "seriesSummary": null,
+    "referee": null,
+    "prediction": {
+      "homeWinProbability": 61,
+      "drawProbability": 21,
+      "awayWinProbability": 18,
+      "recommendation": "Over 1.5 Goals",
+      "analysis": "No-Odds Fixture: Avoids cross-tier form guesses — Goals Market (Over 1.5).\nHomeForm: 50%, AwayForm: 0%, BigGame: false\nOddsSource: season-rates (neutral+form)",
+      "stakingOptions": [
+        "Safe: Over 1.5 Goals",
+        "Value: AS Tefana Draw No Bet",
+        "Risky: AS Tefana to WIN by 2+ Goals",
+        "BTTS: Both Teams To Score - Yes",
+        "Alternative: Over 2.5 Total Goals"
+      ]
+    }
+  },
+  {
+    "id": "New-Zealand-India-2026-11-15",
+    "espnEventId": "401906463",
+    "homeTeam": "New Zealand",
+    "awayTeam": "India",
+    "homeLogo": "https://a.espncdn.com/i/teamlogos/countries/500/nzl.png",
+    "awayLogo": "https://a.espncdn.com/i/teamlogos/countries/500/ind.png",
+    "league": "International Friendly",
+    "date": "2026-11-15T03:00Z",
+    "status": "finished",
+    "statusShort": "FT",
+    "homeScore": 3,
+    "awayScore": 0,
+    "homeOdds": null,
+    "drawOdds": null,
+    "awayOdds": null,
+    "oddsRating": -7,
+    "homeRank": null,
+    "awayRank": null,
+    "homeForm": "WWWDL",
+    "awayForm": "LWLWW",
+    "homeRecord": null,
+    "awayRecord": null,
+    "homePoints": 0,
+    "awayPoints": 0,
+    "h2hSummary": "New Zealand won 2 of last 2 meetings. New Zealand 5-0 India (2026-11-12) | New Zealand 2-1 India (2018-06-07)",
+    "matchUrl": "https://www.espn.com/soccer/match/_/gameId/401906463/india-new-zealand",
+    "stats": null,
+    "events": [
+      {
+        "type": "Goal",
+        "clock": "22'",
+        "team": "home",
+        "player": "Finn Surman",
+        "playerIn": "Finn Surman",
+        "playerOut": null,
+        "scoringPlay": true,
+        "redCard": false,
+        "yellowCard": false,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Goal",
+        "clock": "40'",
+        "team": "home",
+        "player": "James McGarry",
+        "playerIn": "James McGarry",
+        "playerOut": null,
+        "scoringPlay": true,
+        "redCard": false,
+        "yellowCard": false,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Goal",
+        "clock": "42'",
+        "team": "home",
+        "player": "Chris Wood",
+        "playerIn": "Chris Wood",
+        "playerOut": null,
+        "scoringPlay": true,
+        "redCard": false,
+        "yellowCard": false,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Yellow Card",
+        "clock": "90'+1'",
+        "team": "away",
+        "player": "Lalremtluanga Fanai",
+        "playerIn": "Lalremtluanga Fanai",
+        "playerOut": null,
+        "scoringPlay": false,
+        "redCard": false,
+        "yellowCard": true,
+        "penalty": false,
+        "ownGoal": false
+      },
+      {
+        "type": "Yellow Card",
+        "clock": "90'+1'",
+        "team": "home",
+        "player": "Lachlan Bayliss",
+        "playerIn": "Lachlan Bayliss",
+        "playerOut": null,
+        "scoringPlay": false,
+        "redCard": false,
+        "yellowCard": true,
+        "penalty": false,
+        "ownGoal": false
+      }
+    ],
+    "venue": "One New Zealand Stadium, Christchurch",
+    "venueName": "One New Zealand Stadium",
+    "venueCity": "Christchurch",
+    "attendance": null,
+    "seriesSummary": null,
+    "referee": null,
+    "prediction": {
+      "homeWinProbability": 41,
+      "drawProbability": 25,
+      "awayWinProbability": 34,
+      "recommendation": "Over 1.5 Goals",
+      "analysis": "Club Friendly: Balanced exhibition match — Goals Market (Over 1.5).\nHomeForm: 47%, AwayForm: 40%, BigGame: false\nOddsSource: season-rates (form+form)",
+      "stakingOptions": [
+        "Safe: Over 1.5 Goals",
+        "Value: New Zealand Draw No Bet",
+        "Risky: New Zealand to WIN by 2+ Goals",
+        "BTTS: Both Teams To Score - Yes",
+        "Alternative: Under 2.5 Goals"
+      ]
+    }
+  },
+  {
     "id": "Jamaica-Mexico-2026-11-15",
     "espnEventId": "401929772",
     "homeTeam": "Jamaica",
@@ -142,7 +586,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Red-Bull-New-York-América-2026-11-15",
@@ -192,7 +638,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "St.-Vincent-and-the-Grenadines-Belize-2026-11-15",
@@ -311,7 +759,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Chapecoense-Vasco-da-Gama-2026-11-14",
@@ -472,7 +922,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Querétaro-Monterrey-2026-11-14",
@@ -672,7 +1124,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Mirassol-Atlético-MG-2026-11-14",
@@ -820,7 +1274,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Haiti-United-States-2026-11-14",
@@ -1020,7 +1476,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Águilas-Doradas-Independiente-Medellín-2026-11-14",
@@ -1155,7 +1613,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Atlético-Bucaramanga-Fortaleza-CEIF-2026-11-14",
@@ -1316,7 +1776,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Atlético-Nacional-Once-Caldas-2026-11-14",
@@ -1490,7 +1952,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Cúcuta-Deportivo-Jaguares-de-Córdoba-2026-11-14",
@@ -1664,7 +2128,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Deportivo-Cali-Deportes-Tolima-2026-11-14",
@@ -1916,7 +2382,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Deportivo-Pereira-América-de-Cali-2026-11-14",
@@ -2103,7 +2571,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Millonarios-Alianza-FC-2026-11-14",
@@ -2290,7 +2760,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Real-Oviedo-Girona-2026-11-14",
@@ -2464,7 +2936,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Austria-Republic-of-Ireland-2026-11-14",
@@ -2625,7 +3099,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Northern-Ireland-Ukraine-2026-11-14",
@@ -2747,7 +3223,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Portugal-Denmark-2026-11-14",
@@ -2921,7 +3399,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Romania-Poland-2026-11-14",
@@ -3134,7 +3614,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Sweden-Bosnia-Herzegovina-2026-11-14",
@@ -3295,7 +3777,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Olympique-des-Membres-de-Cambrai-Amerique-SC-Amiens-2026-11-14",
@@ -3348,7 +3832,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Sint-Maarten-French-Guiana-2026-11-14",
@@ -3548,7 +4034,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Algeria-Togo-2026-11-14",
@@ -3696,7 +4184,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Angola-South-Sudan-2026-11-14",
@@ -3818,7 +4308,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Avenir-Foot-Lozere-Entente-Crest-Aouste-2026-11-14",
@@ -3871,7 +4363,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Boulazac-Anglet-Genets-2026-11-14",
@@ -3924,7 +4418,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Bressuire-FC-Challans-2026-11-14",
@@ -3977,7 +4473,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Brive-Angouleme-2026-11-14",
@@ -4030,7 +4528,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Cercle-Paul-Bert-Brequigny-Football-Montlucon-Football-2026-11-14",
@@ -4083,7 +4583,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Chauny-Le-Pays-Du-Valois-2026-11-14",
@@ -4136,7 +4638,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Claira-/-St-Laurent-Puissalicon-Magalas-2026-11-14",
@@ -4189,7 +4693,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "ES-Buxerolles-Sablé-FC-2026-11-14",
@@ -4242,7 +4748,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "FC-Lourdes-Pau-2026-11-14",
@@ -4295,7 +4803,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Lannion-Guingamp-2026-11-14",
@@ -4348,7 +4858,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "St-Andre-St-Macaire-Nueillaubiers-2026-11-14",
@@ -4401,7 +4913,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Stade-Bordelais-Mazeres-Uzos-Rontignon-2026-11-14",
@@ -4454,7 +4968,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Fleetwood-Town-Tranmere-Rovers-2026-11-14",
@@ -4576,7 +5092,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Almería-FC-Andorra-2026-11-14",
@@ -4763,7 +5281,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Mallorca-Córdoba-2026-11-14",
@@ -5015,7 +5535,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Balma-Castanet-2026-11-14",
@@ -5068,7 +5590,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Amneville-Sundhoffen-2026-11-14",
@@ -5121,7 +5645,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Asptt-Dijon-Selongey-2026-11-14",
@@ -5174,7 +5700,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Caen-FC-Chambly-2026-11-14",
@@ -5227,7 +5755,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Chateaubriant-Horizon-Patho-2026-11-14",
@@ -5280,7 +5810,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Contres-ESA-Linas-Montlhery-2026-11-14",
@@ -5333,7 +5865,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Cournon-Chassieu-Declines-FC-2026-11-14",
@@ -5386,7 +5920,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Dunkerque-US-Quevilly-2026-11-14",
@@ -5439,7 +5975,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Grau-Du-Roi-Riviera-2026-11-14",
@@ -5492,7 +6030,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "GSI-Pontivy-Rennes-TA-2026-11-14",
@@ -5545,7 +6085,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Le-Touquet-Avranches-2026-11-14",
@@ -5598,7 +6140,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Lyon-la-Duchere-US-Feurs-2026-11-14",
@@ -5651,7 +6195,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Pays-de-Saint-Omer-AF-Virois-2026-11-14",
@@ -5704,7 +6250,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Racing-Besancon-Am.-du-Personnel-Municipal-Metz-2026-11-14",
@@ -5757,7 +6305,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Sag-Cestas-Bayonne-2026-11-14",
@@ -5810,7 +6360,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Saint-Brieuc-Rouen-2026-11-14",
@@ -5863,7 +6415,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "St-Ouen-L'Aumone-Boulogne-2026-11-14",
@@ -5916,7 +6470,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Stade-Béthunois-AS-Nancy-Lorraine-2026-11-14",
@@ -5969,7 +6525,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Strasbourg-Koenigshoffen-Oberlauterbach-2026-11-14",
@@ -6022,7 +6580,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "US-Cheminots-Paray-Foot-Villefranche-2026-11-14",
@@ -6075,7 +6635,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Vesoul-FC-Fleury-91-2026-11-14",
@@ -6128,7 +6690,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Vitre-Saint-Pierre-Milizac-2026-11-14",
@@ -6181,7 +6745,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Georgia-Hungary-2026-11-14",
@@ -6329,7 +6895,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Norway-Wales-2026-11-14",
@@ -6503,7 +7071,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Koetzingue-Biesheim-2026-11-14",
@@ -6556,7 +7126,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Firminy-Annecy-2026-11-14",
@@ -6609,7 +7181,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "IC-Croix-ES-Thaon-2026-11-14",
@@ -6662,7 +7236,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Le-Poire-SV-Vertou-2026-11-14",
@@ -6715,7 +7291,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Pont-de-Cheruy-Bourg-Peronnas-2026-11-14",
@@ -6768,7 +7346,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Saint-Sebastien-La-Baule-Le-Pouliguen-2026-11-14",
@@ -6821,7 +7401,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Tinteniac-St-Domineuc-Concarneau-2026-11-14",
@@ -6874,7 +7456,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Uganda-Botswana-2026-11-14",
@@ -7035,7 +7619,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "PAOK-Partizan-Belgrade-2026-11-14",
@@ -7088,7 +7674,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Real-Sociedad-II-Sporting-Gijón-2026-11-14",
@@ -7301,7 +7889,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "AFC-Wimbledon-Blackpool-2026-11-14",
@@ -7488,7 +8078,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Milton-Keynes-Dons-Burton-Albion-2026-11-14",
@@ -7688,7 +8280,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Sheffield-Wednesday-Plymouth-Argyle-2026-11-14",
@@ -7875,7 +8469,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Stockport-County-Reading-2026-11-14",
@@ -8075,7 +8671,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Wigan-Athletic-Barnsley-2026-11-14",
@@ -8249,7 +8847,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Bristol-Rovers-Chesterfield-2026-11-14",
@@ -8384,7 +8984,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Colchester-United-Gillingham-2026-11-14",
@@ -8519,7 +9121,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Crewe-Alexandra-Newport-County-2026-11-14",
@@ -8732,7 +9336,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Port-Vale-Accrington-Stanley-2026-11-14",
@@ -8919,7 +9525,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Rochdale-York-City-2026-11-14",
@@ -9067,7 +9675,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Salford-City-Northampton-Town-2026-11-14",
@@ -9228,7 +9838,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Shrewsbury-Town-Oldham-Athletic-2026-11-14",
@@ -9389,7 +10001,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Swindon-Town-Grimsby-Town-2026-11-14",
@@ -9576,7 +10190,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Chalon-sur-Saone-Hauts-Lyonnais-2026-11-14",
@@ -9629,7 +10245,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Choisy-Au-Bac-Caen-2026-11-14",
@@ -9682,7 +10300,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Fontenay-Foot-Clermont-Foot-2026-11-14",
@@ -9735,7 +10355,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Palestine-Iran-2026-11-14",
@@ -9893,7 +10515,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Rhone-Crussol-Foot-Frejus-2026-11-14",
@@ -9946,7 +10570,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Kosovo-Israel-2026-11-14",
@@ -10107,7 +10733,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "CA-Boulay-Sochaux-2026-11-14",
@@ -10160,7 +10788,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Real-Valladolid-Castellón-2026-11-14",
@@ -10347,7 +10977,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Balagne-Montpellier-2026-11-14",
@@ -10400,7 +11032,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Le-Puy-Diables-Noirs-2026-11-14",
@@ -10453,7 +11087,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Tourcoing-Stade-de-Reims-2026-11-14",
@@ -10506,7 +11142,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Versailles-78-Rodez-Aveyron-2026-11-14",
@@ -10559,7 +11197,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "River-Plate-Gimnasia-La-Plata-2026-11-14",
@@ -10612,7 +11252,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "SV-Josko-Ried-First-Vienna-FC-1894-2026-11-14",
@@ -10665,7 +11307,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Exeter-City-Cheltenham-Town-2026-11-14",
@@ -10787,7 +11431,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Vllaznia-Shkoder-Beselidhja-2026-11-14",
@@ -10840,7 +11486,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "China-Malaysia-2026-11-14",
@@ -11001,7 +11649,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Chinese-Taipei-Kyrgyz-Republic-2026-11-14",
@@ -11054,7 +11704,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "BFC-Dynamo-Berlin-SV-Tasmania-Berlin-2026-11-14",
@@ -11107,7 +11759,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "CSKA-Moscow-FC-Arsenal-Tula-2026-11-14",
@@ -11160,7 +11814,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Novi-Pazar-Otrant-Ulcinj-2026-11-14",
@@ -11213,7 +11869,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "NK-Lokomotiva-Olimpija-Ljubljana-2026-11-14",
@@ -11266,7 +11924,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Obolon-Kyiv-PFC-Nyva-Vinnytsia-2026-11-14",
@@ -11319,7 +11979,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Widzew-Lodz-Unia-Skierniwice-2026-11-14",
@@ -11372,7 +12034,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Legia-Warsaw-Pogon-Grodzisk-Mazowiecki-2026-11-14",
@@ -11425,7 +12089,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Japan-Brazil-2026-11-14",
@@ -11638,7 +12304,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "PK-35-FC-Inter-Turku-II-2026-11-14",
@@ -11691,7 +12359,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "FC-Arges-Rapid-Bucuresti-2026-11-14",
@@ -11744,7 +12414,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "FC-Zorya-Luhansk-FC-Kharkiv-2026-11-14",
@@ -11797,7 +12469,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Csíkszereda-Bacau-2026-11-14",
@@ -11850,7 +12524,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "ACS-Poli-Timisoara-CSC-Dumbravita-2026-11-14",
@@ -11903,7 +12579,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "FC-Farul-Constanta-Unirea-Slobozia-2026-11-14",
@@ -11956,7 +12634,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Under 2.5 Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Bahrain-Yemen-2026-11-14",
@@ -12009,7 +12689,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Tahiti-Cook-Islands-2026-11-14",
@@ -12062,7 +12744,9 @@
         "BTTS: Both Teams To Score - Yes",
         "Alternative: Over 2.5 Total Goals"
       ]
-    }
+    },
+    "homeScorers": [],
+    "awayScorers": []
   },
   {
     "id": "Guatemala-Canada-2026-11-14",
